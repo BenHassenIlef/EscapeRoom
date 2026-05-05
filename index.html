@@ -11,22 +11,22 @@
   <style>
     /* ─── TOKENS ─────────────────────────────── */
     :root {
-      --black:    #060609;
-      --s1:       #0d0d16;
-      --s2:       #13131e;
-      --s3:       #1b1b28;
-      --red:      #dc2626;
-      --red-l:    #f87171;
-      --red-glow: rgba(220,38,38,.35);
+      --black:    #000000;
+      --s1:       #0b0b0b;
+      --s2:       #111111;
+      --s3:       #181818;
+      --red:      #64748b;
+      --red-l:    #94a3b8;
+      --red-glow: rgba(100,116,139,.22);
       --amber:    #f59e0b;
       --amber-l:  #fcd34d;
-      --white:    #f9fafb;
-      --off:      #e2e8f0;
-      --muted:    #94a3b8;
-      --border:   rgba(255,255,255,.07);
-      --br-red:   rgba(220,38,38,.3);
-      --br-amb:   rgba(245,158,11,.35);
-      --shadow:   0 24px 64px rgba(0,0,0,.65);
+      --white:    #ffffff;
+      --off:      #f3f4f6;
+      --muted:    #6b7280;
+      --border:   rgba(0,0,0,.12);
+      --br-red:   rgba(100,116,139,.18);
+      --br-amb:   rgba(245,158,11,.12);
+      --shadow:   0 24px 64px rgba(0,0,0,.72);
       --r:        .75rem;
       --rs:       .4rem;
       --nav-h:    66px;
@@ -265,11 +265,16 @@
       border: 1px solid transparent;
     }
     .btn-primary { background: var(--red); color: white; border-color: var(--red); }
-    .btn-primary:hover { background: #ef4444; transform: translateY(-2px); box-shadow: 0 8px 24px var(--red-glow); }
+    .btn-primary { background: #f5f5f5; color: #090909; border-color: #f5f5f5; }
+    .btn-primary:hover { background: #ffffff; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,255,255,.15); }
     .btn-outline { background: transparent; color: var(--off); border-color: rgba(255,255,255,.18); }
     .btn-outline:hover { border-color: rgba(255,255,255,.45); background: rgba(255,255,255,.05); transform: translateY(-2px); }
-    .btn-amber { background: var(--amber); color: #1a1200; border-color: var(--amber); }
-    .btn-amber:hover { background: var(--amber-l); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,158,11,.35); }
+    .btn-amber { background: #111111; color: #f5f5f5; border-color: #f5f5f5; }
+    .btn-amber:hover { background: #1b1b1b; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,255,255,.12); }
+
+    .tag-red, .legend-dot.available { background: #f5f5f5; color: #090909; }
+    .tag-amber, .legend-dot.pending { background: #2a2a2a; color: #f5f5f5; }
+    .diff-medium, .diff-hard, .diff-easy { color: #f5f5f5; }
 
     /* ─── PAGES ──────────────────────────────── */
     .page { display: none; }
@@ -461,14 +466,14 @@
     }
     .hero-actions .btn { padding: .85rem 2rem; font-size: .88rem; }
     .hero-actions .hero-cta-main {
-      background: linear-gradient(90deg, #ef4444, #dc2626 52%, #b91c1c);
+      background: linear-gradient(90deg, #1f2937, #111827 52%, #000000);
       border: 1px solid rgba(255,255,255,.2);
-      box-shadow: 0 14px 36px rgba(220,38,38,.45), 0 0 24px rgba(220,38,38,.3);
+      box-shadow: 0 14px 36px rgba(0,0,0,.45), 0 0 24px rgba(0,0,0,.3);
       min-width: 220px;
     }
     .hero-actions .hero-cta-main:hover {
       transform: translateY(-3px) scale(1.02);
-      box-shadow: 0 18px 44px rgba(220,38,38,.58), 0 0 34px rgba(220,38,38,.36);
+      box-shadow: 0 18px 44px rgba(0,0,0,.58), 0 0 34px rgba(0,0,0,.36);
     }
 
     .hero-logo-strip {
@@ -879,6 +884,10 @@
       transform: translateY(-5px);
       box-shadow: 0 24px 50px rgba(0,0,0,.5), 0 0 30px rgba(220,38,38,.08);
     }
+    .scenario-card-unavailable {
+      opacity: .72;
+      filter: saturate(.7);
+    }
 
     .scenario-image {
       position: relative;
@@ -1100,6 +1109,10 @@
       transition: border-color .2s;
     }
     .slot-card:hover { border-color: var(--br-red); }
+    .slot-card-unavailable {
+      opacity: .72;
+      filter: saturate(.7);
+    }
     .slot-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
     .slot-body { padding: 1rem; }
     .slot-title { font-size: 1.5rem; text-align: center; margin-bottom: .2rem; }
@@ -1117,6 +1130,11 @@
       color: var(--off);
       font-family: var(--fl); font-weight: 700; font-size: .7rem; letter-spacing: .03em;
       cursor: pointer; transition: all .18s; text-align: center;
+    }
+    .slot-btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      text-decoration: line-through;
     }
     .slot-btn:hover:not([disabled]) { border-color: var(--red); background: rgba(220,38,38,.1); color: var(--white); }
     .slot-btn.pending  { background: rgba(245,158,11,.12); border-color: var(--amber); color: var(--amber); }
@@ -2425,6 +2443,8 @@
   const bookingStepBack = document.getElementById('booking-step-back');
   const bookingStepNext = document.getElementById('booking-step-next');
   const bookingStepSubmit = document.getElementById('booking-step-submit');
+  const scenariosScroll = document.getElementById('scenarios-scroll');
+  const bookingScroll = document.getElementById('booking-scroll');
   const navCta       = document.getElementById('nav-cta');
   const revealEls    = document.querySelectorAll('.reveal');
   const soundToggle  = document.getElementById('sound-toggle');
@@ -2435,6 +2455,354 @@
   const bpBookNow    = document.getElementById('bp-book-now');
   const flashlightZones = document.querySelectorAll('.flashlight-zone');
   const ambienceAudio = document.getElementById('site-ambience-audio');
+
+  const SCENARIO_KEY = 'ROOM_SCENARIOS_V1';
+  const DEFAULT_SCENARIOS = [
+    {
+      id: 'scenario-jigsaw-1',
+      detailId: 'page-scenario-jigsaw-1',
+      name: 'Saw Chapter 1',
+      image: 'img/saw1.jpg',
+      players: '2 – 8 joueurs',
+      duration: '60 min',
+      difficulty: 'Medium',
+      successRate: '24%',
+      description: 'Une voix vous enferme dans le jeu de Jigsaw. Résoudre ou mourir : vous avez 60 minutes.',
+      access: ['♿', '💡', '🚫 Crawl'],
+      bookingName: 'Saw Chapter 1',
+      detailEyebrow: 'Scénario · Salle 1',
+      detailTitle: 'SAW CHAPTER 1',
+      detailDescription: 'Saurez-vous survivre au jeu de Jigsaw ? Vous ouvrez les yeux dans l\'obscurité totale, votre cœur battant à tout rompre. Une voix sinistre résonne : « Je veux jouer à un jeu… ». Résolvez les énigmes et échappez-vous avant qu\'il ne soit trop tard. « Vivre ou mourir… à vous de choisir. »',
+      pricingHtml: '2 joueurs: <strong>40 TND</strong>/pers · 3 joueurs: <strong>35 TND</strong>/pers · 4+: <strong>30 TND</strong>/pers',
+      tags: { time: '60 min', difficultyClass: 'diff-medium' },
+      slots: ['10:30 - 12:00', '12:00 - 13:30', '13:30 - 15:00', '15:00 - 16:30', '16:30 - 18:00', '18:00 - 19:30', '19:30 - 21:00', '21:00 - 22:30', '22:30 - 00:00', '00:00 - 01:30'],
+      available: true,
+      detailPlayers: '👥 2 – 8 joueurs',
+      detailDifficulty: '⚡ Medium'
+    },
+    {
+      id: 'scenario-jigsaw',
+      detailId: 'page-scenario-jigsaw',
+      name: 'Saw Chapter 2',
+      image: 'img/saw2.png',
+      players: '2 – 8 joueurs',
+      duration: '60 min',
+      difficulty: 'Hard',
+      successRate: '2.8%',
+      description: 'Vous ouvrez les yeux dans l\'obscurité totale, votre cœur battant à tout rompre. 60 minutes pour sortir vivant.',
+      access: ['♿ Partiel', '⚠️ Strobes', '🚶 Crawl'],
+      bookingName: 'Saw Chapter 2',
+      detailEyebrow: 'Scénario · Salle 2',
+      detailTitle: 'SAW CHAPTER 2',
+      detailDescription: 'Saurez-vous survivre au jeu de Jigsaw ? Vous ouvrez les yeux dans l\'obscurité totale, votre cœur battant à tout rompre. Une voix sinistre résonne : « Je veux jouer à un jeu… ». Votre mission est simple : résoudre les énigmes et trouver un moyen de vous échapper avant qu\'il ne soit trop tard.',
+      pricingHtml: '2 joueurs: <strong>40 TND</strong>/pers · 3 joueurs: <strong>35 TND</strong>/pers · 4+: <strong>30 TND</strong>/pers',
+      tags: { time: '60 min', difficultyClass: 'diff-hard' },
+      slots: ['10:30 - 12:00', '12:00 - 13:30', '13:30 - 15:00', '15:00 - 16:30', '16:30 - 18:00', '18:00 - 19:30', '19:30 - 21:00', '21:00 - 22:30', '22:30 - 00:00', '00:00 - 01:30'],
+      available: true,
+      detailPlayers: '👥 2 – 8 joueurs',
+      detailDifficulty: '⚡ Hard'
+    },
+    {
+      id: 'scenario-pirates',
+      detailId: 'page-scenario-pirates',
+      name: 'Pirates des Caraïbes',
+      image: 'img/pirates.png',
+      players: '2 – 6 joueurs',
+      duration: '60 min',
+      difficulty: 'Aventure',
+      successRate: '56%',
+      description: 'Bloqués dans le navire de Barbe Noire, vous devez découvrir le trésor et sortir vivants.',
+      access: ['♿', '💡', '🚫 Crawl'],
+      bookingName: 'Pirates des Caraïbes',
+      detailEyebrow: 'Scénario · Aventure',
+      detailTitle: 'PIRATES DES CARAÏBES',
+      detailDescription: 'Vous êtes des aventuriers audacieux à bord du légendaire navire de Barbe Noire. En quête du célèbre trésor des lingots d\'or, vous explorez le bateau, mais un piège se referme soudain sur vous. Résolvez les énigmes, déjouez les pièges et échappez-vous avec le trésor avant qu\'il ne soit trop tard.',
+      pricingHtml: '2 joueurs: <strong>40 TND</strong>/pers · 3 joueurs: <strong>35 TND</strong>/pers · 4+: <strong>30 TND</strong>/pers',
+      tags: { time: '60 min', difficultyClass: 'diff-medium' },
+      slots: ['10:30 - 12:00', '12:00 - 13:30', '13:30 - 15:00', '15:00 - 16:30', '16:30 - 18:00', '18:00 - 19:30', '19:30 - 21:00', '21:00 - 22:30', '22:30 - 00:00', '00:00 - 01:30'],
+      available: true,
+      detailPlayers: '👥 2 – 6 joueurs',
+      detailDifficulty: '⚡ Medium'
+    },
+    {
+      id: 'scenario-lecter',
+      detailId: 'page-scenario-lecter',
+      name: 'Le Cannibal',
+      image: 'img/cannibal.png',
+      players: '3 – 8 joueurs',
+      duration: '60 min',
+      difficulty: 'Horreur',
+      successRate: '0%',
+      description: 'Vous infiltrez l\'hôpital du Dr Lecter. Le moindre faux pas devient fatal.',
+      access: ['♿ Partiel', '⚠️ Faible lumière', '🚶 Crawl'],
+      bookingName: 'Le Cannibal',
+      detailEyebrow: 'Scénario · Horreur',
+      detailTitle: 'LE CANNIBAL',
+      detailDescription: 'Votre ami journaliste disparaît alors qu\'il enquête sur de mystérieuses disparitions. Votre enquête vous mène à un ancien hôpital psychiatrique abandonné, où le Dr Lecter retient ses proies. Serez-vous assez courageux pour entrer… et assez malins pour ressortir ?',
+      pricingHtml: '2 joueurs: <strong>40 TND</strong>/pers · 3 joueurs: <strong>35 TND</strong>/pers · 4+: <strong>30 TND</strong>/pers',
+      tags: { time: '60 min', difficultyClass: 'diff-hard' },
+      slots: ['10:30 - 12:00', '12:00 - 13:30', '13:30 - 15:00', '15:00 - 16:30', '16:30 - 18:00', '18:00 - 19:30', '19:30 - 21:00', '21:00 - 22:30', '22:30 - 00:00', '00:00 - 01:30'],
+      available: true,
+      detailPlayers: '👥 3 – 8 joueurs',
+      detailDifficulty: '⚡ Hard'
+    },
+    {
+      id: 'scenario-guantanamo',
+      detailId: 'page-scenario-guantanamo',
+      name: 'Guantánamo',
+      image: 'img/gaw.png',
+      players: '4 – 9 joueurs',
+      duration: '60 min',
+      difficulty: 'Évasion',
+      successRate: '11%',
+      description: 'Une prison, un contact corrompu et 60 minutes pour disparaître avant l\'alarme générale.',
+      access: ['♿ Partiel', '💡', '🚫 Crawl'],
+      bookingName: 'Guantánamo',
+      detailEyebrow: 'Scénario · Évasion',
+      detailTitle: 'GUANTÁNAMO',
+      detailDescription: 'Emprisonnés dans le célèbre centre de détention de Guantánamo, un gardien corrompu est prêt à vous aider. Vous avez 60 minutes pour suivre ses instructions et trouver votre chemin vers la liberté. L\'évasion ou l\'exécution… tout dépend de vous.',
+      pricingHtml: '2 joueurs: <strong>40 TND</strong>/pers · 3 joueurs: <strong>35 TND</strong>/pers · 4+: <strong>30 TND</strong>/pers',
+      tags: { time: '60 min', difficultyClass: 'diff-hard' },
+      slots: ['10:30 - 12:00', '12:00 - 13:30', '13:30 - 15:00', '15:00 - 16:30', '16:30 - 18:00', '18:00 - 19:30', '19:30 - 21:00', '21:00 - 22:30', '22:30 - 00:00', '00:00 - 01:30'],
+      available: true,
+      detailPlayers: '👥 4 – 9 joueurs',
+      detailDifficulty: '⚡ Hard'
+    },
+    {
+      id: 'scenario-mafia',
+      detailId: 'page-scenario-mafia',
+      name: 'Mafia',
+      image: 'img/mafia.png',
+      players: '3 – 9 joueurs',
+      duration: '60 min',
+      difficulty: 'Hard',
+      successRate: '16%',
+      description: 'Le temps presse… Démantelez la mafia avant qu\'il ne soit trop tard. Infiltration en cours.',
+      access: ['♿', '⚠️ Dynamic lights', '🚫 Crawl'],
+      bookingName: 'Mafia',
+      detailEyebrow: 'Scénario · Infiltration',
+      detailTitle: 'MAFIA',
+      detailDescription: 'Le temps presse… Démantelez la mafia avant qu\'il ne soit trop tard. Infiltration en cours. Objectif : anéantir le cartel. La chute du cartel commence maintenant.',
+      pricingHtml: '2 joueurs: <strong>40 TND</strong>/pers · 3 joueurs: <strong>35 TND</strong>/pers · 4+: <strong>30 TND</strong>/pers',
+      tags: { time: '60 min', difficultyClass: 'diff-hard' },
+      slots: ['10:30 - 12:00', '12:00 - 13:30', '13:30 - 15:00', '15:00 - 16:30', '16:30 - 18:00', '18:00 - 19:30', '19:30 - 21:00', '21:00 - 22:30', '22:30 - 00:00', '00:00 - 01:30'],
+      available: true,
+      detailPlayers: '👥 3 – 9 joueurs',
+      detailDifficulty: '⚡ Hard'
+    }
+  ];
+
+  function loadJSON(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  function saveJSON(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  function escapeHTML(v) {
+    return String(v || '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  function slugify(value) {
+    return String(value || '')
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'scenario';
+  }
+
+  function parseList(value) {
+    return String(value || '')
+      .split(/[,\n]/)
+      .map(item => item.trim())
+      .filter(Boolean);
+  }
+
+  function normalizeScenario(item, index) {
+    if (!item) return null;
+    const fallback = item.__noFallback ? {} : (DEFAULT_SCENARIOS[index] || DEFAULT_SCENARIOS[0]);
+    const useFallback = Boolean(fallback && (!item.id || String(item.id) === String(fallback.id)));
+    const fallbackSlots = Array.isArray(fallback.slots) ? fallback.slots : [];
+    const fallbackAccess = Array.isArray(fallback.access) ? fallback.access : [];
+    const name = String(item.name || fallback.name || '').trim();
+    const slotsSource = Array.isArray(item.slots) ? item.slots.join(', ') : (item.slots || (useFallback ? fallbackSlots.join(', ') : ''));
+    const accessSource = Array.isArray(item.access) ? item.access.join(', ') : (item.access || (useFallback ? fallbackAccess.join(', ') : ''));
+    const slots = Array.isArray(item.slots) ? item.slots : parseList(slotsSource);
+    const access = Array.isArray(item.access) ? item.access : parseList(accessSource);
+    const detailId = String(item.detailId || fallback.detailId || '').trim();
+    const id = String(item.id || fallback.id || slugify(name)).trim() || slugify(name);
+    return {
+      id,
+      detailId,
+      name,
+      image: String(item.image || fallback.image || '').trim(),
+      players: String(item.players || fallback.players || '').trim(),
+      duration: String(item.duration || fallback.duration || '60 min').trim(),
+      difficulty: String(item.difficulty || fallback.difficulty || '').trim(),
+      successRate: String(item.successRate || fallback.successRate || '').trim(),
+      description: String(item.description || fallback.description || '').trim(),
+      access,
+      bookingName: String(item.bookingName || fallback.bookingName || name).trim() || name,
+      detailEyebrow: String(item.detailEyebrow || (useFallback && fallback.detailEyebrow) || '').trim(),
+      detailTitle: String(item.detailTitle || (useFallback && fallback.detailTitle) || name.toUpperCase()).trim(),
+      detailDescription: String(item.detailDescription || (useFallback && fallback.detailDescription) || item.description || fallback.description || '').trim(),
+      pricingHtml: String(item.pricingHtml || (useFallback && fallback.pricingHtml) || '').trim(),
+      tags: item.tags || (useFallback && fallback.tags) || { time: '60 min', difficultyClass: 'diff-medium' },
+      slots,
+      available: item.available !== false,
+      detailPlayers: String(item.detailPlayers || (useFallback && fallback.detailPlayers) || '').trim(),
+      detailDifficulty: String(item.detailDifficulty || (useFallback && fallback.detailDifficulty) || '').trim()
+    };
+  }
+
+  function getScenarios() {
+    return loadJSON(SCENARIO_KEY, DEFAULT_SCENARIOS).map(normalizeScenario).filter(Boolean);
+  }
+
+  function getAvailableScenarios() {
+    return getScenarios().filter(item => item.available !== false);
+  }
+
+  function getScenarioTimeLabel(slot) {
+    return String(slot || '').split(' - ')[0].trim() || String(slot || '').trim();
+  }
+
+  function ensureSeedScenarios() {
+    const existing = loadJSON(SCENARIO_KEY, null);
+    if (!Array.isArray(existing) || !existing.length) {
+      saveJSON(SCENARIO_KEY, DEFAULT_SCENARIOS);
+      return;
+    }
+    const normalized = existing.map(normalizeScenario).filter(Boolean);
+    if (JSON.stringify(existing) !== JSON.stringify(normalized)) {
+      saveJSON(SCENARIO_KEY, normalized);
+    }
+  }
+
+  function getScenarioById(id) {
+    return getScenarios().find(item => item.id === id) || null;
+  }
+
+  function renderScenarioCatalog(lang) {
+    if (!scenariosScroll || !bookingScroll) return;
+    const t = T[lang] || T.fr;
+    const scenarios = getScenarios();
+    const available = scenarios.filter(item => item.available !== false);
+    const activeIds = new Set(scenarios.map(item => item.detailId).filter(Boolean));
+
+    if (scenariosScroll) {
+      scenariosScroll.innerHTML = scenarios.map(item => {
+        const isAvailable = item.available !== false;
+        const timeLabel = item.tags && item.tags.time ? item.tags.time : item.duration || '60 min';
+        return '<article class="scenario-card' + (isAvailable ? '' : ' scenario-card-unavailable') + '">'
+          + '<div class="scenario-image">'
+          + '<img src="' + escapeHTML(item.image || '') + '" alt="' + escapeHTML(item.name) + '" />'
+          + '<div class="scenario-overlay"><h3>' + escapeHTML(item.name) + '</h3></div>'
+          + '</div>'
+          + '<div class="scenario-body">'
+          + '<div class="scenario-topline">'
+          + '<span class="tag tag-time">' + escapeHTML(timeLabel) + '</span>'
+          + '<span class="diff-label ' + escapeHTML(item.tags && item.tags.difficultyClass ? item.tags.difficultyClass : 'diff-medium') + '">' + escapeHTML(item.difficulty || '-') + '</span>'
+          + '</div>'
+          + '<p class="scenario-desc">' + escapeHTML(item.description || '-') + '</p>'
+          + '<div class="scenario-access">' + (item.access || []).map(v => '<span>' + escapeHTML(v) + '</span>').join('') + '</div>'
+          + '<div class="scenario-actions">'
+          + '<a href="#" class="btn btn-outline" data-page="' + escapeHTML(item.detailId || 'booking') + '">' + escapeHTML(t.explore) + '</a>'
+          + '<a href="#" class="btn btn-primary"' + (isAvailable ? ' data-page="booking"' : ' aria-disabled="true" tabindex="-1"') + '>' + escapeHTML(isAvailable ? t.book : t.unavailable) + '</a>'
+          + '</div>'
+          + '</div>'
+          + '</article>';
+      }).join('');
+    }
+
+    if (bookingScroll) {
+      bookingScroll.innerHTML = scenarios.map(item => {
+        const isAvailable = item.available !== false;
+        const slots = Array.isArray(item.slots) ? item.slots : [];
+        const slotMarkup = slots.length
+          ? slots.map(slot => '<li><button class="slot-btn" type="button" data-open-booking data-scenario="' + escapeHTML(item.bookingName || item.name) + '" data-time="' + escapeHTML(slot) + '"' + (isAvailable ? '' : ' disabled') + '>' + escapeHTML(getScenarioTimeLabel(slot)) + '</button></li>').join('')
+          : '<li><button class="slot-btn" type="button" disabled>' + escapeHTML(t.unavailable) + '</button></li>';
+        return '<article class="slot-card' + (isAvailable ? '' : ' slot-card-unavailable') + '">'
+          + '<img src="' + escapeHTML(item.image || '') + '" alt="' + escapeHTML(item.name) + '" />'
+          + '<div class="slot-body">'
+          + '<h3 class="slot-title">' + escapeHTML(item.name) + '</h3>'
+          + '<p class="slot-players">' + escapeHTML(item.players || '-') + '</p>'
+          + '<div class="scenario-badges" style="justify-content:center;margin-bottom:.75rem">'
+          + '<span class="pill">' + escapeHTML(isAvailable ? t.available : t.unavailable) + '</span>'
+          + '</div>'
+          + '<ul class="slot-times">' + slotMarkup + '</ul>'
+          + '</div>'
+          + '</article>';
+      }).join('');
+    }
+
+    if (modalScen) {
+      const current = modalScen.value;
+      modalScen.innerHTML = ['<option value="">' + escapeHTML(t.modalScenarioOpt || 'Choose a scenario') + '</option>']
+        .concat(available.map(item => '<option value="' + escapeHTML(item.bookingName || item.name) + '">' + escapeHTML(item.bookingName || item.name) + '</option>'))
+        .join('');
+      if (current && available.some(item => (item.bookingName || item.name) === current)) {
+        modalScen.value = current;
+      }
+    }
+
+    if (modalTime) {
+      const currentTime = modalTime.value;
+      const times = Array.from(new Set(available.flatMap(item => item.slots || [])));
+      modalTime.innerHTML = ['<option value="">' + escapeHTML(t.modalTimeOpt || 'Choose a time') + '</option>']
+        .concat(times.map(slot => '<option value="' + escapeHTML(slot) + '">' + escapeHTML(slot) + '</option>'))
+        .join('');
+      if (currentTime && times.includes(currentTime)) modalTime.value = currentTime;
+    }
+
+    if (scenarios.length) {
+      scenarios.forEach(item => {
+        if (!item.detailId) return;
+        const page = document.getElementById(item.detailId);
+        if (!page) return;
+        const active = item.available !== false;
+        page.style.display = '';
+        const title = page.querySelector('h2');
+        const eyebrow = page.querySelector('.detail-eyebrow');
+        const badges = page.querySelectorAll('.detail-badge');
+        const description = page.querySelector('.detail-description');
+        const pricing = page.querySelector('.detail-pricing');
+        const successVal = page.querySelector('.success-val');
+        const successFill = page.querySelector('.success-fill');
+        const reserveBtn = page.querySelector('.btn-primary');
+        if (title) title.textContent = item.detailTitle || item.name.toUpperCase();
+        if (eyebrow) eyebrow.textContent = item.detailEyebrow || 'Scénario';
+        if (badges[0]) badges[0].textContent = item.detailPlayers || item.players || '-';
+        if (badges[1]) badges[1].textContent = item.detailDifficulty || item.difficulty || '-';
+        if (description) description.textContent = item.detailDescription || item.description || '-';
+        if (pricing) pricing.innerHTML = item.pricingHtml || pricing.innerHTML;
+        if (successVal) successVal.textContent = item.successRate || '0%';
+        if (successFill && item.successRate) successFill.style.width = item.successRate;
+        if (reserveBtn) {
+          reserveBtn.textContent = active ? t.reserveNow : t.unavailable;
+          reserveBtn.dataset.page = active ? 'booking' : (item.detailId || 'booking');
+          reserveBtn.toggleAttribute('disabled', !active);
+          reserveBtn.setAttribute('aria-disabled', String(!active));
+        }
+      });
+      document.querySelectorAll('.detail-page').forEach(page => {
+        page.style.display = activeIds.has(page.id) ? '' : 'none';
+      });
+    }
+  }
 
   const SPECIAL = new Set(['scenario-jigsaw','scenario-jigsaw-1','scenario-pirates','scenario-lecter','scenario-guantanamo','scenario-mafia']);
   let bookingStepIndex = 0;
@@ -2612,7 +2980,12 @@
     modal.setAttribute('aria-hidden', 'true');
   }
 
-  slotBtns.forEach(b => b.addEventListener('click', () => openModal(b.dataset.scenario || '', b.dataset.time || '')));
+  document.addEventListener('click', e => {
+    const bookingBtn = e.target.closest('[data-open-booking]');
+    if (!bookingBtn) return;
+    e.preventDefault();
+    openModal(bookingBtn.dataset.scenario || '', bookingBtn.dataset.time || '');
+  });
   closeModalBtn && closeModalBtn.addEventListener('click', closeModal);
   modal && modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
@@ -3051,7 +3424,7 @@
       contactEye: 'Contact', contactCopy: 'Pour réserver, demander un devis ou organiser un événement privé.',
       coords: 'Coordonnées', hours: 'Horaires',
       reserveNow: 'Réserver maintenant',
-      available: 'Disponible', pending: 'En attente', reserved: 'Réservé',
+      available: 'Disponible', unavailable: 'Indisponible', pending: 'En attente', reserved: 'Réservé',
       modalTitle: 'Formulaire de réservation',
       bookingStepTitles: ['Vos coordonnées','Choix du créneau','Finalisation'],
       bookingStepKickers: ['Étape 1 sur 3','Étape 2 sur 3','Étape 3 sur 3'],
@@ -3164,7 +3537,7 @@
       contactEye: 'Contact', contactCopy: 'Book a room, request a quote, or organise a private event.',
       coords: 'Contact Info', hours: 'Opening Hours',
       reserveNow: 'Book Now',
-      available: 'Available', pending: 'Pending', reserved: 'Reserved',
+      available: 'Available', unavailable: 'Unavailable', pending: 'Pending', reserved: 'Reserved',
       modalTitle: 'Booking Form',
       bookingStepTitles: ['Your details','Choose a slot','Finalize'],
       bookingStepKickers: ['Step 1 of 3','Step 2 of 3','Step 3 of 3'],
@@ -3343,19 +3716,7 @@
     if (locBtns[1]) locBtns[1].textContent = t.locBtn2;
 
     // Scenarios
-    const sEyeEl = document.querySelector('#page-scenarios .section-eyebrow');
-    if (sEyeEl) sEyeEl.textContent = t.scenEye;
-    setText('#page-scenarios .section-title', t.scenTitle);
-    setText('#page-scenarios .section-copy', t.scenCopy);
-    setText('#bp-book-now', t.bpBook);
-    document.querySelectorAll('.scenario-actions .btn-outline').forEach(el => el.textContent = t.explore);
-    document.querySelectorAll('.scenario-actions .btn-primary').forEach(el => el.textContent = t.book);
-    document.querySelectorAll('.diff-label').forEach((el, i) => { if (t.scenarioDiffs && t.scenarioDiffs[i]) el.textContent = t.scenarioDiffs[i]; });
-    document.querySelectorAll('.scenario-desc').forEach((el, i) => { if (t.scenarioDescs && t.scenarioDescs[i]) el.textContent = t.scenarioDescs[i]; });
-    document.querySelectorAll('.scenario-access').forEach((el, i) => {
-      if (!t.scenarioAccess || !t.scenarioAccess[i]) return;
-      el.innerHTML = t.scenarioAccess[i].map(v => `<span>${v}</span>`).join('');
-    });
+    renderScenarioCatalog(activeLang);
 
     // Blueprint room labels and briefs
     const bpMap = [
@@ -3398,9 +3759,6 @@
     if (legA) legA.textContent = t.available;
     if (legP) legP.textContent = t.pending;
     if (legR) legR.textContent = t.reserved;
-    document.querySelectorAll('#booking-scroll .slot-players').forEach((el, i) => {
-      if (t.bookingPlayers && t.bookingPlayers[i]) el.textContent = t.bookingPlayers[i];
-    });
 
     // Footer contact
     setText('#footer-contact-title', t.contactTitle);
@@ -3442,26 +3800,8 @@
     if (modalSubmitBtn) modalSubmitBtn.textContent = t.modalSubmit;
     updateBookingSummary();
 
-    // Detail pages
-    document.querySelectorAll('.detail-eyebrow').forEach((el, i) => { if (t.detailEyebrows && t.detailEyebrows[i]) el.textContent = t.detailEyebrows[i]; });
-    document.querySelectorAll('.detail-card .detail-badges').forEach((wrap, i) => {
-      const badges = wrap.querySelectorAll('.detail-badge');
-      if (badges[0] && t.detailPlayers && t.detailPlayers[i]) badges[0].textContent = t.detailPlayers[i];
-      if (badges[1] && t.detailDifficulty && t.detailDifficulty[i]) badges[1].textContent = t.detailDifficulty[i];
-      if (badges[3]) {
-        const a = badges[3].querySelector('a');
-        if (a) a.textContent = t.locationLabel;
-      }
-    });
-    document.querySelectorAll('.detail-description').forEach((el, i) => { if (t.detailDescriptions && t.detailDescriptions[i]) el.textContent = t.detailDescriptions[i]; });
-    document.querySelectorAll('.detail-pricing').forEach(el => { if (t.detailPricing) el.innerHTML = t.detailPricing; });
-    document.querySelectorAll('.success-lbl').forEach(el => { el.textContent = t.detailSuccessLabel; });
-
     // Footer
     setText('.footer-copy', t.footerCopy);
-
-    // Detail pages: book buttons
-    document.querySelectorAll('.detail-page .btn-primary').forEach(el => el.textContent = t.reserveNow);
 
     // a11y
     const prevBtn = document.getElementById('date-prev');
@@ -3476,6 +3816,7 @@
   const storedLang = (rawStoredLang === 'en') ? rawStoredLang : 'fr';
   if (langSelect) langSelect.value = storedLang;
   if (mobileLangSelect) mobileLangSelect.value = storedLang;
+  ensureSeedScenarios();
   applyLang(storedLang);
 
   if (langSelect) langSelect.addEventListener('change', () => applyLang(langSelect.value));
@@ -3485,6 +3826,14 @@
       if (langSelect) langSelect.value = mobileLangSelect.value;
     });
   }
+
+  window.addEventListener('storage', (e) => {
+    if (e.key === SCENARIO_KEY) {
+      ensureSeedScenarios();
+      renderScenarioCatalog(getActiveLang());
+      updateBookingSummary();
+    }
+  });
 
   // Unmute on first user gesture (browsers require this)
   const firstInteractionEvents = ['click', 'keydown', 'touchstart', 'pointerdown'];

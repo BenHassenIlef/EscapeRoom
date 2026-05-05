@@ -11,21 +11,21 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
-      --bg: #07080d;
-      --panel: #10131d;
-      --panel-2: #161b28;
-      --line: rgba(255,255,255,.1);
-      --text: #f4f7ff;
-      --muted: #9da8bc;
-      --accent: #dc2626;
-      --accent-2: #f87171;
+      --bg: #ffffff;
+      --panel: #f8f9fa;
+      --panel-2: #f0f2f5;
+      --line: rgba(0,0,0,.08);
+      --text: #1a202c;
+      --muted: #6b7280;
+      --accent: #2d3748;
+      --accent-2: #4a5568;
       --ok: #10b981;
       --warn: #f59e0b;
       --danger: #ef4444;
       --radius: 12px;
       --sidebar-w: 260px;
       --shadow-soft: 0 16px 36px rgba(0, 0, 0, .35);
-      --shadow-glow: 0 0 0 1px rgba(220, 38, 38, .18), 0 20px 45px rgba(220, 38, 38, .12);
+      --shadow-glow: 0 0 0 1px rgba(255,255,255,.14), 0 20px 45px rgba(255,255,255,.08);
     }
 
     * { box-sizing: border-box; }
@@ -34,10 +34,7 @@
       font-family: 'Space Grotesk', Segoe UI, Arial, sans-serif;
       color: var(--text);
       min-height: 100vh;
-      background:
-        radial-gradient(900px 520px at 6% -8%, rgba(220,38,38,.2), transparent 52%),
-        radial-gradient(700px 420px at 100% 0%, rgba(248,113,113,.12), transparent 45%),
-        var(--bg);
+      background: var(--bg);
       position: relative;
       overflow-x: hidden;
     }
@@ -55,14 +52,14 @@
       height: 280px;
       left: -90px;
       top: 18vh;
-      background: radial-gradient(circle, rgba(220,38,38,.45) 0%, rgba(220,38,38,0) 72%);
+      background: radial-gradient(circle, rgba(59,130,246,.08) 0%, rgba(59,130,246,0) 72%);
     }
     body::after {
       width: 340px;
       height: 340px;
       right: -120px;
       bottom: 10vh;
-      background: radial-gradient(circle, rgba(99,102,241,.24) 0%, rgba(99,102,241,0) 72%);
+      background: radial-gradient(circle, rgba(59,130,246,.04) 0%, rgba(59,130,246,0) 72%);
     }
 
     .auth-shell, .app-shell { width: min(1260px, 96vw); margin: 0 auto; }
@@ -71,7 +68,7 @@
     .auth-card {
       width: min(460px, 100%);
       margin: 9vh auto 0;
-      background: linear-gradient(180deg, rgba(16,19,29,.96), rgba(16,19,29,.84));
+      background: linear-gradient(180deg, rgba(248,249,250,.96), rgba(240,242,245,.84));
       border: 1px solid var(--line);
       border-radius: var(--radius);
       padding: 1.35rem;
@@ -122,14 +119,14 @@
     }
     .field input:focus, .field select:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(220,38,38,.2);
+      box-shadow: 0 0 0 3px rgba(45,55,72,.1);
     }
 
     .btn {
       border: 1px solid transparent;
       border-radius: 10px;
-      background: linear-gradient(180deg, #e03a3a, #c71f1f);
-      color: #fff;
+      background: linear-gradient(180deg, #f5f5f5, #d4d4d4);
+      color: #090909;
       font-weight: 700;
       padding: .68rem .92rem;
       cursor: pointer;
@@ -137,15 +134,21 @@
     }
     .btn:hover {
       transform: translateY(-1px);
-      background: linear-gradient(180deg, #ef4444, #dc2626);
-      box-shadow: 0 12px 26px rgba(220,38,38,.3);
+      background: linear-gradient(180deg, #ffffff, #e5e5e5);
+      box-shadow: 0 12px 26px rgba(255,255,255,.12);
     }
     .btn.ghost { background: transparent; border-color: var(--line); color: var(--text); }
-    .btn.ghost:hover { background: rgba(255,255,255,.06); border-color: rgba(220,38,38,.45); }
-    .btn.danger { background: rgba(239,68,68,.14); color: #fecaca; border-color: rgba(239,68,68,.35); }
+    .btn.ghost:hover { background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.2); }
+    .btn.danger { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
     .btn.small { font-size: .78rem; padding: .36rem .55rem; border-radius: 8px; }
 
-    .error { margin-top: .55rem; min-height: 1.1rem; color: #fecaca; font-size: .9rem; }
+    .error { margin-top: .55rem; min-height: 1.1rem; color: #991b1b; font-size: .9rem; }
+    .success { margin-top: .55rem; min-height: 1.1rem; color: #065f46; font-size: .9rem; }
+    .notification-item { background: rgba(59,130,246,.04); border: 1px solid rgba(59,130,246,.2); border-radius: 8px; padding: .8rem; margin-bottom: .6rem; }
+    .notification-item.unread { border-color: rgba(59,130,246,.4); background: rgba(59,130,246,.08); }
+    .notification-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; font-size: .85rem; }
+    .notification-time { color: var(--muted); }
+    .notification-message { line-height: 1.5; color: var(--text); }
     .auth-help { margin-top: .7rem; color: var(--muted); font-size: .86rem; }
 
     .app-shell { display: none; padding: 1rem 0 1.4rem; position: relative; z-index: 1; }
@@ -163,7 +166,7 @@
       border: 1px solid var(--line);
       border-radius: var(--radius);
       padding: .85rem;
-      background: linear-gradient(180deg, rgba(16,19,29,.95), rgba(16,19,29,.8));
+      background: linear-gradient(180deg, rgba(248,249,250,.95), rgba(243,244,246,.8));
       box-shadow: var(--shadow-soft);
       backdrop-filter: blur(10px);
       max-height: calc(100vh - 1.8rem);
@@ -179,7 +182,7 @@
     }
     .menu button {
       text-align: left;
-      background: rgba(255,255,255,.02);
+      background: rgba(0,0,0,.02);
       border: 1px solid var(--line);
       color: var(--text);
       border-radius: 10px;
@@ -198,12 +201,12 @@
       top: 0;
       width: 3px;
       height: 100%;
-      background: linear-gradient(180deg, #f87171, #dc2626);
+      background: linear-gradient(180deg, #2563eb, #1e40af);
       opacity: 0;
       transition: opacity .2s ease;
     }
-    .menu button:hover { transform: translateX(2px); border-color: rgba(220,38,38,.35); }
-    .menu button.active { border-color: rgba(220,38,38,.6); background: rgba(220,38,38,.16); }
+    .menu button:hover { transform: translateX(2px); border-color: rgba(0,0,0,.2); }
+    .menu button.active { border-color: rgba(37,99,235,.5); background: rgba(37,99,235,.08); }
     .menu button.active::before { opacity: 1; }
 
     .sidebar-actions { display: grid; gap: .45rem; }
@@ -213,7 +216,7 @@
       border: 1px solid var(--line);
       border-radius: var(--radius);
       padding: 1rem;
-      background: linear-gradient(180deg, rgba(16,19,29,.94), rgba(16,19,29,.82));
+      background: linear-gradient(180deg, rgba(248,249,250,.94), rgba(243,244,246,.82));
       box-shadow: var(--shadow-soft);
       backdrop-filter: blur(10px);
       min-height: calc(100vh - 1.8rem);
@@ -241,7 +244,7 @@
       border: 1px solid var(--line);
       border-radius: 999px;
       padding: .26rem .6rem;
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      background: linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.02));
       color: var(--muted);
       font-size: .78rem;
       font-weight: 700;
@@ -273,7 +276,7 @@
     .res-tools input:focus,
     .res-tools select:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(220,38,38,.2);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.2);
     }
 
     .th-sort {
@@ -287,7 +290,7 @@
       text-transform: inherit;
       letter-spacing: inherit;
     }
-    .th-sort:hover { color: #d8dfef; }
+    .th-sort:hover { color: #1e293b; }
     .th-sort .arrow {
       opacity: .55;
       font-size: .76rem;
@@ -306,29 +309,29 @@
       white-space: nowrap;
     }
     .status-pill.new {
-      color: #c7d2fe;
-      background: rgba(99,102,241,.16);
-      border-color: rgba(99,102,241,.4);
+      color: #312e81;
+      background: rgba(99,102,241,.1);
+      border-color: rgba(99,102,241,.3);
     }
     .status-pill.confirmed {
-      color: #bfdbfe;
-      background: rgba(59,130,246,.16);
-      border-color: rgba(59,130,246,.4);
+      color: #003da5;
+      background: rgba(59,130,246,.1);
+      border-color: rgba(59,130,246,.3);
     }
     .status-pill.escaped {
-      color: #86efac;
-      background: rgba(16,185,129,.15);
-      border-color: rgba(16,185,129,.4);
+      color: #065f46;
+      background: rgba(16,185,129,.1);
+      border-color: rgba(16,185,129,.3);
     }
     .status-pill.failed {
-      color: #fca5a5;
-      background: rgba(239,68,68,.15);
-      border-color: rgba(239,68,68,.38);
+      color: #7f1d1d;
+      background: rgba(239,68,68,.1);
+      border-color: rgba(239,68,68,.3);
     }
     .status-pill.cancelled {
-      color: #fcd34d;
-      background: rgba(245,158,11,.15);
-      border-color: rgba(245,158,11,.4);
+      color: #78350f;
+      background: rgba(245,158,11,.1);
+      border-color: rgba(245,158,11,.3);
     }
 
     .stats {
@@ -341,12 +344,12 @@
       border: 1px solid var(--line);
       border-radius: 10px;
       padding: .65rem;
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+      background: linear-gradient(180deg, rgba(0,0,0,.02), rgba(0,0,0,.005));
       transition: transform .16s ease, border-color .2s ease, box-shadow .2s ease;
     }
     .stat:hover {
       transform: translateY(-2px);
-      border-color: rgba(220,38,38,.35);
+      border-color: rgba(59,130,246,.35);
       box-shadow: var(--shadow-glow);
     }
     .stat .k { color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-size: .72rem; }
@@ -356,8 +359,8 @@
       border: 1px solid var(--line);
       border-radius: 12px;
       padding: .85rem;
-      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+      background: linear-gradient(180deg, rgba(0,0,0,.02), rgba(0,0,0,.005));
+      box-shadow: inset 0 1px 0 rgba(0,0,0,.04);
     }
 
     .view { display: none; }
@@ -368,7 +371,7 @@
       border-radius: 10px;
       overflow: auto;
       max-height: 62vh;
-      background: rgba(255,255,255,.01);
+      background: rgba(0,0,0,.01);
     }
     table {
       width: 100%;
@@ -383,7 +386,7 @@
       text-align: left;
     }
     th {
-      background: #121725;
+      background: #e5e7eb;
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: .08em;
@@ -392,10 +395,10 @@
       top: 0;
       z-index: 2;
     }
-    tbody tr:nth-child(even) { background: rgba(255,255,255,.015); }
-    tbody tr:hover { background: rgba(220,38,38,.08); }
+    tbody tr:nth-child(even) { background: rgba(0,0,0,.01); }
+    tbody tr:hover { background: rgba(59,130,246,.05); }
     td select,
-    td input[type="checkbox"] { accent-color: #dc2626; }
+    td input[type="checkbox"] { accent-color: #2563eb; }
 
     .pill {
       display: inline-block;
@@ -403,7 +406,7 @@
       padding: .12rem .45rem;
       font-size: .74rem;
       border: 1px solid rgba(16,185,129,.35);
-      color: #86efac;
+      color: #065f46;
       background: rgba(16,185,129,.12);
       white-space: nowrap;
     }
@@ -419,7 +422,7 @@
       border: 1px solid var(--line);
       border-radius: 10px;
       padding: .65rem;
-      background: rgba(255,255,255,.02);
+      background: rgba(0,0,0,.01);
       display: grid;
       gap: .3rem;
     }
@@ -440,7 +443,7 @@
       border: 1px solid var(--line);
       border-radius: 10px;
       padding: .55rem;
-      background: rgba(255,255,255,.02);
+      background: rgba(0,0,0,.01);
       margin-bottom: .45rem;
     }
 
@@ -454,7 +457,7 @@
       border: 1px solid var(--line);
       border-radius: 10px;
       padding: .7rem;
-      background: rgba(255,255,255,.02);
+      background: rgba(0,0,0,.01);
     }
     .kpi h4 { margin-bottom: .35rem; font-size: .9rem; }
     .kpi p { color: var(--muted); font-size: .84rem; }
@@ -476,6 +479,131 @@
       align-items: center;
       gap: .5rem;
       font-size: .9rem;
+    }
+
+    .scenario-admin-list {
+      list-style: none;
+      margin: .65rem 0 0;
+      padding: 0;
+      display: grid;
+      gap: .45rem;
+    }
+
+    .scenario-admin-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255,255,255,.02);
+      padding: .65rem;
+      display: grid;
+      gap: .5rem;
+    }
+
+    .scenario-admin-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+
+    .scenario-admin-meta {
+      color: var(--muted);
+      font-size: .84rem;
+      line-height: 1.55;
+    }
+
+    .scenario-image-preview {
+      margin-top: .5rem;
+      min-height: 104px;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      background: rgba(255,255,255,.03);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scenario-image-preview img {
+      width: 100%;
+      height: 104px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .scenario-image-preview .empty {
+      color: var(--muted);
+      font-size: .82rem;
+      padding: .85rem;
+      text-align: center;
+    }
+
+    .scenario-grid {
+      display: grid;
+      gap: .7rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .scenario-grid .field {
+      margin-bottom: 0;
+    }
+
+    .scenario-grid .field.full {
+      grid-column: 1 / -1;
+    }
+
+    .scenario-grid textarea,
+    .scenario-grid input,
+    .scenario-grid select {
+      width: 100%;
+    }
+
+    .scenario-actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .55rem;
+      margin-top: .85rem;
+    }
+
+    .scenario-actions-row .btn {
+      flex: 1 1 160px;
+    }
+
+    .scenario-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .35rem;
+    }
+
+    .profile-photo-preview {
+      margin-top: .5rem;
+      width: 120px;
+      height: 120px;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      background: rgba(255,255,255,.03);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .profile-photo-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .profile-photo-preview .empty {
+      color: var(--muted);
+      font-size: .82rem;
+      padding: .85rem;
+      text-align: center;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
     }
 
     .sidebar::-webkit-scrollbar,
@@ -550,14 +678,18 @@
         <div class="eyebrow">Navigation</div>
         <div class="brand">The Room Admin</div>
         <div class="menu" id="side-menu">
-          <button data-view="view-reservations" class="active">Reservations</button>
-          <button data-view="view-manifest">Player Manifest</button>
-          <button data-view="view-metrics">Escape Rate Metrics</button>
-          <button data-view="view-revenue">Revenue Reports</button>
-          <button data-view="view-admins">Add / Delete Admins</button>
+          <button data-view="view-reservations" class="active" data-role="ADMIN,SUPER_ADMIN">Reservations</button>
+          <button data-view="view-profile" data-role="ADMIN,SUPER_ADMIN">Edit Profile</button>
+          <button data-view="view-manifest" data-role="SUPER_ADMIN">Player Manifest</button>
+          <button data-view="view-metrics" data-role="SUPER_ADMIN">Escape Rate Metrics</button>
+          <button data-view="view-revenue" data-role="SUPER_ADMIN">Revenue Reports</button>
+          <button data-view="view-scenarios" data-role="SUPER_ADMIN">Scenario Management</button>
+          <button data-view="view-email-templates" data-role="SUPER_ADMIN">Email Templates</button>
+          <button data-view="view-notifications" data-role="SUPER_ADMIN">Notifications</button>
+          <button data-view="view-admins" data-role="SUPER_ADMIN">Add / Delete Admins</button>
         </div>
         <div class="sidebar-actions">
-          <button class="btn ghost" id="export-pdf-btn" type="button">Export Reservations PDF</button>
+          <button class="btn ghost" id="export-pdf-btn" type="button" data-role="SUPER_ADMIN">Export Reservations PDF</button>
           <button class="btn ghost" id="logout-btn" type="button">Log Out</button>
         </div>
       </aside>
@@ -618,6 +750,145 @@
           </div>
         </section>
 
+        <section class="view" id="view-scenarios">
+          <div class="panel" style="margin-bottom:.7rem">
+            <div class="eyebrow">Scenario Management</div>
+            <h3 style="margin-bottom:.6rem">Add or Edit Scenario</h3>
+            <form id="scenario-form">
+              <div class="field">
+                <label for="scenario-select">Scenario</label>
+                <select id="scenario-select"></select>
+              </div>
+              <div class="scenario-grid">
+                <div class="field">
+                  <label for="scenario-name">Name</label>
+                  <input id="scenario-name" type="text" required />
+                </div>
+                <div class="field">
+                  <label for="scenario-image">Image path</label>
+                  <input id="scenario-image" type="text" placeholder="img/example.jpg" />
+                </div>
+                <div class="field">
+                  <label for="scenario-image-file">Upload photo</label>
+                  <input id="scenario-image-file" type="file" accept="image/*" />
+                  <div class="scenario-image-preview" id="scenario-image-preview"></div>
+                </div>
+                <div class="field">
+                  <label for="scenario-detail-id">Detail page id</label>
+                  <input id="scenario-detail-id" type="text" placeholder="page-scenario-example" />
+                </div>
+                <div class="field">
+                  <label for="scenario-players">Players</label>
+                  <input id="scenario-players" type="text" placeholder="2 – 8 joueurs" />
+                </div>
+                <div class="field">
+                  <label for="scenario-duration">Duration</label>
+                  <input id="scenario-duration" type="text" placeholder="60 min" />
+                </div>
+                <div class="field">
+                  <label for="scenario-difficulty">Difficulty</label>
+                  <input id="scenario-difficulty" type="text" placeholder="Medium" />
+                </div>
+                <div class="field">
+                  <label for="scenario-success">Success rate</label>
+                  <input id="scenario-success" type="text" placeholder="24%" />
+                </div>
+                <div class="field">
+                  <label for="scenario-available">Availability</label>
+                  <select id="scenario-available">
+                    <option value="true">Available</option>
+                    <option value="false">Unavailable</option>
+                  </select>
+                </div>
+                <div class="field full">
+                  <label for="scenario-description">Description</label>
+                  <textarea id="scenario-description" rows="4" placeholder="Public-facing description"></textarea>
+                </div>
+                <div class="field full">
+                  <label for="scenario-access">Access labels</label>
+                  <input id="scenario-access" type="text" placeholder="♿, 💡, 🚫 Crawl" />
+                </div>
+                <div class="field full">
+                  <label for="scenario-slots">Game times</label>
+                  <textarea id="scenario-slots" rows="3" placeholder="10:30 - 12:00, 12:00 - 13:30"></textarea>
+                </div>
+              </div>
+              <div class="scenario-actions-row">
+                <button class="btn" id="scenario-save-btn" type="submit">Save Scenario</button>
+                <button class="btn ghost" id="scenario-new-btn" type="button">New Scenario</button>
+              </div>
+              <p class="error" id="scenario-error"></p>
+            </form>
+          </div>
+          <div class="panel">
+            <h3>Current Scenarios</h3>
+            <ul class="scenario-admin-list" id="scenario-admin-list"></ul>
+          </div>
+        </section>
+
+        <section class="view" id="view-profile">
+          <div class="panel">
+            <div class="eyebrow">Account Settings</div>
+            <h3 style="margin-bottom:.6rem">Edit Your Profile</h3>
+            <form id="profile-form">
+              <div class="field">
+                <label for="profile-email">Email (Read-only)</label>
+                <input id="profile-email" type="email" readonly />
+              </div>
+              <div class="field">
+                <label for="profile-name">Full Name</label>
+                <input id="profile-name" type="text" placeholder="Your name" />
+              </div>
+              <div class="field">
+                <label for="profile-photo">Profile Photo</label>
+                <input id="profile-photo" type="file" accept="image/*" />
+                <div class="profile-photo-preview" id="profile-photo-preview"></div>
+              </div>
+              <button class="btn" type="submit">Save Profile</button>
+              <p class="error" id="profile-error"></p>
+              <p class="success" id="profile-success"></p>
+            </form>
+          </div>
+        </section>
+
+        <section class="view" id="view-email-templates">
+          <div class="panel">
+            <div class="eyebrow">Email Management</div>
+            <h3 style="margin-bottom:.6rem">Reservation Confirmation Email</h3>
+            <form id="email-template-form">
+              <div class="field full">
+                <label for="email-template-subject">Subject</label>
+                <input id="email-template-subject" type="text" placeholder="Email subject" />
+              </div>
+              <div class="field full">
+                <label for="email-template-body">Email Body</label>
+                <textarea id="email-template-body" rows="8" placeholder="Email content. Use {customerName}, {scenarioName}, {date}, {time}, {players} as placeholders"></textarea>
+              </div>
+              <button class="btn" type="submit">Save Email Template</button>
+              <p class="error" id="email-template-error"></p>
+              <p class="success" id="email-template-success"></p>
+            </form>
+            <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--line)">
+              <h4>Available Placeholders</h4>
+              <p style="color:var(--muted);font-size:.85rem;line-height:1.5">
+                {customerName} - Guest name<br />
+                {scenarioName} - Scenario title<br />
+                {date} - Reservation date<br />
+                {time} - Reservation time<br />
+                {players} - Number of players
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="view-notifications">
+          <div class="panel">
+            <div class="eyebrow">Notifications</div>
+            <h3 style="margin-bottom:.6rem">Reservation Decline Notifications</h3>
+            <div id="notifications-list"></div>
+          </div>
+        </section>
+
         <section class="view" id="view-admins">
           <div class="panel" style="margin-bottom:.7rem">
             <div class="eyebrow">Admin Management</div>
@@ -630,6 +901,13 @@
               <div class="field">
                 <label for="new-admin-password">Password</label>
                 <input id="new-admin-password" type="password" required minlength="4" />
+              </div>
+              <div class="field">
+                <label for="new-admin-role">Role</label>
+                <select id="new-admin-role" required>
+                  <option value="ADMIN">Admin (Reservations Only)</option>
+                  <option value="SUPER_ADMIN">Super Admin (Full Access)</option>
+                </select>
               </div>
               <button class="btn" type="submit">Add Admin</button>
               <p class="error" id="admin-error"></p>
@@ -649,6 +927,7 @@
       const RES_KEY = 'ROOM_RESERVATIONS_V1';
       const ADM_KEY = 'ROOM_ADMINS_V1';
       const SESSION_KEY = 'ROOM_ADMIN_SESSION_V1';
+      const SCENARIO_KEY = 'ROOM_SCENARIOS_V1';
 
       const authShell = document.getElementById('auth-shell');
       const appShell = document.getElementById('app-shell');
@@ -663,6 +942,26 @@
       const resStatusFilter = document.getElementById('res-status-filter');
       const resScenarioFilter = document.getElementById('res-scenario-filter');
       const resClearFilters = document.getElementById('res-clear-filters');
+      const scenarioForm = document.getElementById('scenario-form');
+      const scenarioSelect = document.getElementById('scenario-select');
+      const scenarioName = document.getElementById('scenario-name');
+      const scenarioImage = document.getElementById('scenario-image');
+      const scenarioImageFile = document.getElementById('scenario-image-file');
+      const scenarioImagePreview = document.getElementById('scenario-image-preview');
+      const scenarioDetailId = document.getElementById('scenario-detail-id');
+      const scenarioPlayers = document.getElementById('scenario-players');
+      const scenarioDuration = document.getElementById('scenario-duration');
+      const scenarioDifficulty = document.getElementById('scenario-difficulty');
+      const scenarioSuccess = document.getElementById('scenario-success');
+      const scenarioAvailable = document.getElementById('scenario-available');
+      const scenarioDescription = document.getElementById('scenario-description');
+      const scenarioAccess = document.getElementById('scenario-access');
+      const scenarioSlots = document.getElementById('scenario-slots');
+      const scenarioErr = document.getElementById('scenario-error');
+      const scenarioAdminList = document.getElementById('scenario-admin-list');
+      const scenarioNewBtn = document.getElementById('scenario-new-btn');
+
+      let scenarioEditorId = '';
 
       const reservationState = {
         query: '',
@@ -684,14 +983,441 @@
         localStorage.setItem(key, JSON.stringify(value));
       }
 
+      const DEFAULT_SCENARIOS = [
+        {
+          id: 'scenario-jigsaw-1',
+          detailId: 'page-scenario-jigsaw-1',
+          name: 'Saw Chapter 1',
+          image: 'img/saw1.jpg',
+          players: '2 – 8 joueurs',
+          duration: '60 min',
+          difficulty: 'Medium',
+          successRate: '24%',
+          description: 'Une voix vous enferme dans le jeu de Jigsaw. Résoudre ou mourir : vous avez 60 minutes.',
+          access: ['♿', '💡', '🚫 Crawl'],
+          bookingName: 'Saw Chapter 1',
+          detailEyebrow: 'Scénario · Salle 1',
+          detailTitle: 'SAW CHAPTER 1',
+          detailDescription: 'Saurez-vous survivre au jeu de Jigsaw ? Vous ouvrez les yeux dans l\'obscurité totale, votre cœur battant à tout rompre. Une voix sinistre résonne : « Je veux jouer à un jeu… ». Résolvez les énigmes et échappez-vous avant qu\'il ne soit trop tard. « Vivre ou mourir… à vous de choisir. »',
+          pricingHtml: '2 joueurs: <strong>40 TND</strong>/pers · 3 joueurs: <strong>35 TND</strong>/pers · 4+: <strong>30 TND</strong>/pers',
+          tags: { time: '60 min', difficultyClass: 'diff-medium' },
+          slots: ['10:30 - 12:00', '12:00 - 13:30', '13:30 - 15:00', '15:00 - 16:30', '16:30 - 18:00', '18:00 - 19:30', '19:30 - 21:00', '21:00 - 22:30', '22:30 - 00:00', '00:00 - 01:30'],
+          available: true,
+          detailPlayers: '👥 2 – 8 joueurs',
+          detailDifficulty: '⚡ Medium'
+        },
+        {
+          id: 'scenario-jigsaw',
+          detailId: 'page-scenario-jigsaw',
+          name: 'Saw Chapter 2',
+          image: 'img/saw2.png',
+          players: '2 – 8 joueurs',
+          duration: '60 min',
+          difficulty: 'Hard',
+          successRate: '2.8%',
+          description: 'Vous ouvrez les yeux dans l\'obscurité totale, votre cœur battant à tout rompre. 60 minutes pour sortir vivant.',
+          access: ['♿ Partiel', '⚠️ Strobes', '🚶 Crawl'],
+          bookingName: 'Saw Chapter 2',
+          detailEyebrow: 'Scénario · Salle 2',
+          detailTitle: 'SAW CHAPTER 2',
+          detailDescription: 'Saurez-vous survivre au jeu de Jigsaw ? Vous ouvrez les yeux dans l\'obscurité totale, votre cœur battant à tout rompre. Une voix sinistre résonne : « Je veux jouer à un jeu… ». Votre mission est simple : résoudre les énigmes et trouver un moyen de vous échapper avant qu\'il ne soit trop tard.',
+          pricingHtml: '2 joueurs: <strong>40 TND</strong>/pers · 3 joueurs: <strong>35 TND</strong>/pers · 4+: <strong>30 TND</strong>/pers',
+          tags: { time: '60 min', difficultyClass: 'diff-hard' },
+          slots: ['10:30 - 12:00', '12:00 - 13:30', '13:30 - 15:00', '15:00 - 16:30', '16:30 - 18:00', '18:00 - 19:30', '19:30 - 21:00', '21:00 - 22:30', '22:30 - 00:00', '00:00 - 01:30'],
+          available: true,
+          detailPlayers: '👥 2 – 8 joueurs',
+          detailDifficulty: '⚡ Hard'
+        },
+        {
+          id: 'scenario-pirates',
+          detailId: 'page-scenario-pirates',
+          name: 'Pirates des Caraïbes',
+          image: 'img/pirates.png',
+          players: '2 – 6 joueurs',
+          duration: '60 min',
+          difficulty: 'Aventure',
+          successRate: '56%',
+          description: 'Bloqués dans le navire de Barbe Noire, vous devez découvrir le trésor et sortir vivants.',
+          access: ['♿', '💡', '🚫 Crawl'],
+          bookingName: 'Pirates des Caraïbes',
+          detailEyebrow: 'Scénario · Aventure',
+          detailTitle: 'PIRATES DES CARAÏBES',
+          detailDescription: 'Vous êtes des aventuriers audacieux à bord du légendaire navire de Barbe Noire. En quête du célèbre trésor des lingots d\'or, vous explorez le bateau, mais un piège se referme soudain sur vous. Résolvez les énigmes, déjouez les pièges et échappez-vous avec le trésor avant qu\'il ne soit trop tard.',
+          pricingHtml: '2 joueurs: <strong>40 TND</strong>/pers · 3 joueurs: <strong>35 TND</strong>/pers · 4+: <strong>30 TND</strong>/pers',
+          tags: { time: '60 min', difficultyClass: 'diff-medium' },
+          slots: ['10:30 - 12:00', '12:00 - 13:30', '13:30 - 15:00', '15:00 - 16:30', '16:30 - 18:00', '18:00 - 19:30', '19:30 - 21:00', '21:00 - 22:30', '22:30 - 00:00', '00:00 - 01:30'],
+          available: true,
+          detailPlayers: '👥 2 – 6 joueurs',
+          detailDifficulty: '⚡ Medium'
+        },
+        {
+          id: 'scenario-lecter',
+          detailId: 'page-scenario-lecter',
+          name: 'Le Cannibal',
+          image: 'img/cannibal.png',
+          players: '3 – 8 joueurs',
+          duration: '60 min',
+          difficulty: 'Horreur',
+          successRate: '0%',
+          description: 'Vous infiltrez l\'hôpital du Dr Lecter. Le moindre faux pas devient fatal.',
+          access: ['♿ Partiel', '⚠️ Faible lumière', '🚶 Crawl'],
+          bookingName: 'Le Cannibal',
+          detailEyebrow: 'Scénario · Horreur',
+          detailTitle: 'LE CANNIBAL',
+          detailDescription: 'Votre ami journaliste disparaît alors qu\'il enquête sur de mystérieuses disparitions. Votre enquête vous mène à un ancien hôpital psychiatrique abandonné, où le Dr Lecter retient ses proies. Serez-vous assez courageux pour entrer… et assez malins pour ressortir ?',
+          pricingHtml: '2 joueurs: <strong>40 TND</strong>/pers · 3 joueurs: <strong>35 TND</strong>/pers · 4+: <strong>30 TND</strong>/pers',
+          tags: { time: '60 min', difficultyClass: 'diff-hard' },
+          slots: ['10:30 - 12:00', '12:00 - 13:30', '13:30 - 15:00', '15:00 - 16:30', '16:30 - 18:00', '18:00 - 19:30', '19:30 - 21:00', '21:00 - 22:30', '22:30 - 00:00', '00:00 - 01:30'],
+          available: true,
+          detailPlayers: '👥 3 – 8 joueurs',
+          detailDifficulty: '⚡ Hard'
+        },
+        {
+          id: 'scenario-guantanamo',
+          detailId: 'page-scenario-guantanamo',
+          name: 'Guantánamo',
+          image: 'img/gaw.png',
+          players: '4 – 9 joueurs',
+          duration: '60 min',
+          difficulty: 'Évasion',
+          successRate: '11%',
+          description: 'Une prison, un contact corrompu et 60 minutes pour disparaître avant l\'alarme générale.',
+          access: ['♿ Partiel', '💡', '🚫 Crawl'],
+          bookingName: 'Guantánamo',
+          detailEyebrow: 'Scénario · Évasion',
+          detailTitle: 'GUANTÁNAMO',
+          detailDescription: 'Emprisonnés dans le célèbre centre de détention de Guantánamo, un gardien corrompu est prêt à vous aider. Vous avez 60 minutes pour suivre ses instructions et trouver votre chemin vers la liberté. L\'évasion ou l\'exécution… tout dépend de vous.',
+          pricingHtml: '2 joueurs: <strong>40 TND</strong>/pers · 3 joueurs: <strong>35 TND</strong>/pers · 4+: <strong>30 TND</strong>/pers',
+          tags: { time: '60 min', difficultyClass: 'diff-hard' },
+          slots: ['10:30 - 12:00', '12:00 - 13:30', '13:30 - 15:00', '15:00 - 16:30', '16:30 - 18:00', '18:00 - 19:30', '19:30 - 21:00', '21:00 - 22:30', '22:30 - 00:00', '00:00 - 01:30'],
+          available: true,
+          detailPlayers: '👥 4 – 9 joueurs',
+          detailDifficulty: '⚡ Hard'
+        },
+        {
+          id: 'scenario-mafia',
+          detailId: 'page-scenario-mafia',
+          name: 'Mafia',
+          image: 'img/mafia.png',
+          players: '3 – 9 joueurs',
+          duration: '60 min',
+          difficulty: 'Hard',
+          successRate: '16%',
+          description: 'Le temps presse… Démantelez la mafia avant qu\'il ne soit trop tard. Infiltration en cours.',
+          access: ['♿', '⚠️ Dynamic lights', '🚫 Crawl'],
+          bookingName: 'Mafia',
+          detailEyebrow: 'Scénario · Infiltration',
+          detailTitle: 'MAFIA',
+          detailDescription: 'Le temps presse… Démantelez la mafia avant qu\'il ne soit trop tard. Infiltration en cours. Objectif : anéantir le cartel. La chute du cartel commence maintenant.',
+          pricingHtml: '2 joueurs: <strong>40 TND</strong>/pers · 3 joueurs: <strong>35 TND</strong>/pers · 4+: <strong>30 TND</strong>/pers',
+          tags: { time: '60 min', difficultyClass: 'diff-hard' },
+          slots: ['10:30 - 12:00', '12:00 - 13:30', '13:30 - 15:00', '15:00 - 16:30', '16:30 - 18:00', '18:00 - 19:30', '19:30 - 21:00', '21:00 - 22:30', '22:30 - 00:00', '00:00 - 01:30'],
+          available: true,
+          detailPlayers: '👥 3 – 9 joueurs',
+          detailDifficulty: '⚡ Hard'
+        }
+      ];
+
+      function slugify(value) {
+        return String(value || '')
+          .trim()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '') || 'scenario';
+      }
+
+      function parseList(value) {
+        return String(value || '')
+          .split(/[,\n]/)
+          .map(item => item.trim())
+          .filter(Boolean);
+      }
+
+      function normalizeScenario(item, index) {
+        if (!item) return null;
+        const fallback = item.__noFallback ? {} : (DEFAULT_SCENARIOS[index] || DEFAULT_SCENARIOS[0]);
+        const useFallback = Boolean(fallback && (!item.id || String(item.id) === String(fallback.id)));
+        const fallbackSlots = Array.isArray(fallback.slots) ? fallback.slots : [];
+        const fallbackAccess = Array.isArray(fallback.access) ? fallback.access : [];
+        const name = String(item.name || fallback.name || '').trim();
+        const slotsSource = Array.isArray(item.slots) ? item.slots.join(', ') : (item.slots || (useFallback ? fallbackSlots.join(', ') : ''));
+        const accessSource = Array.isArray(item.access) ? item.access.join(', ') : (item.access || (useFallback ? fallbackAccess.join(', ') : ''));
+        const slots = Array.isArray(item.slots) ? item.slots : parseList(slotsSource);
+        const access = Array.isArray(item.access) ? item.access : parseList(accessSource);
+        const detailId = String(item.detailId || fallback.detailId || '').trim();
+        const id = String(item.id || fallback.id || slugify(name)).trim() || slugify(name);
+        return {
+          id,
+          detailId,
+          name,
+          image: String(item.image || fallback.image || '').trim(),
+          players: String(item.players || fallback.players || '').trim(),
+          duration: String(item.duration || fallback.duration || '60 min').trim(),
+          difficulty: String(item.difficulty || fallback.difficulty || '').trim(),
+          successRate: String(item.successRate || fallback.successRate || '').trim(),
+          description: String(item.description || fallback.description || '').trim(),
+          access,
+          bookingName: String(item.bookingName || fallback.bookingName || name).trim() || name,
+          detailEyebrow: String(item.detailEyebrow || (useFallback && fallback.detailEyebrow) || '').trim(),
+          detailTitle: String(item.detailTitle || (useFallback && fallback.detailTitle) || name.toUpperCase()).trim(),
+          detailDescription: String(item.detailDescription || (useFallback && fallback.detailDescription) || item.description || fallback.description || '').trim(),
+          pricingHtml: String(item.pricingHtml || (useFallback && fallback.pricingHtml) || '').trim(),
+          tags: item.tags || (useFallback && fallback.tags) || { time: '60 min', difficultyClass: 'diff-medium' },
+          slots,
+          available: item.available !== false,
+          detailPlayers: String(item.detailPlayers || (useFallback && fallback.detailPlayers) || '').trim(),
+          detailDifficulty: String(item.detailDifficulty || (useFallback && fallback.detailDifficulty) || '').trim()
+        };
+      }
+
+      function getScenarios() {
+        return loadJSON(SCENARIO_KEY, DEFAULT_SCENARIOS).map(normalizeScenario).filter(Boolean);
+      }
+
+      function saveScenarios(list) {
+        saveJSON(SCENARIO_KEY, list.map((item, index) => normalizeScenario(item, index)).filter(Boolean));
+      }
+
+      function ensureSeedScenarios() {
+        const existing = loadJSON(SCENARIO_KEY, null);
+        if (!Array.isArray(existing) || !existing.length) {
+          saveJSON(SCENARIO_KEY, DEFAULT_SCENARIOS);
+          return;
+        }
+        const normalized = existing.map(normalizeScenario).filter(Boolean);
+        if (JSON.stringify(existing) !== JSON.stringify(normalized)) {
+          saveJSON(SCENARIO_KEY, normalized);
+        }
+      }
+
+      function getScenarioById(id) {
+        return getScenarios().find(item => item.id === id) || null;
+      }
+
+      function getScenarioSelectOptions() {
+        return getScenarios().filter(item => item.available !== false);
+      }
+
+      function getScenarioTimeLabel(slot) {
+        return String(slot || '').split(' - ')[0].trim() || String(slot || '').trim();
+      }
+
+      function populateScenarioForm(item) {
+        const scenario = item || null;
+        scenarioEditorId = scenario ? scenario.id : '';
+        if (scenarioSelect) scenarioSelect.value = scenarioEditorId || '';
+        if (scenarioName) scenarioName.value = scenario ? scenario.name : '';
+        if (scenarioImage) scenarioImage.value = scenario ? scenario.image : '';
+        if (scenarioImageFile) scenarioImageFile.value = '';
+        if (scenarioDetailId) scenarioDetailId.value = scenario ? scenario.detailId : '';
+        if (scenarioPlayers) scenarioPlayers.value = scenario ? scenario.players : '';
+        if (scenarioDuration) scenarioDuration.value = scenario ? scenario.duration : '';
+        if (scenarioDifficulty) scenarioDifficulty.value = scenario ? scenario.difficulty : '';
+        if (scenarioSuccess) scenarioSuccess.value = scenario ? scenario.successRate : '';
+        if (scenarioAvailable) scenarioAvailable.value = scenario && scenario.available === false ? 'false' : 'true';
+        if (scenarioDescription) scenarioDescription.value = scenario ? scenario.description : '';
+        if (scenarioAccess) scenarioAccess.value = scenario ? scenario.access.join(', ') : '';
+        if (scenarioSlots) scenarioSlots.value = scenario ? scenario.slots.join(', ') : '';
+        if (scenarioImagePreview) {
+          if (scenario && scenario.image) {
+            scenarioImagePreview.innerHTML = '<img src="' + escapeHTML(scenario.image) + '" alt="' + escapeHTML(scenario.name || 'Scenario image') + '" />';
+          } else {
+            scenarioImagePreview.innerHTML = '<div class="empty">No image selected.</div>';
+          }
+        }
+      }
+
+      function renderScenarioEditorOptions() {
+        if (!scenarioSelect) return;
+        const scenarios = getScenarios();
+        scenarioSelect.innerHTML = ['<option value="">New scenario</option>']
+          .concat(scenarios.map(item => '<option value="' + escapeHTML(item.id) + '">' + escapeHTML(item.name) + '</option>'))
+          .join('');
+        if (scenarioEditorId && scenarios.some(item => item.id === scenarioEditorId)) {
+          scenarioSelect.value = scenarioEditorId;
+        }
+      }
+
+      function renderScenarioAdminList() {
+        if (!scenarioAdminList) return;
+        const scenarios = getScenarios();
+        if (!scenarios.length) {
+          scenarioAdminList.innerHTML = '<li class="empty">No scenarios configured.</li>';
+          return;
+        }
+
+        scenarioAdminList.innerHTML = scenarios.map(item => {
+          const badges = [
+            '<span class="pill">' + escapeHTML(item.available ? 'Available' : 'Unavailable') + '</span>',
+            item.detailId ? '<span class="pill">' + escapeHTML(item.detailId) + '</span>' : ''
+          ].filter(Boolean).join('');
+          return '<li class="scenario-admin-item">'
+            + '<div class="scenario-admin-head">'
+            + '<strong>' + escapeHTML(item.name) + '</strong>'
+            + '<div class="scenario-badges">' + badges + '</div>'
+            + '</div>'
+            + '<div class="scenario-admin-meta">'
+            + escapeHTML(item.players || '-') + ' | ' + escapeHTML(item.duration || '-') + ' | ' + escapeHTML(item.difficulty || '-') + '<br />'
+            + escapeHTML(item.slots.join(' · '))
+            + '</div>'
+            + '<div class="scenario-actions-row" style="margin-top:0">'
+            + '<button class="btn ghost small" type="button" data-scenario-edit="' + escapeHTML(item.id) + '">Edit</button>'
+            + '<button class="btn ghost small" type="button" data-scenario-toggle="' + escapeHTML(item.id) + '">' + (item.available ? 'Make unavailable' : 'Make available') + '</button>'
+            + '<button class="btn danger small" type="button" data-scenario-delete="' + escapeHTML(item.id) + '">Delete</button>'
+            + '</div>'
+            + '</li>';
+        }).join('');
+
+        scenarioAdminList.querySelectorAll('[data-scenario-edit]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const item = getScenarioById(btn.getAttribute('data-scenario-edit'));
+            populateScenarioForm(item);
+            if (scenarioForm && typeof scenarioForm.scrollIntoView === 'function') {
+              scenarioForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            if (scenarioName && typeof scenarioName.focus === 'function') {
+              scenarioName.focus();
+            }
+          });
+        });
+
+        scenarioAdminList.querySelectorAll('[data-scenario-toggle]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-scenario-toggle');
+            const scenariosNow = getScenarios();
+            const item = scenariosNow.find(entry => entry.id === id);
+            if (!item) return;
+            item.available = !item.available;
+            saveScenarios(scenariosNow);
+            refreshAll();
+            if (scenarioEditorId === id) populateScenarioForm(getScenarioById(id));
+          });
+        });
+
+        scenarioAdminList.querySelectorAll('[data-scenario-delete]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-scenario-delete');
+            const next = getScenarios().filter(item => item.id !== id);
+            saveScenarios(next);
+            if (scenarioEditorId === id) populateScenarioForm(null);
+            refreshAll();
+          });
+        });
+      }
+
+      function addOrUpdateScenarioFromForm() {
+        const name = String(scenarioName && scenarioName.value || '').trim();
+        if (!name) {
+          if (scenarioErr) scenarioErr.textContent = 'Scenario name is required.';
+          return;
+        }
+
+        const scenarios = getScenarios();
+        const index = scenarioEditorId ? scenarios.findIndex(item => item.id === scenarioEditorId) : -1;
+        const next = normalizeScenario({
+          __noFallback: index < 0,
+          id: scenarioEditorId || slugify(name),
+          detailId: String(scenarioDetailId && scenarioDetailId.value || '').trim(),
+          name,
+          image: scenarioImage ? scenarioImage.value : '',
+          players: scenarioPlayers ? scenarioPlayers.value : '',
+          duration: scenarioDuration ? scenarioDuration.value : '',
+          difficulty: scenarioDifficulty ? scenarioDifficulty.value : '',
+          successRate: scenarioSuccess ? scenarioSuccess.value : '',
+          available: scenarioAvailable ? scenarioAvailable.value !== 'false' : true,
+          description: scenarioDescription ? scenarioDescription.value : '',
+          access: scenarioAccess ? parseList(scenarioAccess.value) : [],
+          slots: scenarioSlots ? parseList(scenarioSlots.value) : []
+        }, index >= 0 ? index : scenarios.length);
+
+        if (index >= 0) scenarios[index] = next;
+        else scenarios.push(next);
+
+        saveScenarios(scenarios);
+        scenarioEditorId = next.id;
+        if (scenarioErr) scenarioErr.textContent = '';
+        refreshAll();
+        populateScenarioForm(getScenarioById(next.id));
+      }
+
+      function setupScenarioTools() {
+        if (scenarioImageFile) {
+          scenarioImageFile.addEventListener('change', () => {
+            const file = scenarioImageFile.files && scenarioImageFile.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+              const dataUrl = String(reader.result || '');
+              if (scenarioImage) scenarioImage.value = dataUrl;
+              if (scenarioImagePreview) {
+                scenarioImagePreview.innerHTML = '<img src="' + escapeHTML(dataUrl) + '" alt="Scenario image preview" />';
+              }
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+
+        if (scenarioImage) {
+          scenarioImage.addEventListener('input', () => {
+            const value = scenarioImage.value.trim();
+            if (!scenarioImagePreview) return;
+            scenarioImagePreview.innerHTML = value
+              ? '<img src="' + escapeHTML(value) + '" alt="Scenario image preview" />'
+              : '<div class="empty">No image selected.</div>';
+          });
+        }
+
+        if (scenarioSelect) {
+          scenarioSelect.addEventListener('change', () => {
+            const item = getScenarioById(scenarioSelect.value);
+            populateScenarioForm(item);
+            if (item && scenarioForm && typeof scenarioForm.scrollIntoView === 'function') {
+              scenarioForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          });
+        }
+        if (scenarioNewBtn) {
+          scenarioNewBtn.addEventListener('click', () => {
+            scenarioEditorId = '';
+            populateScenarioForm(null);
+            renderScenarioEditorOptions();
+            if (scenarioName && typeof scenarioName.focus === 'function') {
+              scenarioName.focus();
+            }
+          });
+        }
+        if (scenarioForm) {
+          scenarioForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            addOrUpdateScenarioFromForm();
+          });
+        }
+      }
+
       function ensureSeedAdmin() {
         const admins = loadJSON(ADM_KEY, []);
         if (!admins.length) {
-          saveJSON(ADM_KEY, [{ email: 'admin@gmail.com', password: 'admin' }]);
+          saveJSON(ADM_KEY, [
+            { email: 'admin@gmail.com', password: 'admin', role: 'ADMIN', name: 'Admin User', photo: '' },
+            { email: 'superadmin@gmail.com', password: 'superadmin', role: 'SUPER_ADMIN', name: 'Super Admin', photo: '' }
+          ]);
         }
       }
 
       function getAdmins() { return loadJSON(ADM_KEY, []); }
+      
+      function getUserRole(email) {
+        const admins = getAdmins();
+        const admin = admins.find(a => a.email.toLowerCase() === String(email).toLowerCase());
+        return admin ? admin.role : 'USER';
+      }
+      
+      function getUserProfile(email) {
+        const admins = getAdmins();
+        return admins.find(a => a.email.toLowerCase() === String(email).toLowerCase()) || null;
+      }
       function getReservations() { return loadJSON(RES_KEY, []); }
       function saveReservations(list) { saveJSON(RES_KEY, list); }
 
@@ -703,7 +1429,241 @@
         authShell.style.display = show ? 'none' : 'block';
         appShell.style.display = show ? 'block' : 'none';
         if (show && sessionEmailEl) {
-          sessionEmailEl.textContent = getSession() || '-';
+          const email = getSession();
+          sessionEmailEl.textContent = email || '-';
+          const userRole = getUserRole(email);
+          filterMenuByRole(userRole);
+          // Hide stats for admin users, show only for super admin
+          const statsSection = document.querySelector('.stats');
+          if (statsSection) {
+            statsSection.style.display = userRole === 'SUPER_ADMIN' ? 'block' : 'none';
+          }
+        }
+      }
+
+      function filterMenuByRole(role) {
+        const viewAccessMap = {
+          'view-reservations': ['ADMIN', 'SUPER_ADMIN'],
+          'view-profile': ['ADMIN', 'SUPER_ADMIN'],
+          'view-scenarios': ['SUPER_ADMIN'],
+          'view-admins': ['SUPER_ADMIN'],
+          'view-email-templates': ['SUPER_ADMIN'],
+          'view-notifications': ['SUPER_ADMIN'],
+          'view-manifest': ['SUPER_ADMIN'],
+          'view-metrics': ['SUPER_ADMIN'],
+          'view-revenue': ['SUPER_ADMIN']
+        };
+        
+        const sideMenu = document.getElementById('side-menu');
+        if (!sideMenu) return;
+        
+        sideMenu.querySelectorAll('button[data-view]').forEach(btn => {
+          const viewId = btn.getAttribute('data-view');
+          const allowed = viewAccessMap[viewId] || [];
+          btn.style.display = allowed.includes(role) ? 'block' : 'none';
+        });
+      }
+
+      function populateProfileForm() {
+        const email = getSession();
+        const profile = getUserProfile(email);
+        const profileEmailEl = document.getElementById('profile-email');
+        const profileNameEl = document.getElementById('profile-name');
+        const profilePhotoPreview = document.getElementById('profile-photo-preview');
+        
+        if (profileEmailEl) profileEmailEl.value = email || '';
+        if (profileNameEl) profileNameEl.value = profile && profile.name ? profile.name : '';
+        if (profilePhotoPreview) {
+          profilePhotoPreview.innerHTML = profile && profile.photo
+            ? '<img src="' + escapeHTML(profile.photo) + '" alt="Profile photo" />'
+            : '<div class="empty">No photo selected.</div>';
+        }
+      }
+
+      function saveProfile() {
+        const email = getSession();
+        const admins = getAdmins();
+        const idx = admins.findIndex(a => a.email.toLowerCase() === email.toLowerCase());
+        if (idx < 0) return false;
+        
+        const nameEl = document.getElementById('profile-name');
+        const name = nameEl ? nameEl.value.trim() : '';
+        const photoEl = document.getElementById('profile-photo');
+        
+        if (!name) {
+          const err = document.getElementById('profile-error');
+          if (err) err.textContent = 'Name is required.';
+          return false;
+        }
+        
+        admins[idx].name = name;
+        
+        if (photoEl && photoEl.files && photoEl.files[0]) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            admins[idx].photo = String(reader.result || '');
+            saveJSON(ADM_KEY, admins);
+            if (document.getElementById('profile-error')) document.getElementById('profile-error').textContent = '';
+            populateProfileForm();
+          };
+          reader.readAsDataURL(photoEl.files[0]);
+          return true;
+        }
+        
+        saveJSON(ADM_KEY, admins);
+        if (document.getElementById('profile-error')) document.getElementById('profile-error').textContent = '';
+        return true;
+      }
+
+      const NOTIFICATIONS_KEY = 'ROOM_NOTIFICATIONS_V1';
+
+      function getNotifications() {
+        return loadJSON(NOTIFICATIONS_KEY, []);
+      }
+
+      function saveNotifications(list) {
+        saveJSON(NOTIFICATIONS_KEY, list);
+      }
+
+      function createDeclineNotification(reservation, adminEmail) {
+        const notification = {
+          id: 'notif_' + Date.now(),
+          type: 'decline',
+          message: 'Admin ' + adminEmail + ' declined reservation for ' + reservation.name + ' (' + reservation.scenario + ' on ' + reservation.date + ')',
+          reservationId: reservation.id,
+          adminEmail: adminEmail,
+          customerName: reservation.name,
+          scenarioName: reservation.scenario,
+          createdAt: new Date().toISOString(),
+          read: false
+        };
+        const notifs = getNotifications();
+        notifs.unshift(notification);
+        saveNotifications(notifs);
+      }
+
+      function markNotificationAsRead(notificationId) {
+        const notifs = getNotifications();
+        const notif = notifs.find(n => n.id === notificationId);
+        if (notif) {
+          notif.read = true;
+          saveNotifications(notifs);
+        }
+      }
+
+      function dismissNotification(notificationId) {
+        const notifs = getNotifications();
+        const idx = notifs.findIndex(n => n.id === notificationId);
+        if (idx >= 0) {
+          notifs.splice(idx, 1);
+          saveNotifications(notifs);
+        }
+      }
+
+      function sendReservationEmail(reservation, resIdx) {
+        const template = getEmailTemplate();
+        let body = template.body;
+        let subject = template.subject;
+        
+        // Substitute placeholders
+        body = body.replace(/{customerName}/g, reservation.name || '');
+        body = body.replace(/{scenarioName}/g, reservation.scenario || '');
+        body = body.replace(/{date}/g, reservation.date || '');
+        body = body.replace(/{time}/g, reservation.time || '');
+        body = body.replace(/{players}/g, reservation.players || '');
+        
+        subject = subject.replace(/{customerName}/g, reservation.name || '');
+        subject = subject.replace(/{scenarioName}/g, reservation.scenario || '');
+        subject = subject.replace(/{date}/g, reservation.date || '');
+        subject = subject.replace(/{time}/g, reservation.time || '');
+        subject = subject.replace(/{players}/g, reservation.players || '');
+        
+        // For now, show a preview and mark as sent in localStorage
+        // In a real app, this would send via backend
+        const confirmed = confirm('Send confirmation email to ' + (reservation.email || 'unknown') + '?\n\nSubject: ' + subject);
+        
+        if (confirmed) {
+          // Mark reservation as emailed
+          const list = getReservations();
+          if (list[resIdx]) {
+            list[resIdx].emailSent = new Date().toISOString();
+            saveReservations(list);
+            alert('Email sent to ' + reservation.email);
+            refreshAll();
+          }
+        }
+      }
+      const DEFAULT_EMAIL_TEMPLATE = {
+        subject: 'Reservation Confirmation - The Room Escape Game',
+        body: 'Dear {customerName},\n\nYour reservation has been confirmed!\n\nScenario: {scenarioName}\nDate: {date}\nTime: {time}\nPlayers: {players}\n\nPlease arrive 15 minutes early.\n\nBest regards,\nThe Room Team'
+      };
+
+      function getEmailTemplate() {
+        const existing = loadJSON(EMAIL_TEMPLATE_KEY, null);
+        if (!existing) {
+          saveJSON(EMAIL_TEMPLATE_KEY, DEFAULT_EMAIL_TEMPLATE);
+          return DEFAULT_EMAIL_TEMPLATE;
+        }
+        return existing;
+      }
+
+      function saveEmailTemplate(subject, body) {
+        saveJSON(EMAIL_TEMPLATE_KEY, { subject, body });
+      }
+
+      function populateEmailTemplateForm() {
+        const template = getEmailTemplate();
+        const subjectEl = document.getElementById('email-template-subject');
+        const bodyEl = document.getElementById('email-template-body');
+        
+        if (subjectEl) subjectEl.value = template.subject;
+        if (bodyEl) bodyEl.value = template.body;
+      }
+
+      function renderNotifications() {
+        const container = document.getElementById('notifications-list');
+        if (!container) return;
+        
+        const notifs = getNotifications();
+        
+        if (!notifs.length) {
+          container.innerHTML = '<div class="empty">No notifications.</div>';
+          return;
+        }
+        
+        const html = notifs.map(n => {
+          const created = n.createdAt ? new Date(n.createdAt).toLocaleString() : '-';
+          const readClass = n.read ? 'read' : 'unread';
+          return '<div class="notification-item ' + readClass + '" data-notif-id="' + escapeHTML(n.id) + '">' +
+            '<div class="notification-header">' +
+              '<span class="notification-time">' + created + '</span>' +
+              '<button class="btn small" type="button" data-dismiss-notif="' + escapeHTML(n.id) + '">Dismiss</button>' +
+            '</div>' +
+            '<div class="notification-message">' + escapeHTML(n.message) + '</div>' +
+          '</div>';
+        }).join('');
+        
+        container.innerHTML = html;
+        
+        // Add event listeners
+        container.querySelectorAll('[data-dismiss-notif]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const notifId = btn.getAttribute('data-dismiss-notif');
+            dismissNotification(notifId);
+            renderNotifications();
+          });
+        });
+      }
+
+      function detectReservationDecline(reservation, statusValue) {
+        // List of decline statuses
+        const declineStatuses = ['cancelled', 'failed'];
+        const previousStatus = reservation.status || 'new';
+        
+        // Check if status changed to a decline status
+        if (declineStatuses.includes(statusValue) && !declineStatuses.includes(previousStatus)) {
+          const adminEmail = getSession();
+          createDeclineNotification(reservation, adminEmail);
         }
       }
 
@@ -787,6 +1747,10 @@
       }
 
       function renderStats() {
+        // Only show stats for super admin
+        const userRole = getUserRole(getSession());
+        if (userRole !== 'SUPER_ADMIN') return;
+        
         const list = getReservations();
         const upcoming = list.filter(isUpcoming);
         const waiverCount = list.filter(r => !!r.waiverSigned).length;
@@ -847,6 +1811,10 @@
         const rows = filtered.map(({ r, idx }) => {
           const created = r.createdAt ? new Date(r.createdAt).toLocaleString() : '-';
           const statusClass = getStatusClass(r.status || 'new');
+          const userRole = getUserRole(getSession());
+          const emailBtn = userRole === 'SUPER_ADMIN' 
+            ? '<button class="btn small" type="button" data-send-email="' + idx + '">Send Email</button>' 
+            : '';
           return '<tr>' +
             '<td>' + escapeHTML(r.id || '-') + '</td>' +
             '<td>' + escapeHTML(created) + '</td>' +
@@ -862,7 +1830,7 @@
             '<td><span class="status-pill ' + statusClass + '">' + escapeHTML(r.status || 'new') + '</span><br /><select data-status-idx="' + idx + '">' 
               + ['new','confirmed','escaped','failed','cancelled'].map(s => '<option value="' + s + '"' + (r.status === s ? ' selected' : '') + '>' + s + '</option>').join('')
               + '</select></td>' +
-            '<td><button class="btn danger small" type="button" data-del-res="' + idx + '">Delete</button></td>' +
+            '<td>' + emailBtn + '<button class="btn danger small" type="button" data-del-res="' + idx + '">Delete</button></td>' +
           '</tr>';
         }).join('');
 
@@ -914,7 +1882,9 @@
             const i = Number(sel.getAttribute('data-status-idx'));
             const listNow = getReservations();
             if (!listNow[i]) return;
+            const oldStatus = listNow[i].status || 'new';
             listNow[i].status = sel.value;
+            detectReservationDecline(listNow[i], sel.value);
             saveReservations(listNow);
             refreshAll();
           });
@@ -928,6 +1898,15 @@
             listNow[i].waiverSigned = !!chk.checked;
             saveReservations(listNow);
             refreshAll();
+          });
+        });
+
+        wrap.querySelectorAll('[data-send-email]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const i = Number(btn.getAttribute('data-send-email'));
+            const res = getReservations()[i];
+            if (!res) return;
+            sendReservationEmail(res, i);
           });
         });
       }
@@ -1071,6 +2050,8 @@
       }
 
       function refreshAll() {
+        renderScenarioEditorOptions();
+        renderScenarioAdminList();
         renderStats();
         renderReservationsView();
         renderManifestView();
@@ -1080,6 +2061,28 @@
       }
 
       function switchView(id) {
+        const userRole = getUserRole(getSession());
+        
+        // Enforce role-based view access
+        const viewAccessMap = {
+          'view-reservations': ['ADMIN', 'SUPER_ADMIN'],
+          'view-profile': ['ADMIN', 'SUPER_ADMIN'],
+          'view-scenarios': ['SUPER_ADMIN'],
+          'view-admins': ['SUPER_ADMIN'],
+          'view-email-templates': ['SUPER_ADMIN'],
+          'view-notifications': ['SUPER_ADMIN'],
+          'view-manifest': ['SUPER_ADMIN'],
+          'view-metrics': ['SUPER_ADMIN'],
+          'view-revenue': ['SUPER_ADMIN']
+        };
+        
+        const allowed = viewAccessMap[id] || [];
+        if (!allowed.includes(userRole)) {
+          console.warn('Access denied to view:', id);
+          switchView('view-reservations'); // Fallback to reservations
+          return;
+        }
+        
         document.querySelectorAll('.menu button').forEach(b => b.classList.toggle('active', b.dataset.view === id));
         document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === id));
         const titleMap = {
@@ -1087,10 +2090,23 @@
           'view-manifest': 'Player Manifest',
           'view-metrics': 'Escape Rate Metrics',
           'view-revenue': 'Revenue Reports',
-          'view-admins': 'Admin Management'
+          'view-scenarios': 'Scenario Management',
+          'view-admins': 'Admin Management',
+          'view-profile': 'Edit Profile',
+          'view-email-templates': 'Email Templates',
+          'view-notifications': 'Notifications'
         };
         const ttl = document.getElementById('view-title');
         if (ttl) ttl.textContent = titleMap[id] || 'Dashboard';
+        
+        // Load view-specific data
+        if (id === 'view-profile') {
+          populateProfileForm();
+        } else if (id === 'view-email-templates') {
+          populateEmailTemplateForm();
+        } else if (id === 'view-notifications') {
+          renderNotifications();
+        }
       }
 
       function tryLogin(email, password) {
@@ -1239,7 +2255,9 @@
       }
 
       ensureSeedAdmin();
+      ensureSeedScenarios();
       setupReservationTools();
+      setupScenarioTools();
 
       loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -1289,6 +2307,36 @@
         btn.addEventListener('click', () => switchView(btn.dataset.view));
       });
 
+      const profileForm = document.getElementById('profile-form');
+      if (profileForm) {
+        profileForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const success = saveProfile();
+          const msg = document.getElementById('profile-success');
+          if (msg && success) {
+            msg.textContent = 'Profile updated successfully!';
+            setTimeout(() => msg.textContent = '', 3000);
+          }
+        });
+      }
+
+      const emailTemplateForm = document.getElementById('email-template-form');
+      if (emailTemplateForm) {
+        emailTemplateForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const subject = (document.getElementById('email-template-subject') || {}).value || '';
+          const body = (document.getElementById('email-template-body') || {}).value || '';
+          if (subject.trim() && body.trim()) {
+            saveEmailTemplate(subject, body);
+            const msg = document.getElementById('email-template-success');
+            if (msg) {
+              msg.textContent = 'Email template saved successfully!';
+              setTimeout(() => msg.textContent = '', 3000);
+            }
+          }
+        });
+      }
+
       document.getElementById('logout-btn').addEventListener('click', () => {
         clearSession();
         showApp(false);
@@ -1305,7 +2353,7 @@
       }
 
       window.addEventListener('storage', (e) => {
-        if (e.key === RES_KEY || e.key === ADM_KEY) {
+        if (e.key === RES_KEY || e.key === ADM_KEY || e.key === SCENARIO_KEY) {
           if (appShell.style.display === 'block') refreshAll();
         }
       });
