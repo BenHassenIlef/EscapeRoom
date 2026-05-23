@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard - The Room</title>
+  <title>Tableau de bord Admin - The Room</title>
   <link rel="icon" type="image/webp" href="img/loc.webp" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -146,6 +146,14 @@
     .success { margin-top: .55rem; min-height: 1.1rem; color: #065f46; font-size: .9rem; }
     .notification-item { background: rgba(59,130,246,.04); border: 1px solid rgba(59,130,246,.2); border-radius: 8px; padding: .8rem; margin-bottom: .6rem; }
     .notification-item.unread { border-color: rgba(59,130,246,.4); background: rgba(59,130,246,.08); }
+    .notif-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 18px; height: 18px; padding: 0 4px;
+      border-radius: 999px;
+      background: #ef4444; color: #fff;
+      font-size: .68rem; font-weight: 800;
+      margin-left: .4rem; vertical-align: middle;
+    }
     .notification-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; font-size: .85rem; }
     .notification-time { color: var(--muted); }
     .notification-message { line-height: 1.5; color: var(--text); }
@@ -653,20 +661,20 @@
 <body>
   <section class="auth-shell" id="auth-shell">
     <article class="auth-card">
-      <div class="eyebrow">Admin Access</div>
-      <h1 class="title">The Room Ops Dashboard</h1>
-      <p class="sub">Sign in to manage reservations, admins, waivers, metrics, and reports.</p>
+      <div class="eyebrow">Accès Admin</div>
+      <h1 class="title">Tableau de bord The Room</h1>
+      <p class="sub">Connectez-vous pour gérer les réservations, les admins, les décharges, les métriques et les rapports.</p>
       <form id="login-form">
         <div class="field">
-          <label for="login-email">Email</label>
+          <label for="login-email">E-mail</label>
           <input id="login-email" type="email" required autocomplete="username" />
         </div>
         <div class="field">
-          <label for="login-password">Password</label>
+          <label for="login-password">Mot de passe</label>
           <input id="login-password" type="password" required autocomplete="current-password" />
         </div>
-        <button class="btn" type="submit">Sign In</button>
-        <p class="auth-help">Default admin: <strong>admin@gmail.com</strong> / <strong>admin</strong></p>
+        <button class="btn" type="submit">Se connecter</button>
+        <p class="auth-help">Super Admin : <strong>superadmin@gmail.com</strong> / <strong>superadmin</strong></p>
         <p class="error" id="login-error"></p>
       </form>
     </article>
@@ -678,62 +686,62 @@
         <div class="eyebrow">Navigation</div>
         <div class="brand">The Room Admin</div>
         <div class="menu" id="side-menu">
-          <button data-view="view-reservations" class="active" data-role="ADMIN,SUPER_ADMIN">Reservations</button>
-          <button data-view="view-profile" data-role="ADMIN,SUPER_ADMIN">Edit Profile</button>
-          <button data-view="view-manifest" data-role="SUPER_ADMIN">Player Manifest</button>
-          <button data-view="view-metrics" data-role="SUPER_ADMIN">Escape Rate Metrics</button>
-          <button data-view="view-revenue" data-role="SUPER_ADMIN">Revenue Reports</button>
-          <button data-view="view-scenarios" data-role="SUPER_ADMIN">Scenario Management</button>
-          <button data-view="view-email-templates" data-role="SUPER_ADMIN">Email Templates</button>
+          <button data-view="view-reservations" class="active" data-role="ADMIN,SUPER_ADMIN">Réservations</button>
+          <button data-view="view-profile" data-role="ADMIN,SUPER_ADMIN">Modifier le profil</button>
+          <button data-view="view-manifest" data-role="SUPER_ADMIN">Liste des joueurs</button>
+          <button data-view="view-metrics" data-role="SUPER_ADMIN">Métriques d'évasion</button>
+          <button data-view="view-revenue" data-role="SUPER_ADMIN">Rapports de revenus</button>
+          <button data-view="view-scenarios" data-role="SUPER_ADMIN">Gestion des scénarios</button>
+          <button data-view="view-email-templates" data-role="ADMIN,SUPER_ADMIN">Modèles d'e-mail</button>
           <button data-view="view-notifications" data-role="SUPER_ADMIN">Notifications</button>
-          <button data-view="view-admins" data-role="SUPER_ADMIN">Add / Delete Admins</button>
+          <button data-view="view-admins" data-role="SUPER_ADMIN">Gérer les admins</button>
         </div>
         <div class="sidebar-actions">
-          <button class="btn ghost" id="export-pdf-btn" type="button" data-role="SUPER_ADMIN">Export Reservations PDF</button>
-          <button class="btn ghost" id="logout-btn" type="button">Log Out</button>
+          <button class="btn ghost" id="export-pdf-btn" data-role="SUPER_ADMIN" type="button" style="display:none">Exporter PDF</button>
+          <button class="btn ghost" id="logout-btn" type="button">Déconnexion</button>
         </div>
       </aside>
 
       <main class="content">
         <header class="topbar">
           <div>
-            <div class="eyebrow">Control Center</div>
-            <h2 id="view-title">Reservations</h2>
+            <div class="eyebrow">Centre de contrôle</div>
+            <h2 id="view-title">Réservations</h2>
           </div>
           <div class="topbar-meta">
-            <div class="session-chip">Signed in as <strong id="session-email">-</strong></div>
+            <div class="session-chip">Connecté en tant que <strong id="session-email">-</strong></div>
           </div>
         </header>
 
         <section class="stats">
-          <article class="stat"><div class="k">Total Reservations</div><div class="v" id="stat-total">0</div></article>
-          <article class="stat"><div class="k">Upcoming</div><div class="v" id="stat-upcoming">0</div></article>
-          <article class="stat"><div class="k">Waivers Signed</div><div class="v" id="stat-waivers">0</div></article>
-          <article class="stat"><div class="k">Estimated Revenue</div><div class="v" id="stat-revenue">0 TND</div></article>
+          <article class="stat"><div class="k">Total réservations</div><div class="v" id="stat-total">0</div></article>
+          <article class="stat"><div class="k">À venir</div><div class="v" id="stat-upcoming">0</div></article>
+          <article class="stat"><div class="k">Décharges signées</div><div class="v" id="stat-waivers">0</div></article>
+          <article class="stat"><div class="k">Revenus estimés</div><div class="v" id="stat-revenue">0 TND</div></article>
         </section>
 
         <section class="view active" id="view-reservations">
           <div class="res-tools">
-            <input id="res-search" type="search" placeholder="Search name, email, phone, scenario..." aria-label="Search reservations" />
-            <select id="res-status-filter" aria-label="Filter by status">
-              <option value="all">All statuses</option>
-              <option value="new">New</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="escaped">Escaped</option>
-              <option value="failed">Failed</option>
-              <option value="cancelled">Cancelled</option>
+            <input id="res-search" type="search" placeholder="Rechercher nom, e-mail, téléphone, scénario..." aria-label="Rechercher des réservations" />
+            <select id="res-status-filter" aria-label="Filtrer par statut">
+              <option value="all">Tous les statuts</option>
+              <option value="new">Nouveau</option>
+              <option value="confirmed">Confirmé</option>
+              <option value="escaped">Évadé</option>
+              <option value="failed">Échoué</option>
+              <option value="cancelled">Annulé</option>
             </select>
-            <select id="res-scenario-filter" aria-label="Filter by scenario">
-              <option value="all">All scenarios</option>
+            <select id="res-scenario-filter" aria-label="Filtrer par scénario">
+              <option value="all">Tous les scénarios</option>
             </select>
-            <button class="btn ghost" id="res-clear-filters" type="button">Clear</button>
+            <button class="btn ghost" id="res-clear-filters" type="button">Effacer</button>
           </div>
           <div class="table-wrap" id="reservations-table-wrap"></div>
         </section>
 
         <section class="view" id="view-manifest">
           <div class="panel">
-            <h3 style="margin-bottom:.65rem">Upcoming Player Manifest</h3>
+            <h3 style="margin-bottom:.65rem">Liste des joueurs à venir</h3>
             <ul class="manifest-list" id="manifest-list"></ul>
           </div>
         </section>
@@ -745,106 +753,93 @@
         <section class="view" id="view-revenue">
           <div class="kpi-grid" id="revenue-kpis"></div>
           <div class="panel" style="margin-top:.7rem">
-            <h3 style="margin-bottom:.5rem">Popular Time Slots</h3>
+            <h3 style="margin-bottom:.5rem">Créneaux les plus populaires</h3>
             <div id="popular-slots"></div>
           </div>
         </section>
 
         <section class="view" id="view-scenarios">
           <div class="panel" style="margin-bottom:.7rem">
-            <div class="eyebrow">Scenario Management</div>
-            <h3 style="margin-bottom:.6rem">Add or Edit Scenario</h3>
+            <div class="eyebrow">Gestion des scénarios</div>
+            <h3 style="margin-bottom:.6rem">Ajouter ou modifier un scénario</h3>
             <form id="scenario-form">
               <div class="field">
-                <label for="scenario-select">Scenario</label>
+                <label for="scenario-select">Scénario</label>
                 <select id="scenario-select"></select>
               </div>
               <div class="scenario-grid">
                 <div class="field">
-                  <label for="scenario-name">Name</label>
+                  <label for="scenario-name">Nom</label>
                   <input id="scenario-name" type="text" required />
                 </div>
                 <div class="field">
-                  <label for="scenario-image">Image path</label>
-                  <input id="scenario-image" type="text" placeholder="img/example.jpg" />
-                </div>
-                <div class="field">
-                  <label for="scenario-image-file">Upload photo</label>
-                  <input id="scenario-image-file" type="file" accept="image/*" />
-                  <div class="scenario-image-preview" id="scenario-image-preview"></div>
-                </div>
-                <div class="field">
-                  <label for="scenario-detail-id">Detail page id</label>
-                  <input id="scenario-detail-id" type="text" placeholder="page-scenario-example" />
-                </div>
-                <div class="field">
-                  <label for="scenario-players">Players</label>
+                  <label for="scenario-players">Joueurs</label>
                   <input id="scenario-players" type="text" placeholder="2 – 8 joueurs" />
                 </div>
                 <div class="field">
-                  <label for="scenario-duration">Duration</label>
+                  <label for="scenario-duration">Durée</label>
                   <input id="scenario-duration" type="text" placeholder="60 min" />
                 </div>
                 <div class="field">
-                  <label for="scenario-difficulty">Difficulty</label>
+                  <label for="scenario-difficulty">Difficulté</label>
                   <input id="scenario-difficulty" type="text" placeholder="Medium" />
                 </div>
                 <div class="field">
-                  <label for="scenario-success">Success rate</label>
+                  <label for="scenario-success">Taux de succès</label>
                   <input id="scenario-success" type="text" placeholder="24%" />
                 </div>
                 <div class="field">
-                  <label for="scenario-available">Availability</label>
+                  <label for="scenario-available">Disponibilité</label>
                   <select id="scenario-available">
-                    <option value="true">Available</option>
-                    <option value="false">Unavailable</option>
+                    <option value="true">Disponible</option>
+                    <option value="false">Indisponible</option>
                   </select>
                 </div>
                 <div class="field full">
                   <label for="scenario-description">Description</label>
-                  <textarea id="scenario-description" rows="4" placeholder="Public-facing description"></textarea>
+                  <textarea id="scenario-description" rows="4" placeholder="Description publique"></textarea>
                 </div>
                 <div class="field full">
-                  <label for="scenario-access">Access labels</label>
+                  <label for="scenario-access">Labels d'accès</label>
                   <input id="scenario-access" type="text" placeholder="♿, 💡, 🚫 Crawl" />
                 </div>
                 <div class="field full">
-                  <label for="scenario-slots">Game times</label>
+                  <label for="scenario-slots">Horaires</label>
                   <textarea id="scenario-slots" rows="3" placeholder="10:30 - 12:00, 12:00 - 13:30"></textarea>
                 </div>
               </div>
               <div class="scenario-actions-row">
-                <button class="btn" id="scenario-save-btn" type="submit">Save Scenario</button>
-                <button class="btn ghost" id="scenario-new-btn" type="button">New Scenario</button>
+                <button class="btn" id="scenario-save-btn" type="submit">Enregistrer le scénario</button>
+                <button class="btn ghost" id="scenario-new-btn" type="button">Nouveau scénario</button>
               </div>
               <p class="error" id="scenario-error"></p>
             </form>
           </div>
           <div class="panel">
-            <h3>Current Scenarios</h3>
+            <h3>Scénarios actuels</h3>
             <ul class="scenario-admin-list" id="scenario-admin-list"></ul>
           </div>
         </section>
 
         <section class="view" id="view-profile">
           <div class="panel">
-            <div class="eyebrow">Account Settings</div>
-            <h3 style="margin-bottom:.6rem">Edit Your Profile</h3>
+            <div class="eyebrow">Paramètres du compte</div>
+            <h3 style="margin-bottom:.6rem">Modifier votre profil</h3>
             <form id="profile-form">
               <div class="field">
-                <label for="profile-email">Email (Read-only)</label>
+                <label for="profile-email">E-mail (lecture seule)</label>
                 <input id="profile-email" type="email" readonly />
               </div>
               <div class="field">
-                <label for="profile-name">Full Name</label>
-                <input id="profile-name" type="text" placeholder="Your name" />
+                <label for="profile-name">Nom complet</label>
+                <input id="profile-name" type="text" placeholder="Votre nom" />
               </div>
               <div class="field">
-                <label for="profile-photo">Profile Photo</label>
+                <label for="profile-photo">Photo de profil</label>
                 <input id="profile-photo" type="file" accept="image/*" />
                 <div class="profile-photo-preview" id="profile-photo-preview"></div>
               </div>
-              <button class="btn" type="submit">Save Profile</button>
+              <button class="btn" type="submit">Enregistrer le profil</button>
               <p class="error" id="profile-error"></p>
               <p class="success" id="profile-success"></p>
             </form>
@@ -853,29 +848,29 @@
 
         <section class="view" id="view-email-templates">
           <div class="panel">
-            <div class="eyebrow">Email Management</div>
-            <h3 style="margin-bottom:.6rem">Reservation Confirmation Email</h3>
+            <div class="eyebrow">Gestion des e-mails</div>
+            <h3 style="margin-bottom:.6rem">E-mail de confirmation de réservation</h3>
             <form id="email-template-form">
               <div class="field full">
-                <label for="email-template-subject">Subject</label>
-                <input id="email-template-subject" type="text" placeholder="Email subject" />
+                <label for="email-template-subject">Sujet</label>
+                <input id="email-template-subject" type="text" placeholder="Sujet de l'e-mail" />
               </div>
               <div class="field full">
-                <label for="email-template-body">Email Body</label>
-                <textarea id="email-template-body" rows="8" placeholder="Email content. Use {customerName}, {scenarioName}, {date}, {time}, {players} as placeholders"></textarea>
+                <label for="email-template-body">Corps de l'e-mail</label>
+                <textarea id="email-template-body" rows="8" placeholder="Contenu de l'e-mail. Utilisez {customerName}, {scenarioName}, {date}, {time}, {players} comme variables"></textarea>
               </div>
-              <button class="btn" type="submit">Save Email Template</button>
+              <button class="btn" type="submit">Enregistrer le modèle</button>
               <p class="error" id="email-template-error"></p>
               <p class="success" id="email-template-success"></p>
             </form>
             <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--line)">
-              <h4>Available Placeholders</h4>
+              <h4>Variables disponibles</h4>
               <p style="color:var(--muted);font-size:.85rem;line-height:1.5">
-                {customerName} - Guest name<br />
-                {scenarioName} - Scenario title<br />
-                {date} - Reservation date<br />
-                {time} - Reservation time<br />
-                {players} - Number of players
+                {customerName} - Nom du client<br />
+                {scenarioName} - Titre du scénario<br />
+                {date} - Date de réservation<br />
+                {time} - Heure de réservation<br />
+                {players} - Nombre de joueurs
               </p>
             </div>
           </div>
@@ -884,37 +879,37 @@
         <section class="view" id="view-notifications">
           <div class="panel">
             <div class="eyebrow">Notifications</div>
-            <h3 style="margin-bottom:.6rem">Reservation Decline Notifications</h3>
+            <h3 style="margin-bottom:.6rem">Notifications de réservation</h3>
             <div id="notifications-list"></div>
           </div>
         </section>
 
         <section class="view" id="view-admins">
           <div class="panel" style="margin-bottom:.7rem">
-            <div class="eyebrow">Admin Management</div>
-            <h3 style="margin-bottom:.6rem">Add New Admin</h3>
+            <div class="eyebrow">Gestion des admins</div>
+            <h3 style="margin-bottom:.6rem">Ajouter un nouvel admin</h3>
             <form id="add-admin-form">
               <div class="field">
-                <label for="new-admin-email">Email</label>
+                <label for="new-admin-email">E-mail</label>
                 <input id="new-admin-email" type="email" required />
               </div>
               <div class="field">
-                <label for="new-admin-password">Password</label>
+                <label for="new-admin-password">Mot de passe</label>
                 <input id="new-admin-password" type="password" required minlength="4" />
               </div>
               <div class="field">
-                <label for="new-admin-role">Role</label>
+                <label for="new-admin-role">Rôle</label>
                 <select id="new-admin-role" required>
-                  <option value="ADMIN">Admin (Reservations Only)</option>
-                  <option value="SUPER_ADMIN">Super Admin (Full Access)</option>
+                  <option value="ADMIN">Admin (Réservations uniquement)</option>
+                  <option value="SUPER_ADMIN">Super Admin (Accès complet)</option>
                 </select>
               </div>
-              <button class="btn" type="submit">Add Admin</button>
+              <button class="btn" type="submit">Ajouter un admin</button>
               <p class="error" id="admin-error"></p>
             </form>
           </div>
           <div class="panel">
-            <h3>Current Admins</h3>
+            <h3>Admins actuels</h3>
             <ul class="admin-list" id="admin-list"></ul>
           </div>
         </section>
@@ -923,11 +918,135 @@
   </section>
 
   <script>
+  /* ── EMAIL : mailto (opens default mail client — zero config needed) ────── */
+  function sendConfirmationEmail(reservation) {
+    if (!reservation || !reservation.email) return;
+    var subject = encodeURIComponent('Confirmation de votre réservation — The Room Escape Game');
+    var body = encodeURIComponent(
+      'Bonjour ' + (reservation.name || '') + ',\n\n' +
+      'Votre réservation a été CONFIRMÉE par notre équipe.\n\n' +
+      '--- RÉCAPITULATIF ---\n' +
+      'Scénario  : ' + (reservation.scenario || '') + '\n' +
+      'Date      : ' + (reservation.date || '') + '\n' +
+      'Heure     : ' + (reservation.time || '') + '\n' +
+      'Joueurs   : ' + (reservation.players || '') + '\n' +
+      'Téléphone : ' + (reservation.phone || '') + '\n' +
+      (reservation.message ? 'Message   : ' + reservation.message + '\n' : '') +
+      '\nMerci de vous présenter 15 minutes avant le début de la session.\n\n' +
+      'À bientôt !\nThe Room — Escape Game'
+    );
+    window.open('mailto:' + encodeURIComponent(reservation.email) + '?subject=' + subject + '&body=' + body);
+  }
+
+  /* ── BACKEND SYNC ──────────────────────────────────────────────────────── */
+  var BACKEND = 'http://localhost:8081/api';
+
+  // Tracks status changes the user just made locally so the polling fetch
+  // doesn't overwrite them before the backend PUT has been processed.
+  // { backendId: { status: 'confirmed', ts: Date.now() } }
+  var pendingStatusChanges = {};
+
+  async function backendLogin(email, password) {
+    try {
+      var r = await fetch(BACKEND + '/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, password: password })
+      });
+      if (!r.ok) return null;
+      var d = await r.json();
+      return d.token || d.accessToken || null;
+    } catch (_) { return null; }
+  }
+
+  function mapBackendReservation(r) {
+    var dt = r.reservationDateTime || r.reservation_date_time || '';
+    var statusMap = { PENDING: 'new', CONFIRMED: 'confirmed', CANCELLED: 'cancelled', COMPLETED: 'escaped' };
+    return {
+      id: 'bk-' + r.id,
+      backendId: r.id,
+      createdAt: r.createdAt || r.created_at || new Date().toISOString(),
+      name: r.customerName || r.customer_name || '',
+      email: r.customerEmail || r.customer_email || '',
+      phone: r.customerPhone || r.customer_phone || '',
+      scenario: r.scenarioName || r.scenario_name || '',
+      players: String(r.numberOfPlayers || r.number_of_players || ''),
+      date: dt ? dt.split('T')[0] : '',
+      time: dt ? dt.split('T')[1].slice(0, 5) : '',
+      message: r.notes || '',
+      status: statusMap[r.status] || 'new',
+      source: 'backend'
+    };
+  }
+
+  async function fetchAndMergeReservations(token) {
+    try {
+      var headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+      var r = await fetch(BACKEND + '/reservations', { headers: headers });
+      if (!r.ok) return;
+      var backendList = await r.json();
+      var now = Date.now();
+      var mapped = backendList.map(function(item) {
+        var res = mapBackendReservation(item);
+        // If the user changed this status locally in the last 15 s, keep their
+        // value — the backend PUT may not have committed yet.
+        var p = pendingStatusChanges[res.backendId];
+        if (p) {
+          if (now - p.ts < 15000) {
+            res.status = p.status;
+          } else {
+            delete pendingStatusChanges[res.backendId]; // expired, trust backend
+          }
+        }
+        return res;
+      });
+      localStorage.setItem('ROOM_RESERVATIONS_V1', JSON.stringify(mapped));
+    } catch (_) {}
+  }
+
+
+  async function ensureJWT() {
+    var token = sessionStorage.getItem('ADMIN_JWT');
+    if (token) return token;
+    try {
+      var email = localStorage.getItem('ROOM_ADMIN_SESSION_V1');
+      if (!email) return null;
+      var admins = JSON.parse(localStorage.getItem('ROOM_ADMINS_V2') || '[]');
+      var admin = admins.find(function(a) { return a.email === email; });
+      if (!admin || !admin.password) return null;
+      token = await backendLogin(email, admin.password);
+      if (token) sessionStorage.setItem('ADMIN_JWT', token);
+    } catch (_) {}
+    return token || null;
+  }
+
+  async function updateBackendStatus(backendId, frontendStatus) {
+    if (!backendId) return;
+    var token = await ensureJWT();
+    if (!token) { console.error('[status] No JWT — cannot update backend status'); return; }
+    var map = { new: 'PENDING', confirmed: 'CONFIRMED', cancelled: 'CANCELLED', escaped: 'COMPLETED', failed: 'CANCELLED' };
+    var backendStatus = map[frontendStatus] || 'PENDING';
+    console.log('[status] PUT →', BACKEND + '/reservations/' + backendId + '/status', backendStatus);
+    try {
+      var r = await fetch(BACKEND + '/reservations/' + backendId + '/status', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ status: backendStatus })
+      });
+      if (r.ok) {
+        console.log('[status] PUT succeeded for backendId', backendId, '→', backendStatus);
+      } else {
+        console.error('[status] PUT failed:', r.status, await r.text());
+      }
+    } catch (err) { console.error('[status] PUT error:', err); }
+  }
+
     (function() {
       const RES_KEY = 'ROOM_RESERVATIONS_V1';
-      const ADM_KEY = 'ROOM_ADMINS_V1';
+      const ADM_KEY = 'ROOM_ADMINS_V2';
       const SESSION_KEY = 'ROOM_ADMIN_SESSION_V1';
-      const SCENARIO_KEY = 'ROOM_SCENARIOS_V1';
+      const SCENARIO_KEY = 'ROOM_SCENARIOS_V2';
+      const EMAIL_TEMPLATE_KEY = 'ROOM_EMAIL_TEMPLATE_V1';
 
       const authShell = document.getElementById('auth-shell');
       const appShell = document.getElementById('app-shell');
@@ -1224,7 +1343,7 @@
           if (scenario && scenario.image) {
             scenarioImagePreview.innerHTML = '<img src="' + escapeHTML(scenario.image) + '" alt="' + escapeHTML(scenario.name || 'Scenario image') + '" />';
           } else {
-            scenarioImagePreview.innerHTML = '<div class="empty">No image selected.</div>';
+            scenarioImagePreview.innerHTML = '<div class="empty">Aucune image sélectionnée.</div>';
           }
         }
       }
@@ -1232,7 +1351,7 @@
       function renderScenarioEditorOptions() {
         if (!scenarioSelect) return;
         const scenarios = getScenarios();
-        scenarioSelect.innerHTML = ['<option value="">New scenario</option>']
+        scenarioSelect.innerHTML = ['<option value="">Nouveau scénario</option>']
           .concat(scenarios.map(item => '<option value="' + escapeHTML(item.id) + '">' + escapeHTML(item.name) + '</option>'))
           .join('');
         if (scenarioEditorId && scenarios.some(item => item.id === scenarioEditorId)) {
@@ -1244,13 +1363,13 @@
         if (!scenarioAdminList) return;
         const scenarios = getScenarios();
         if (!scenarios.length) {
-          scenarioAdminList.innerHTML = '<li class="empty">No scenarios configured.</li>';
+          scenarioAdminList.innerHTML = '<li class="empty">Aucun scénario configuré.</li>';
           return;
         }
 
         scenarioAdminList.innerHTML = scenarios.map(item => {
           const badges = [
-            '<span class="pill">' + escapeHTML(item.available ? 'Available' : 'Unavailable') + '</span>',
+            '<span class="pill">' + escapeHTML(item.available ? 'Disponible' : 'Indisponible') + '</span>',
             item.detailId ? '<span class="pill">' + escapeHTML(item.detailId) + '</span>' : ''
           ].filter(Boolean).join('');
           return '<li class="scenario-admin-item">'
@@ -1263,9 +1382,9 @@
             + escapeHTML(item.slots.join(' · '))
             + '</div>'
             + '<div class="scenario-actions-row" style="margin-top:0">'
-            + '<button class="btn ghost small" type="button" data-scenario-edit="' + escapeHTML(item.id) + '">Edit</button>'
-            + '<button class="btn ghost small" type="button" data-scenario-toggle="' + escapeHTML(item.id) + '">' + (item.available ? 'Make unavailable' : 'Make available') + '</button>'
-            + '<button class="btn danger small" type="button" data-scenario-delete="' + escapeHTML(item.id) + '">Delete</button>'
+            + '<button class="btn ghost small" type="button" data-scenario-edit="' + escapeHTML(item.id) + '">Modifier</button>'
+            + '<button class="btn ghost small" type="button" data-scenario-toggle="' + escapeHTML(item.id) + '">' + (item.available ? 'Rendre indisponible' : 'Rendre disponible') + '</button>'
+            + '<button class="btn danger small" type="button" data-scenario-delete="' + escapeHTML(item.id) + '">Supprimer</button>'
             + '</div>'
             + '</li>';
         }).join('');
@@ -1310,7 +1429,7 @@
       function addOrUpdateScenarioFromForm() {
         const name = String(scenarioName && scenarioName.value || '').trim();
         if (!name) {
-          if (scenarioErr) scenarioErr.textContent = 'Scenario name is required.';
+          if (scenarioErr) scenarioErr.textContent = 'Le nom du scénario est requis.';
           return;
         }
 
@@ -1364,8 +1483,8 @@
             const value = scenarioImage.value.trim();
             if (!scenarioImagePreview) return;
             scenarioImagePreview.innerHTML = value
-              ? '<img src="' + escapeHTML(value) + '" alt="Scenario image preview" />'
-              : '<div class="empty">No image selected.</div>';
+              ? '<img src="' + escapeHTML(value) + '" alt="Aperçu de l\'image du scénario" />'
+              : '<div class="empty">Aucune image sélectionnée.</div>';
           });
         }
 
@@ -1397,13 +1516,21 @@
       }
 
       function ensureSeedAdmin() {
-        const admins = loadJSON(ADM_KEY, []);
-        if (!admins.length) {
-          saveJSON(ADM_KEY, [
-            { email: 'admin@gmail.com', password: 'admin', role: 'ADMIN', name: 'Admin User', photo: '' },
-            { email: 'superadmin@gmail.com', password: 'superadmin', role: 'SUPER_ADMIN', name: 'Super Admin', photo: '' }
-          ]);
-        }
+        const REQUIRED = [
+          { email: 'superadmin@gmail.com', password: 'superadmin', role: 'SUPER_ADMIN', name: 'Super Admin', photo: '' },
+          { email: 'admin@gmail.com',      password: 'admin',      role: 'ADMIN',       name: 'Admin',       photo: '' }
+        ];
+        let admins = loadJSON(ADM_KEY, []);
+        // Remove any old/stale emails that are not in the required list
+        const requiredEmails = REQUIRED.map(a => a.email.toLowerCase());
+        admins = admins.filter(a => requiredEmails.includes(a.email.toLowerCase()));
+        // Add or reset each required admin — always restore the correct password
+        REQUIRED.forEach(req => {
+          const idx = admins.findIndex(a => a.email.toLowerCase() === req.email.toLowerCase());
+          if (idx < 0) admins.push(req);
+          else admins[idx] = { ...admins[idx], ...req }; // always sync role, name, and password
+        });
+        saveJSON(ADM_KEY, admins);
       }
 
       function getAdmins() { return loadJSON(ADM_KEY, []); }
@@ -1447,7 +1574,7 @@
           'view-profile': ['ADMIN', 'SUPER_ADMIN'],
           'view-scenarios': ['SUPER_ADMIN'],
           'view-admins': ['SUPER_ADMIN'],
-          'view-email-templates': ['SUPER_ADMIN'],
+          'view-email-templates': ['ADMIN', 'SUPER_ADMIN'],
           'view-notifications': ['SUPER_ADMIN'],
           'view-manifest': ['SUPER_ADMIN'],
           'view-metrics': ['SUPER_ADMIN'],
@@ -1462,6 +1589,9 @@
           const allowed = viewAccessMap[viewId] || [];
           btn.style.display = allowed.includes(role) ? 'block' : 'none';
         });
+
+        const exportBtn = document.getElementById('export-pdf-btn');
+        if (exportBtn) exportBtn.style.display = role === 'SUPER_ADMIN' ? '' : 'none';
       }
 
       function populateProfileForm() {
@@ -1475,8 +1605,8 @@
         if (profileNameEl) profileNameEl.value = profile && profile.name ? profile.name : '';
         if (profilePhotoPreview) {
           profilePhotoPreview.innerHTML = profile && profile.photo
-            ? '<img src="' + escapeHTML(profile.photo) + '" alt="Profile photo" />'
-            : '<div class="empty">No photo selected.</div>';
+            ? '<img src="' + escapeHTML(profile.photo) + '" alt="Photo de profil" />'
+            : '<div class="empty">Aucune photo sélectionnée.</div>';
         }
       }
 
@@ -1492,7 +1622,7 @@
         
         if (!name) {
           const err = document.getElementById('profile-error');
-          if (err) err.textContent = 'Name is required.';
+          if (err) err.textContent = 'Le nom est requis.';
           return false;
         }
         
@@ -1517,6 +1647,16 @@
 
       const NOTIFICATIONS_KEY = 'ROOM_NOTIFICATIONS_V1';
 
+      const ACTION_META = {
+        confirmed:  { label: 'Confirmé',       color: '#2563eb', bg: 'rgba(37,99,235,.1)',   icon: '✅' },
+        cancelled:  { label: 'Annulé',         color: '#ef4444', bg: 'rgba(239,68,68,.1)',   icon: '❌' },
+        failed:     { label: 'Échoué',         color: '#dc2626', bg: 'rgba(220,38,38,.1)',   icon: '💀' },
+        escaped:    { label: 'Évadé',          color: '#10b981', bg: 'rgba(16,185,129,.1)',  icon: '🏆' },
+        new:        { label: 'Remis à nouveau',color: '#6366f1', bg: 'rgba(99,102,241,.1)',  icon: '🆕' },
+        deleted:    { label: 'Supprimé',       color: '#f59e0b', bg: 'rgba(245,158,11,.1)',  icon: '🗑️' },
+        waiver:     { label: 'Décharge',       color: '#8b5cf6', bg: 'rgba(139,92,246,.1)',  icon: '📋' }
+      };
+
       function getNotifications() {
         return loadJSON(NOTIFICATIONS_KEY, []);
       }
@@ -1525,72 +1665,171 @@
         saveJSON(NOTIFICATIONS_KEY, list);
       }
 
-      function createDeclineNotification(reservation, adminEmail) {
-        const notification = {
-          id: 'notif_' + Date.now(),
-          type: 'decline',
-          message: 'Admin ' + adminEmail + ' declined reservation for ' + reservation.name + ' (' + reservation.scenario + ' on ' + reservation.date + ')',
-          reservationId: reservation.id,
-          adminEmail: adminEmail,
-          customerName: reservation.name,
-          scenarioName: reservation.scenario,
+      async function createActionNotification(reservation, action) {
+        console.log('[notif] createActionNotification called, action=', action, 'reservation=', reservation);
+        if (action !== 'confirmed' && action !== 'cancelled') return;
+        const adminEmail = getSession();
+        const messages = {
+          confirmed: 'confirmed reservation',
+          cancelled: 'cancelled reservation',
+          deleted:   'deleted reservation',
+          waiver:    'updated waiver for'
+        };
+        const verb = messages[action] || ('changed status to ' + action + ' for');
+        const message = adminEmail + ' ' + verb + ' ' + (reservation.name || 'unknown') +
+          ' — ' + (reservation.scenario || '') +
+          (reservation.date ? ' on ' + reservation.date : '');
+
+        const notif = {
+          id: 'notif_' + Date.now() + '_' + Math.random().toString(36).slice(2),
+          type: action,
+          action,
+          message,
+          adminEmail,
+          reservationId: String(reservation.id || ''),
+          customerName: reservation.name || '',
+          scenarioName: reservation.scenario || '',
           createdAt: new Date().toISOString(),
           read: false
         };
+
+        // Save locally so the current tab sees it immediately
         const notifs = getNotifications();
-        notifs.unshift(notification);
+        notifs.unshift(notif);
         saveNotifications(notifs);
+        updateNotifBadge();
+
+        // Post to backend so superadmin sees it
+        const token = await ensureJWT();
+        if (!token) { console.error('[notif] No JWT — cannot post notification to backend'); return; }
+        try {
+          const resp = await fetch(BACKEND + '/notifications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ type: action, action, message, reservationId: notif.reservationId, customerName: notif.customerName, scenarioName: notif.scenarioName })
+          });
+          if (!resp.ok) console.error('[notif] POST failed:', resp.status, await resp.text());
+        } catch (err) { console.error('[notif] POST error:', err); }
       }
 
-      function markNotificationAsRead(notificationId) {
+      async function loadBackendNotifications() {
+        const token = await ensureJWT();
+        if (!token) { console.warn('[notif] No JWT — skipping loadBackendNotifications'); return; }
+        try {
+          const r = await fetch(BACKEND + '/notifications', { headers: { 'Authorization': 'Bearer ' + token } });
+          if (!r.ok) { console.error('[notif] GET failed:', r.status); return; }
+          const list = await r.json();
+          // Backend is source of truth; keep local-only notifications without a backendId
+          const local = getNotifications().filter(n => !n.backendId);
+          const merged = list.map(n => ({
+            id: 'bn_' + n.id,
+            backendId: n.id,
+            type: n.action || n.type,
+            action: n.action,
+            message: n.message,
+            adminEmail: n.adminEmail,
+            reservationId: n.reservationId,
+            customerName: n.customerName,
+            scenarioName: n.scenarioName,
+            createdAt: n.createdAt,
+            read: n.read
+          })).concat(local);
+          saveNotifications(merged);
+          updateNotifBadge();
+        } catch (err) { console.error('[notif] GET error:', err); }
+      }
+
+      function dismissNotification(notifId) {
         const notifs = getNotifications();
-        const notif = notifs.find(n => n.id === notificationId);
+        const notif = notifs.find(n => n.id === notifId);
+        const next = notifs.filter(n => n.id !== notifId);
+        saveNotifications(next);
+        updateNotifBadge();
+        // Also delete from backend
+        if (notif && notif.backendId) {
+          ensureJWT().then(token => {
+            if (token) fetch(BACKEND + '/notifications/' + notif.backendId, {
+              method: 'DELETE',
+              headers: { 'Authorization': 'Bearer ' + token }
+            }).catch(() => {});
+          });
+        }
+      }
+
+      function markNotificationAsRead(notifId) {
+        const notifs = getNotifications();
+        const notif = notifs.find(n => n.id === notifId);
         if (notif) {
           notif.read = true;
           saveNotifications(notifs);
-        }
-      }
-
-      function dismissNotification(notificationId) {
-        const notifs = getNotifications();
-        const idx = notifs.findIndex(n => n.id === notificationId);
-        if (idx >= 0) {
-          notifs.splice(idx, 1);
-          saveNotifications(notifs);
-        }
-      }
-
-      function sendReservationEmail(reservation, resIdx) {
-        const template = getEmailTemplate();
-        let body = template.body;
-        let subject = template.subject;
-        
-        // Substitute placeholders
-        body = body.replace(/{customerName}/g, reservation.name || '');
-        body = body.replace(/{scenarioName}/g, reservation.scenario || '');
-        body = body.replace(/{date}/g, reservation.date || '');
-        body = body.replace(/{time}/g, reservation.time || '');
-        body = body.replace(/{players}/g, reservation.players || '');
-        
-        subject = subject.replace(/{customerName}/g, reservation.name || '');
-        subject = subject.replace(/{scenarioName}/g, reservation.scenario || '');
-        subject = subject.replace(/{date}/g, reservation.date || '');
-        subject = subject.replace(/{time}/g, reservation.time || '');
-        subject = subject.replace(/{players}/g, reservation.players || '');
-        
-        // For now, show a preview and mark as sent in localStorage
-        // In a real app, this would send via backend
-        const confirmed = confirm('Send confirmation email to ' + (reservation.email || 'unknown') + '?\n\nSubject: ' + subject);
-        
-        if (confirmed) {
-          // Mark reservation as emailed
-          const list = getReservations();
-          if (list[resIdx]) {
-            list[resIdx].emailSent = new Date().toISOString();
-            saveReservations(list);
-            alert('Email sent to ' + reservation.email);
-            refreshAll();
+          updateNotifBadge();
+          if (notif.backendId) {
+            ensureJWT().then(token => {
+              if (token) fetch(BACKEND + '/notifications/' + notif.backendId + '/read', {
+                method: 'PUT',
+                headers: { 'Authorization': 'Bearer ' + token }
+              }).catch(() => {});
+            });
           }
+        }
+      }
+
+      function updateNotifBadge() {
+        const unread = getNotifications().filter(n => !n.read).length;
+        const btn = document.querySelector('[data-view="view-notifications"]');
+        if (!btn) return;
+        const existing = btn.querySelector('.notif-badge');
+        if (unread > 0) {
+          if (existing) { existing.textContent = unread; }
+          else { btn.insertAdjacentHTML('beforeend', '<span class="notif-badge">' + unread + '</span>'); }
+        } else {
+          if (existing) existing.remove();
+        }
+      }
+
+      async function sendReservationEmail(reservation, resIdx) {
+        if (!reservation.email) {
+          alert('Pas d\'adresse e-mail pour cette réservation.');
+          return;
+        }
+        const token = await ensureJWT();
+        if (!token) {
+          alert('Le backend est hors ligne. Démarrez le serveur puis réessayez.');
+          return;
+        }
+        const template = getEmailTemplate();
+        const subject = template.subject
+          .replace(/{customerName}/g, reservation.name || '')
+          .replace(/{scenarioName}/g, reservation.scenario || '')
+          .replace(/{date}/g, reservation.date || '')
+          .replace(/{time}/g, reservation.time || '')
+          .replace(/{players}/g, reservation.players || '');
+        const body = template.body
+          .replace(/{customerName}/g, reservation.name || '')
+          .replace(/{scenarioName}/g, reservation.scenario || '')
+          .replace(/{date}/g, reservation.date || '')
+          .replace(/{time}/g, reservation.time || '')
+          .replace(/{players}/g, reservation.players || '');
+        try {
+          const r = await fetch(BACKEND + '/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ to: reservation.email, subject, body })
+          });
+          if (r.ok) {
+            alert('E-mail envoyé à ' + reservation.email);
+            const list = getReservations();
+            if (list[resIdx]) {
+              list[resIdx].emailSent = new Date().toISOString();
+              saveReservations(list);
+              refreshAll();
+            }
+          } else {
+            const d = await r.json();
+            alert('Échec de l\'envoi de l\'e-mail : ' + (d.error || 'Erreur inconnue'));
+          }
+        } catch (err) {
+          alert('Impossible de joindre le serveur. Est-il en cours d\'exécution ?');
         }
       }
       const DEFAULT_EMAIL_TEMPLATE = {
@@ -1623,47 +1862,74 @@
       function renderNotifications() {
         const container = document.getElementById('notifications-list');
         if (!container) return;
-        
+
         const notifs = getNotifications();
-        
+        updateNotifBadge();
+
         if (!notifs.length) {
-          container.innerHTML = '<div class="empty">No notifications.</div>';
+          container.innerHTML = '<div class="empty">Aucune notification pour l\'instant.</div>';
           return;
         }
-        
+
+        const unreadCount = notifs.filter(n => !n.read).length;
+        const headerHtml = unreadCount > 0
+          ? '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem">'
+            + '<span style="font-size:.82rem;color:var(--muted)">' + unreadCount + ' non lu(s)</span>'
+            + '<button class="btn ghost small" id="mark-all-read-btn" type="button">Tout marquer comme lu</button>'
+            + '</div>'
+          : '';
+
         const html = notifs.map(n => {
+          const meta = ACTION_META[n.action || n.type] || { label: n.action || 'Action', color: '#6b7280', bg: 'rgba(107,114,128,.1)', icon: '🔔' };
           const created = n.createdAt ? new Date(n.createdAt).toLocaleString() : '-';
-          const readClass = n.read ? 'read' : 'unread';
-          return '<div class="notification-item ' + readClass + '" data-notif-id="' + escapeHTML(n.id) + '">' +
-            '<div class="notification-header">' +
-              '<span class="notification-time">' + created + '</span>' +
-              '<button class="btn small" type="button" data-dismiss-notif="' + escapeHTML(n.id) + '">Dismiss</button>' +
+          const unreadStyle = n.read ? '' : 'border-left:3px solid ' + meta.color + ';';
+          return '<div class="notification-item ' + (n.read ? '' : 'unread') + '" data-notif-id="' + escapeHTML(String(n.id)) + '" style="' + unreadStyle + 'margin-bottom:.55rem">' +
+            '<div class="notification-header" style="margin-bottom:.35rem">' +
+              '<div style="display:flex;align-items:center;gap:.45rem">' +
+                '<span style="font-size:1rem">' + meta.icon + '</span>' +
+                '<span style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:.15rem .45rem;border-radius:999px;background:' + meta.bg + ';color:' + meta.color + '">' + escapeHTML(meta.label) + '</span>' +
+                (n.read ? '' : '<span style="width:7px;height:7px;border-radius:50%;background:' + meta.color + ';display:inline-block"></span>') +
+              '</div>' +
+              '<div style="display:flex;align-items:center;gap:.4rem">' +
+                '<span class="notification-time" style="font-size:.75rem">' + escapeHTML(created) + '</span>' +
+                (n.read ? '' : '<button class="btn ghost small" type="button" data-read-notif="' + escapeHTML(String(n.id)) + '">Marquer comme lu</button>') +
+                '<button class="btn danger small" type="button" data-dismiss-notif="' + escapeHTML(String(n.id)) + '">Ignorer</button>' +
+              '</div>' +
             '</div>' +
-            '<div class="notification-message">' + escapeHTML(n.message) + '</div>' +
+            '<div class="notification-message" style="font-size:.88rem;line-height:1.5">' + escapeHTML(n.message) + '</div>' +
           '</div>';
         }).join('');
-        
-        container.innerHTML = html;
-        
-        // Add event listeners
+
+        container.innerHTML = headerHtml + html;
+
+        const markAllBtn = container.querySelector('#mark-all-read-btn');
+        if (markAllBtn) {
+          markAllBtn.addEventListener('click', () => {
+            const all = getNotifications();
+            all.forEach(n => { n.read = true; });
+            saveNotifications(all);
+            renderNotifications();
+          });
+        }
+
+        container.querySelectorAll('[data-read-notif]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            markNotificationAsRead(btn.getAttribute('data-read-notif'));
+            renderNotifications();
+          });
+        });
+
         container.querySelectorAll('[data-dismiss-notif]').forEach(btn => {
           btn.addEventListener('click', () => {
-            const notifId = btn.getAttribute('data-dismiss-notif');
-            dismissNotification(notifId);
+            dismissNotification(btn.getAttribute('data-dismiss-notif'));
             renderNotifications();
           });
         });
       }
 
-      function detectReservationDecline(reservation, statusValue) {
-        // List of decline statuses
-        const declineStatuses = ['cancelled', 'failed'];
-        const previousStatus = reservation.status || 'new';
-        
-        // Check if status changed to a decline status
-        if (declineStatuses.includes(statusValue) && !declineStatuses.includes(previousStatus)) {
-          const adminEmail = getSession();
-          createDeclineNotification(reservation, adminEmail);
+      async function detectReservationDecline(reservation, statusValue) {
+        if (statusValue === 'confirmed' || statusValue === 'cancelled') {
+          await createActionNotification(reservation, statusValue);
         }
       }
 
@@ -1729,6 +1995,11 @@
         return ['new', 'confirmed', 'escaped', 'failed', 'cancelled'].includes(s) ? s : 'new';
       }
 
+      const STATUS_LABELS_FR = { new: 'Nouveau', confirmed: 'Confirmé', escaped: 'Évadé', failed: 'Échoué', cancelled: 'Annulé' };
+      function getStatusLabel(status) {
+        return STATUS_LABELS_FR[normalizeText(status || 'new')] || (status || 'Nouveau');
+      }
+
       function renderSortHeader(label, key) {
         const active = reservationState.sortKey === key;
         const arrow = active ? (reservationState.sortDir === 'asc' ? '↑' : '↓') : '↕';
@@ -1739,7 +2010,7 @@
         if (!resScenarioFilter) return;
         const current = reservationState.scenario;
         const scenarios = Array.from(new Set(list.map(r => String(r.scenario || '').trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b));
-        const options = ['<option value="all">All scenarios</option>']
+        const options = ['<option value="all">Tous les scénarios</option>']
           .concat(scenarios.map(name => '<option value="' + escapeHTML(name) + '">' + escapeHTML(name) + '</option>'));
         resScenarioFilter.innerHTML = options.join('');
         resScenarioFilter.value = scenarios.includes(current) || current === 'all' ? current : 'all';
@@ -1768,7 +2039,7 @@
         updateScenarioFilterOptions(list);
 
         if (!list.length) {
-          wrap.innerHTML = '<div class="empty">No reservations yet.</div>';
+          wrap.innerHTML = '<div class="empty">Aucune réservation pour l\'instant.</div>';
           return;
         }
 
@@ -1804,7 +2075,7 @@
           });
 
         if (!filtered.length) {
-          wrap.innerHTML = '<div class="empty">No reservations match your filters.</div>';
+          wrap.innerHTML = '<div class="empty">Aucune réservation ne correspond à vos filtres.</div>';
           return;
         }
 
@@ -1812,8 +2083,9 @@
           const created = r.createdAt ? new Date(r.createdAt).toLocaleString() : '-';
           const statusClass = getStatusClass(r.status || 'new');
           const userRole = getUserRole(getSession());
-          const emailBtn = userRole === 'SUPER_ADMIN' 
-            ? '<button class="btn small" type="button" data-send-email="' + idx + '">Send Email</button>' 
+          const emailSentLabel = r.emailSent ? ' ✓' : '';
+          const emailBtn = (userRole === 'SUPER_ADMIN' || userRole === 'ADMIN')
+            ? '<button class="btn small" type="button" data-send-email="' + idx + '">Envoyer e-mail' + emailSentLabel + '</button>'
             : '';
           return '<tr>' +
             '<td>' + escapeHTML(r.id || '-') + '</td>' +
@@ -1827,32 +2099,37 @@
             '<td>' + escapeHTML(r.players) + '</td>' +
             '<td>' + escapeHTML(getSpecialNote(r)) + '</td>' +
             '<td><input type="checkbox" data-waiver-idx="' + idx + '" ' + (r.waiverSigned ? 'checked' : '') + ' /></td>' +
-            '<td><span class="status-pill ' + statusClass + '">' + escapeHTML(r.status || 'new') + '</span><br /><select data-status-idx="' + idx + '">' 
-              + ['new','confirmed','escaped','failed','cancelled'].map(s => '<option value="' + s + '"' + (r.status === s ? ' selected' : '') + '>' + s + '</option>').join('')
+            '<td><span class="status-pill ' + statusClass + '">' + escapeHTML(getStatusLabel(r.status)) + '</span><br /><select data-status-idx="' + idx + '">' 
+              + [{v:'confirmed',l:'Confirmé'},{v:'cancelled',l:'Annulé'}].map(s => '<option value="' + s.v + '"' + (r.status === s.v ? ' selected' : '') + '>' + s.l + '</option>').join('')
               + '</select></td>' +
-            '<td>' + emailBtn + '<button class="btn danger small" type="button" data-del-res="' + idx + '">Delete</button></td>' +
+            '<td>' + emailBtn + '<button class="btn danger small" type="button" data-del-res="' + idx + '">Supprimer</button></td>' +
           '</tr>';
         }).join('');
 
+        // Preserve scroll position so polling re-renders don't reset it
+        const prevScrollLeft = wrap.scrollLeft;
+        const prevScrollTop  = wrap.scrollTop;
+
         wrap.innerHTML =
-          '<div class="table-wrap">'
-          + '<table>'
+          '<table>'
           + '<thead><tr>'
           + '<th>ID</th>'
-          + renderSortHeader('Created', 'createdAt')
-          + renderSortHeader('Name', 'name')
-          + '<th>Phone</th><th>Email</th>'
-          + renderSortHeader('Scenario', 'scenario')
+          + renderSortHeader('Créé', 'createdAt')
+          + renderSortHeader('Nom', 'name')
+          + '<th>Téléphone</th><th>E-mail</th>'
+          + renderSortHeader('Scénario', 'scenario')
           + renderSortHeader('Date', 'dateTime')
-          + '<th>Time</th>'
-          + renderSortHeader('Players', 'players')
-          + '<th>Special Notes</th><th>Waiver</th>'
-          + renderSortHeader('Status', 'status')
+          + '<th>Heure</th>'
+          + renderSortHeader('Joueurs', 'players')
+          + '<th>Notes spéciales</th><th>Décharge</th>'
+          + renderSortHeader('Statut', 'status')
           + '<th>Actions</th>'
           + '</tr></thead>'
           + '<tbody>' + rows + '</tbody>'
-          + '</table>'
-          + '</div>';
+          + '</table>';
+
+        wrap.scrollLeft = prevScrollLeft;
+        wrap.scrollTop  = prevScrollTop;
 
         wrap.querySelectorAll('[data-sort-key]').forEach(btn => {
           btn.addEventListener('click', () => {
@@ -1869,24 +2146,45 @@
         });
 
         wrap.querySelectorAll('[data-del-res]').forEach(btn => {
-          btn.addEventListener('click', () => {
+          btn.addEventListener('click', async () => {
             const i = Number(btn.getAttribute('data-del-res'));
-            const next = getReservations().filter((_, idx) => idx !== i);
-            saveReservations(next);
+            const listNow = getReservations();
+            const res = listNow[i];
+            if (!res) return;
+            await createActionNotification(res, 'deleted');
+            const token = await ensureJWT();
+            if (res.backendId) {
+              await fetch(BACKEND + '/reservations/' + res.backendId, {
+                method: 'DELETE',
+                headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+              }).catch(() => {});
+            }
+            await fetchAndMergeReservations(token);
             refreshAll();
           });
         });
 
         wrap.querySelectorAll('[data-status-idx]').forEach(sel => {
-          sel.addEventListener('change', () => {
+          sel.addEventListener('change', async () => {
             const i = Number(sel.getAttribute('data-status-idx'));
             const listNow = getReservations();
             if (!listNow[i]) return;
-            const oldStatus = listNow[i].status || 'new';
-            listNow[i].status = sel.value;
-            detectReservationDecline(listNow[i], sel.value);
+            const newStatus = sel.value;
+            console.log('[status] change fired — idx:', i, 'newStatus:', newStatus, 'backendId:', listNow[i].backendId);
+            // Guard against poll overwriting this before the PUT reaches the backend
+            if (listNow[i].backendId) {
+              pendingStatusChanges[listNow[i].backendId] = { status: newStatus, ts: Date.now() };
+            }
+            // Optimistic save so re-render never reverts the user's choice
+            listNow[i].status = newStatus;
             saveReservations(listNow);
             refreshAll();
+            await detectReservationDecline(listNow[i], newStatus);
+            if (listNow[i].backendId) {
+              await updateBackendStatus(listNow[i].backendId, newStatus);
+            } else {
+              console.error('[status] No backendId on reservation — PUT skipped', listNow[i]);
+            }
           });
         });
 
@@ -1896,6 +2194,7 @@
             const listNow = getReservations();
             if (!listNow[i]) return;
             listNow[i].waiverSigned = !!chk.checked;
+            if (chk.checked) createActionNotification(listNow[i], 'waiver');
             saveReservations(listNow);
             refreshAll();
           });
@@ -1916,15 +2215,15 @@
         const upcoming = getReservations().filter(isUpcoming).sort((a,b) => (a.date + a.time).localeCompare(b.date + b.time));
 
         if (!upcoming.length) {
-          root.innerHTML = '<div class="empty">No upcoming bookings.</div>';
+          root.innerHTML = '<div class="empty">Aucune réservation à venir.</div>';
           return;
         }
 
         root.innerHTML = upcoming.map(r =>
           '<li class="manifest-item">'
           + '<div class="manifest-head"><strong>' + escapeHTML(r.scenario || '-') + '</strong><span class="pill">' + escapeHTML(r.date || '-') + ' ' + escapeHTML(r.time || '-') + '</span></div>'
-          + '<div class="manifest-meta">Players: ' + escapeHTML(r.players || '-') + ' | Contact: ' + escapeHTML(r.name || '-') + ' / ' + escapeHTML(r.phone || '-') + ' / ' + escapeHTML(r.email || '-') + '</div>'
-          + '<div class="manifest-meta">Special notes: ' + escapeHTML(getSpecialNote(r)) + '</div>'
+          + '<div class="manifest-meta">Joueurs : ' + escapeHTML(r.players || '-') + ' | Contact : ' + escapeHTML(r.name || '-') + ' / ' + escapeHTML(r.phone || '-') + ' / ' + escapeHTML(r.email || '-') + '</div>'
+          + '<div class="manifest-meta">Notes spéciales : ' + escapeHTML(getSpecialNote(r)) + '</div>'
           + '</li>'
         ).join('');
       }
@@ -1944,7 +2243,7 @@
 
         const keys = Object.keys(byScenario);
         if (!keys.length) {
-          root.innerHTML = '<div class="empty">No data yet for escape metrics.</div>';
+          root.innerHTML = '<div class="empty">Aucune donnée pour les métriques d\'évasion.</div>';
           return;
         }
 
@@ -1952,12 +2251,12 @@
           const s = byScenario[name];
           const decisions = s.escaped + s.failed;
           const successRate = decisions ? (s.escaped / decisions) * 100 : 0;
-          const warning = (s.failed > 0 && s.escaped === 0) ? ' Potentially too hard (0% escaped).' : '';
+          const warning = (s.failed > 0 && s.escaped === 0) ? ' Potentiellement trop difficile (0% d\'évasion).' : '';
           return '<article class="kpi">'
             + '<h4>' + escapeHTML(name) + '</h4>'
-            + '<p>Total runs: <strong>' + s.total + '</strong></p>'
-            + '<p>Escaped: <strong>' + s.escaped + '</strong> | Failed: <strong>' + s.failed + '</strong></p>'
-            + '<p>Escape rate: <strong>' + successRate.toFixed(1) + '%</strong>' + escapeHTML(warning) + '</p>'
+            + '<p>Total parties : <strong>' + s.total + '</strong></p>'
+            + '<p>Évadés : <strong>' + s.escaped + '</strong> | Échoués : <strong>' + s.failed + '</strong></p>'
+            + '<p>Taux d\'évasion : <strong>' + successRate.toFixed(1) + '%</strong>' + escapeHTML(warning) + '</p>'
             + '</article>';
         }).join('');
       }
@@ -2008,19 +2307,19 @@
         });
 
         kpis.innerHTML =
-          '<article class="kpi"><h4>Daily Revenue</h4><p><strong>' + formatMoney(daily) + '</strong></p></article>' +
-          '<article class="kpi"><h4>Weekly Revenue</h4><p><strong>' + formatMoney(weekly) + '</strong></p></article>' +
-          '<article class="kpi"><h4>Monthly Revenue</h4><p><strong>' + formatMoney(monthly) + '</strong></p></article>' +
-          '<article class="kpi"><h4>Gift Card Sales</h4><p><strong>' + formatMoney(giftCards) + '</strong></p></article>';
+          '<article class="kpi"><h4>Revenus du jour</h4><p><strong>' + formatMoney(daily) + '</strong></p></article>' +
+          '<article class="kpi"><h4>Revenus de la semaine</h4><p><strong>' + formatMoney(weekly) + '</strong></p></article>' +
+          '<article class="kpi"><h4>Revenus du mois</h4><p><strong>' + formatMoney(monthly) + '</strong></p></article>' +
+          '<article class="kpi"><h4>Ventes de chèques-cadeaux</h4><p><strong>' + formatMoney(giftCards) + '</strong></p></article>';
 
         const top = Object.entries(slotMap).sort((a,b) => b[1]-a[1]).slice(0, 6);
         if (!top.length) {
-          slots.innerHTML = '<div class="empty">No slot activity yet.</div>';
+          slots.innerHTML = '<div class="empty">Aucune activité sur les créneaux.</div>';
           return;
         }
 
         slots.innerHTML = top.map(([slot, count]) =>
-          '<div class="waiver-row"><div><strong>' + escapeHTML(slot) + '</strong></div><span class="pill">' + count + ' bookings</span></div>'
+          '<div class="waiver-row"><div><strong>' + escapeHTML(slot) + '</strong></div><span class="pill">' + count + ' réservations</span></div>'
         ).join('');
       }
 
@@ -2032,10 +2331,10 @@
           const lock = a.email === 'admin@gmail.com';
           const self = a.email === current;
           const disabled = lock || self;
-          const hint = lock ? 'Default admin' : (self ? 'Current session' : '');
+          const hint = lock ? 'Admin par défaut' : (self ? 'Session actuelle' : '');
           return '<li class="admin-item">'
             + '<span>' + escapeHTML(a.email) + (hint ? ' - ' + escapeHTML(hint) : '') + '</span>'
-            + '<button class="btn danger small" type="button" data-del-admin="' + escapeHTML(a.email) + '"' + (disabled ? ' disabled' : '') + '>Delete</button>'
+            + '<button class="btn danger small" type="button" data-del-admin="' + escapeHTML(a.email) + '"' + (disabled ? ' disabled' : '') + '>Supprimer</button>'
             + '</li>';
         }).join('');
 
@@ -2059,6 +2358,23 @@
         renderRevenueView();
         renderAdmins();
       }
+      let _pollTimer = null;
+      function startPolling() {
+        if (_pollTimer) clearInterval(_pollTimer);
+        _pollTimer = setInterval(async function() {
+          const tok = await ensureJWT();
+          await fetchAndMergeReservations(tok);
+          await loadBackendNotifications();
+          const notifView = document.getElementById('view-notifications');
+          if (notifView && notifView.classList.contains('active')) {
+            renderNotifications();
+          }
+          refreshAll();
+        }, 3000);
+      }
+      function stopPolling() {
+        if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+      }
 
       function switchView(id) {
         const userRole = getUserRole(getSession());
@@ -2069,7 +2385,7 @@
           'view-profile': ['ADMIN', 'SUPER_ADMIN'],
           'view-scenarios': ['SUPER_ADMIN'],
           'view-admins': ['SUPER_ADMIN'],
-          'view-email-templates': ['SUPER_ADMIN'],
+          'view-email-templates': ['ADMIN', 'SUPER_ADMIN'],
           'view-notifications': ['SUPER_ADMIN'],
           'view-manifest': ['SUPER_ADMIN'],
           'view-metrics': ['SUPER_ADMIN'],
@@ -2086,26 +2402,28 @@
         document.querySelectorAll('.menu button').forEach(b => b.classList.toggle('active', b.dataset.view === id));
         document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === id));
         const titleMap = {
-          'view-reservations': 'Reservations',
-          'view-manifest': 'Player Manifest',
-          'view-metrics': 'Escape Rate Metrics',
-          'view-revenue': 'Revenue Reports',
-          'view-scenarios': 'Scenario Management',
-          'view-admins': 'Admin Management',
-          'view-profile': 'Edit Profile',
-          'view-email-templates': 'Email Templates',
+          'view-reservations': 'Réservations',
+          'view-manifest': 'Liste des joueurs',
+          'view-metrics': "Métriques d'évasion",
+          'view-revenue': 'Rapports de revenus',
+          'view-scenarios': 'Gestion des scénarios',
+          'view-admins': 'Gestion des admins',
+          'view-profile': 'Modifier le profil',
+          'view-email-templates': "Modèles d'e-mail",
           'view-notifications': 'Notifications'
         };
         const ttl = document.getElementById('view-title');
-        if (ttl) ttl.textContent = titleMap[id] || 'Dashboard';
+        if (ttl) ttl.textContent = titleMap[id] || 'Tableau de bord';
         
         // Load view-specific data
-        if (id === 'view-profile') {
+        if (id === 'view-reservations') {
+          ensureJWT().then(token => fetchAndMergeReservations(token).then(() => refreshAll()));
+        } else if (id === 'view-profile') {
           populateProfileForm();
         } else if (id === 'view-email-templates') {
           populateEmailTemplateForm();
         } else if (id === 'view-notifications') {
-          renderNotifications();
+          loadBackendNotifications().then(() => renderNotifications());
         }
       }
 
@@ -2149,109 +2467,123 @@
 
       function exportPdfReservations() {
         const list = getReservations();
-        if (!list.length) {
-          alert('No reservations to export.');
-          return;
-        }
-
-        if (!window.jspdf || !window.jspdf.jsPDF) {
-          alert('PDF library unavailable in this browser.');
-          return;
-        }
+        if (!list.length) { alert('Aucune réservation à exporter.'); return; }
+        if (!window.jspdf || !window.jspdf.jsPDF) { alert('Bibliothèque PDF non disponible.'); return; }
 
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-        const margin = 34;
-        const pageWidth = doc.internal.pageSize.getWidth();
+        // Landscape A4 gives ~842 pt width — enough for all columns
+        const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'landscape' });
+        const margin = 30;
+        const pageWidth  = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const tableWidth = pageWidth - margin * 2;
-        let y = 42;
+        let y = 46;
 
-        doc.setFontSize(16);
-        doc.text('The Room - Reservations Report', margin, y);
+        // ── Title block ──────────────────────────────────────────────────────
+        doc.setFontSize(17);
+        doc.setTextColor(18, 23, 37);
+        doc.text('The Room — Rapport des réservations', margin, y);
+        y += 16;
+        doc.setFontSize(9);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Généré : ' + new Date().toLocaleString() + '   |   Total : ' + list.length + ' réservation(s)', margin, y);
         y += 18;
-        doc.setFontSize(10);
-        doc.text('Generated: ' + new Date().toLocaleString(), margin, y);
-        y += 20;
 
+        // ── Column definitions ───────────────────────────────────────────────
         const columns = [
-          { key: 'id', label: '#', w: 28 },
-          { key: 'name', label: 'Name', w: 82 },
-          { key: 'phone', label: 'Phone', w: 68 },
-          { key: 'scenario', label: 'Scenario', w: 78 },
-          { key: 'slot', label: 'Date/Time', w: 92 },
-          { key: 'players', label: 'Players', w: 40 },
-          { key: 'status', label: 'Status', w: 46 },
-          { key: 'waiver', label: 'Waiver', w: 42 },
-          { key: 'gift', label: 'Gift', w: 42 }
+          { key: 'num',      label: '#',           w: 22  },
+          { key: 'created',  label: 'Créé',        w: 68  },
+          { key: 'name',     label: 'Nom',         w: 80  },
+          { key: 'email',    label: 'E-mail',      w: 114 },
+          { key: 'phone',    label: 'Téléphone',   w: 70  },
+          { key: 'scenario', label: 'Scénario',    w: 80  },
+          { key: 'slot',     label: 'Date / Heure',w: 80  },
+          { key: 'players',  label: 'Joueurs',     w: 38  },
+          { key: 'status',   label: 'Statut',      w: 52  },
+          { key: 'waiver',   label: 'Décharge',    w: 38  },
+          { key: 'notes',    label: 'Notes',       w: 0   }  // fills remaining space
         ];
+        const fixedW = columns.slice(0, -1).reduce((s, c) => s + c.w, 0);
+        columns[columns.length - 1].w = Math.max(60, tableWidth - fixedW);
 
-        const totalFixed = columns.reduce((sum, c) => sum + c.w, 0);
-        const notesColW = Math.max(120, tableWidth - totalFixed);
-        columns.push({ key: 'notes', label: 'Notes', w: notesColW });
-
-        function truncateText(value, max) {
-          const txt = String(value || '-').replace(/\s+/g, ' ').trim();
-          if (txt.length <= max) return txt;
-          return txt.slice(0, Math.max(1, max - 1)) + '...';
+        function trunc(value, max) {
+          const t = String(value || '-').replace(/\s+/g, ' ').trim();
+          return t.length <= max ? t : t.slice(0, max - 1) + '…';
         }
 
-        function drawHeader() {
-          let x = margin;
-          const h = 18;
+        function drawTableHeader() {
+          const h = 17;
           doc.setFillColor(18, 23, 37);
           doc.rect(margin, y, tableWidth, h, 'F');
-          doc.setDrawColor(210, 210, 210);
-          doc.setLineWidth(0.4);
-          doc.setFontSize(8);
-          doc.setTextColor(245, 247, 255);
+          doc.setDrawColor(180, 180, 180);
+          doc.setLineWidth(0.3);
+          doc.setFontSize(7.5);
+          doc.setTextColor(240, 243, 255);
+          let x = margin;
           columns.forEach(col => {
             doc.rect(x, y, col.w, h);
-            doc.text(col.label, x + 3, y + 12);
+            doc.text(col.label, x + 3, y + 11.5);
             x += col.w;
           });
           y += h;
         }
 
-        function ensureRoom(nextHeight) {
-          if (y + nextHeight <= pageHeight - margin) return;
-          doc.addPage();
-          y = margin;
-          drawHeader();
+        function ensureRoom(h) {
+          if (y + h > pageHeight - margin) {
+            doc.addPage();
+            y = margin;
+            drawTableHeader();
+          }
         }
 
-        drawHeader();
-        doc.setTextColor(20, 20, 20);
-        doc.setFontSize(7.4);
+        drawTableHeader();
+        doc.setFontSize(7.2);
 
         list.forEach((r, idx) => {
+          const createdStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '-';
           const row = {
-            id: idx + 1,
-            name: truncateText(r.name, 18),
-            phone: truncateText(r.phone, 16),
-            scenario: truncateText(r.scenario, 15),
-            slot: truncateText((r.date || '-') + ' ' + (r.time || '-'), 18),
-            players: truncateText(r.players, 4),
-            status: truncateText(r.status || 'new', 8),
-            waiver: r.waiverSigned ? 'Yes' : 'No',
-            gift: truncateText(formatMoney(r.giftCardAmount || 0), 12),
-            notes: truncateText(getSpecialNote(r), 42)
+            num:      idx + 1,
+            created:  trunc(createdStr, 12),
+            name:     trunc(r.name, 18),
+            email:    trunc(r.email, 26),
+            phone:    trunc(r.phone, 16),
+            scenario: trunc(r.scenario, 16),
+            slot:     trunc((r.date || '-') + ' ' + (r.time || ''), 16),
+            players:  trunc(r.players, 4),
+            status:   trunc(r.status || 'new', 10),
+            waiver:   r.waiverSigned ? 'Oui' : 'Non',
+            notes:    trunc(r.message || getSpecialNote(r), 50)
           };
 
-          const rowH = 16;
+          const rowH = 15;
           ensureRoom(rowH);
+
+          // Alternating row background
+          if (idx % 2 === 0) {
+            doc.setFillColor(248, 249, 252);
+            doc.rect(margin, y, tableWidth, rowH, 'F');
+          }
+
+          doc.setDrawColor(210, 210, 210);
+          doc.setLineWidth(0.3);
+          doc.setTextColor(20, 20, 20);
 
           let x = margin;
           columns.forEach(col => {
-            const value = String(row[col.key] || '-');
             doc.rect(x, y, col.w, rowH);
-            doc.text(value, x + 3, y + 11);
+            doc.text(String(row[col.key] || '-'), x + 3, y + 10.5);
             x += col.w;
           });
           y += rowH;
         });
 
-        doc.save('the-room-reservations.pdf');
+        // Bottom total line
+        y += 6;
+        doc.setFontSize(8);
+        doc.setTextColor(80, 80, 80);
+        doc.text('Total réservations : ' + list.length, margin, y);
+
+        doc.save('the-room-reservations-' + new Date().toISOString().slice(0, 10) + '.pdf');
       }
 
       ensureSeedAdmin();
@@ -2259,21 +2591,49 @@
       setupReservationTools();
       setupScenarioTools();
 
-      loginForm.addEventListener('submit', (e) => {
+      loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         loginErr.textContent = '';
 
         const email = (document.getElementById('login-email').value || '').trim();
         const password = document.getElementById('login-password').value || '';
 
-        if (!tryLogin(email, password)) {
-          loginErr.textContent = 'Invalid credentials.';
+        // Try backend auth first — syncs reservations from database
+        const token = await backendLogin(email, password);
+        if (token) {
+          sessionStorage.setItem('ADMIN_JWT', token);
+          // Save the actual password used so ensureJWT() can re-authenticate after token expiry
+          const admins = getAdmins();
+          const existing = admins.find(a => a.email.toLowerCase() === email.toLowerCase());
+          if (existing) {
+            existing.password = password; // always update with the password that just worked
+            saveJSON(ADM_KEY, admins);
+          } else {
+            const role = email === 'superadmin@gmail.com' ? 'SUPER_ADMIN' : 'ADMIN';
+            admins.push({ email, password, role, name: email, photo: '' });
+            saveJSON(ADM_KEY, admins);
+          }
+          setSession(email);
+          showApp(true);
+          await fetchAndMergeReservations(token);
+          await loadBackendNotifications();
+          updateNotifBadge();
+          refreshAll();
+          startPolling();
           return;
         }
 
+        // Fallback: localStorage-only auth (works offline)
+        if (!tryLogin(email, password)) {
+          loginErr.textContent = 'Identifiants incorrects.';
+          return;
+        }
         setSession(email);
         showApp(true);
+        await fetchAndMergeReservations(null);
+        updateNotifBadge();
         refreshAll();
+        startPolling();
       });
 
       addAdminForm.addEventListener('submit', (e) => {
@@ -2286,13 +2646,13 @@
         const password = passInput.value || '';
 
         if (!email || !password) {
-          adminErr.textContent = 'Email and password are required.';
+          adminErr.textContent = 'E-mail et mot de passe requis.';
           return;
         }
 
         const admins = getAdmins();
         if (admins.some(a => a.email.toLowerCase() === email)) {
-          adminErr.textContent = 'This admin already exists.';
+          adminErr.textContent = 'Cet admin existe déjà.';
           return;
         }
 
@@ -2314,7 +2674,7 @@
           const success = saveProfile();
           const msg = document.getElementById('profile-success');
           if (msg && success) {
-            msg.textContent = 'Profile updated successfully!';
+            msg.textContent = 'Profil mis à jour avec succès !';
             setTimeout(() => msg.textContent = '', 3000);
           }
         });
@@ -2330,24 +2690,39 @@
             saveEmailTemplate(subject, body);
             const msg = document.getElementById('email-template-success');
             if (msg) {
-              msg.textContent = 'Email template saved successfully!';
+              msg.textContent = "Modèle d'e-mail enregistré avec succès !";
               setTimeout(() => msg.textContent = '', 3000);
             }
           }
         });
       }
 
+      document.getElementById('export-pdf-btn').addEventListener('click', () => {
+        exportPdfReservations();
+      });
+
       document.getElementById('logout-btn').addEventListener('click', () => {
+        stopPolling();
+        sessionStorage.removeItem('ADMIN_JWT');
         clearSession();
         showApp(false);
       });
 
-      document.getElementById('export-pdf-btn').addEventListener('click', exportPdfReservations);
 
       const session = getSession();
-      if (session && getAdmins().some(a => a.email === session)) {
+      const storedAdmin = session ? getAdmins().find(a => a.email === session) : null;
+      if (storedAdmin) {
         showApp(true);
         refreshAll();
+        // Re-authenticate against backend so polling has a valid JWT even after page refresh
+        backendLogin(session, storedAdmin.password || '').then(async tok => {
+          if (tok) sessionStorage.setItem('ADMIN_JWT', tok);
+          await fetchAndMergeReservations(tok || null);
+          refreshAll();
+          startPolling();
+        }).catch(() => {
+          startPolling();
+        });
       } else {
         showApp(false);
       }
@@ -2355,6 +2730,14 @@
       window.addEventListener('storage', (e) => {
         if (e.key === RES_KEY || e.key === ADM_KEY || e.key === SCENARIO_KEY) {
           if (appShell.style.display === 'block') refreshAll();
+        }
+        // When admin saves a notification in another tab, update superadmin immediately
+        if (e.key === NOTIFICATIONS_KEY && appShell.style.display === 'block') {
+          updateNotifBadge();
+          const notifView = document.getElementById('view-notifications');
+          if (notifView && notifView.classList.contains('active')) {
+            loadBackendNotifications().then(() => renderNotifications());
+          }
         }
       });
     })();

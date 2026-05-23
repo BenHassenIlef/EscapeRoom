@@ -264,7 +264,6 @@
       transition: all .22s ease;
       border: 1px solid transparent;
     }
-    .btn-primary { background: var(--red); color: white; border-color: var(--red); }
     .btn-primary { background: #f5f5f5; color: #090909; border-color: #f5f5f5; }
     .btn-primary:hover { background: #ffffff; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,255,255,.15); }
     .btn-outline { background: transparent; color: var(--off); border-color: rgba(255,255,255,.18); }
@@ -467,9 +466,11 @@
     .hero-actions .btn { padding: .85rem 2rem; font-size: .88rem; }
     .hero-actions .hero-cta-main {
       background: linear-gradient(90deg, #1f2937, #111827 52%, #000000);
+      color: #f5f5f5;
       border: 1px solid rgba(255,255,255,.2);
       box-shadow: 0 14px 36px rgba(0,0,0,.45), 0 0 24px rgba(0,0,0,.3);
       min-width: 220px;
+      white-space: nowrap;
     }
     .hero-actions .hero-cta-main:hover {
       transform: translateY(-3px) scale(1.02);
@@ -1745,7 +1746,7 @@
               <div class="scenario-access"><span>♿</span><span>💡</span><span>🚫 Crawl</span></div>
               <div class="scenario-actions">
                 <a href="#" class="btn btn-outline" data-page="scenario-jigsaw-1">Explorer</a>
-                <a href="#" class="btn btn-primary" data-page="booking">Réserver</a>
+                <button type="button" class="btn btn-primary" data-open-booking data-scenario="Saw Chapter 1">Réserver</button>
               </div>
             </div>
           </article>
@@ -1764,7 +1765,7 @@
               <div class="scenario-access"><span>♿ Partiel</span><span>⚠️ Strobes</span><span>🚶 Crawl</span></div>
               <div class="scenario-actions">
                 <a href="#" class="btn btn-outline" data-page="scenario-jigsaw">Explorer</a>
-                <a href="#" class="btn btn-primary" data-page="booking">Réserver</a>
+                <button type="button" class="btn btn-primary" data-open-booking data-scenario="Saw Chapter 2">Réserver</button>
               </div>
             </div>
           </article>
@@ -1783,7 +1784,7 @@
               <div class="scenario-access"><span>♿</span><span>💡</span><span>🚫 Crawl</span></div>
               <div class="scenario-actions">
                 <a href="#" class="btn btn-outline" data-page="scenario-pirates">Explorer</a>
-                <a href="#" class="btn btn-primary" data-page="booking">Réserver</a>
+                <button type="button" class="btn btn-primary" data-open-booking data-scenario="Pirates des Caraïbes">Réserver</button>
               </div>
             </div>
           </article>
@@ -1802,7 +1803,7 @@
               <div class="scenario-access"><span>♿ Partiel</span><span>⚠️ Faible lumière</span><span>🚶 Crawl</span></div>
               <div class="scenario-actions">
                 <a href="#" class="btn btn-outline" data-page="scenario-lecter">Explorer</a>
-                <a href="#" class="btn btn-primary" data-page="booking">Réserver</a>
+                <button type="button" class="btn btn-primary" data-open-booking data-scenario="Le Cannibal">Réserver</button>
               </div>
             </div>
           </article>
@@ -1821,7 +1822,7 @@
               <div class="scenario-access"><span>♿ Partiel</span><span>💡</span><span>🚫 Crawl</span></div>
               <div class="scenario-actions">
                 <a href="#" class="btn btn-outline" data-page="scenario-guantanamo">Explorer</a>
-                <a href="#" class="btn btn-primary" data-page="booking">Réserver</a>
+                <button type="button" class="btn btn-primary" data-open-booking data-scenario="Guantánamo">Réserver</button>
               </div>
             </div>
           </article>
@@ -1840,7 +1841,7 @@
               <div class="scenario-access"><span>♿</span><span>⚠️ Dynamic lights</span><span>🚫 Crawl</span></div>
               <div class="scenario-actions">
                 <a href="#" class="btn btn-outline" data-page="scenario-mafia">Explorer</a>
-                <a href="#" class="btn btn-primary" data-page="booking">Réserver</a>
+                <button type="button" class="btn btn-primary" data-open-booking data-scenario="Mafia">Réserver</button>
               </div>
             </div>
           </article>
@@ -2294,11 +2295,11 @@
               </div>
               <div class="form-group">
                 <label for="modal-phone">Numéro de téléphone</label>
-                <input id="modal-phone" type="tel" placeholder="Votre numéro" inputmode="tel" required />
+                <input id="modal-phone" type="tel" placeholder="8 chiffres" inputmode="numeric" pattern="[0-9]{8}" minlength="8" maxlength="8" title="Le numéro doit contenir exactement 8 chiffres" required />
               </div>
               <div class="form-group">
                 <label for="modal-email">Email</label>
-                <input id="modal-email" type="email" placeholder="Votre email" autocomplete="email" required />
+                <input id="modal-email" type="email" placeholder="exemple@email.com" autocomplete="email" pattern="[^@\s]+@[^@\s]+\.[^@\s]+" title="Entrez une adresse email valide (ex: nom@domaine.com)" required />
               </div>
               <div class="form-group">
                 <label for="modal-date">Date</label>
@@ -2356,7 +2357,7 @@
                 <label for="modal-first-timer">Je suis un first-timer</label>
               </div>
               <div class="inline-check">
-                <input id="modal-waiver" type="checkbox" />
+                <input id="modal-waiver" type="checkbox" required />
                 <label for="modal-waiver">Je confirme avoir accepté le waiver sécurité</label>
               </div>
               <div class="form-group">
@@ -2456,7 +2457,8 @@
   const flashlightZones = document.querySelectorAll('.flashlight-zone');
   const ambienceAudio = document.getElementById('site-ambience-audio');
 
-  const SCENARIO_KEY = 'ROOM_SCENARIOS_V1';
+  const SCENARIO_KEY = 'ROOM_SCENARIOS_V2';
+  const RESERVATION_KEY = 'ROOM_RESERVATIONS_V1';
   const DEFAULT_SCENARIOS = [
     {
       id: 'scenario-jigsaw-1',
@@ -2680,6 +2682,146 @@
     return String(slot || '').split(' - ')[0].trim() || String(slot || '').trim();
   }
 
+  function getSelectedBookingDate() {
+    return (resDate && resDate.value) || isoDate(new Date());
+  }
+
+  function getBookingReservations() {
+    return loadJSON(RESERVATION_KEY, []).filter(item => item && item.date && item.time);
+  }
+
+  function parseSlotStartMinutes(slot) {
+    const start = getScenarioTimeLabel(slot);
+    const parts = start.split(':');
+    if (parts.length !== 2) return null;
+    const hours = Number(parts[0]);
+    const minutes = Number(parts[1]);
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
+    return hours * 60 + minutes;
+  }
+
+  function getSlotDateTime(dateValue, slot) {
+    if (!dateValue || !slot) return null;
+    const minutes = parseSlotStartMinutes(slot);
+    if (minutes == null) return null;
+    const hour = String(Math.floor(minutes / 60)).padStart(2, '0');
+    const minute = String(minutes % 60).padStart(2, '0');
+    return new Date(dateValue + 'T' + hour + ':' + minute + ':00');
+  }
+
+  function getReservationMatch(dateValue, scenarioName, slot) {
+    const targetDate = String(dateValue || '').trim();
+    const targetScenario = String(scenarioName || '').trim();
+    const targetSlot = String(slot || '').trim();
+
+    return getBookingReservations().find(reservation => {
+      const status = String(reservation.status || 'new').toLowerCase();
+      if (status === 'cancelled') return false;
+      if (targetDate && String(reservation.date || '').trim() !== targetDate) return false;
+      if (targetScenario && String(reservation.scenario || '').trim() !== targetScenario) return false;
+      return String(reservation.time || '').trim() === targetSlot;
+    }) || null;
+  }
+
+  function getSlotRestriction(dateValue, scenarioName, slot) {
+    const reservation = getReservationMatch(dateValue, scenarioName, slot);
+    if (reservation) {
+      return { blocked: true, reason: 'reserved', reservation };
+    }
+
+    const slotDate = getSlotDateTime(dateValue, slot);
+    if (!slotDate) return { blocked: false, reason: '' };
+
+    const minutesUntilSlot = (slotDate.getTime() - Date.now()) / 60000;
+    if (minutesUntilSlot < 90) {
+      return { blocked: true, reason: 'too-soon' };
+    }
+
+    return { blocked: false, reason: '' };
+  }
+
+  function isSlotBookable(dateValue, scenarioName, slot) {
+    return !getSlotRestriction(dateValue, scenarioName, slot).blocked;
+  }
+
+  function showBookingRestriction(reason) {
+    const t = T[getActiveLang()] || T.fr;
+    if (reason === 'too-soon') {
+      alert(t.bookingTooSoonMessage || 'To make Reservation before 90 Min you must call us 25 499 810');
+      return;
+    }
+    alert(t.bookingReservedMessage || 'Ce créneau est déjà réservé. Choisissez un autre horaire.');
+  }
+
+  function getScenarioForBookingName(name) {
+    const target = String(name || '').trim();
+    if (!target) return null;
+    return getScenarios().find(item => String(item.bookingName || item.name || '').trim() === target || String(item.name || '').trim() === target) || null;
+  }
+
+  function getTimeOptionsForScenario(scenarioName) {
+    const scenario = getScenarioForBookingName(scenarioName);
+    if (scenario && Array.isArray(scenario.slots) && scenario.slots.length) {
+      return scenario.slots.slice();
+    }
+
+    return Array.from(new Set(getAvailableScenarios().flatMap(item => item.slots || [])));
+  }
+
+  function refreshModalTimeOptions() {
+    if (!modalTime) return;
+
+    const t = T[getActiveLang()] || T.fr;
+    const currentScenario = modalScen ? modalScen.value : '';
+    const currentDate = (modalDate && modalDate.value) || getSelectedBookingDate();
+    const currentValue = modalTime.value;
+    const options = getTimeOptionsForScenario(currentScenario);
+
+    modalTime.innerHTML = ['<option value="">' + escapeHTML(t.modalTimeOpt || 'Choisir une heure') + '</option>']
+      .concat(options.map(slot => {
+        const restriction = currentScenario ? getSlotRestriction(currentDate, currentScenario, slot) : { blocked: false, reason: '' };
+        const disabled = restriction.reason === 'reserved' ? ' disabled' : '';
+        return '<option value="' + escapeHTML(slot) + '"' + disabled + '>' + escapeHTML(slot) + '</option>';
+      }))
+      .join('');
+
+    if (currentValue && Array.from(modalTime.options).some(option => option.value === currentValue && !option.disabled)) {
+      modalTime.value = currentValue;
+    } else {
+      modalTime.value = '';
+    }
+  }
+
+  function refreshBookingAvailability() {
+    const selectedDate = getSelectedBookingDate();
+    const t = T[getActiveLang()] || T.fr;
+    const bookingCards = document.querySelectorAll('#booking-scroll .slot-card');
+
+    bookingCards.forEach(card => {
+      const title = card.querySelector('.slot-title');
+      const scenarioName = title ? title.textContent.trim() : '';
+      card.querySelectorAll('[data-open-booking]').forEach(button => {
+        const slot = button.dataset.time || '';
+        const restriction = getSlotRestriction(selectedDate, scenarioName, slot);
+        const isReserved = restriction.reason === 'reserved';
+        const isTooSoon = restriction.reason === 'too-soon';
+        button.disabled = isReserved;
+        button.classList.toggle('reserved', isReserved);
+        button.classList.toggle('pending', isTooSoon);
+        button.dataset.blockedReason = isReserved || isTooSoon ? restriction.reason : '';
+        if (isTooSoon) {
+          button.title = t.bookingTooSoonMessage || 'To make Reservation before 90 Min you must call us 25 499 810';
+        } else if (isReserved) {
+          button.title = t.bookingReservedMessage || 'Ce créneau est déjà réservé. Choisissez un autre horaire.';
+        } else {
+          button.removeAttribute('title');
+        }
+      });
+    });
+
+    refreshModalTimeOptions();
+  }
+
   function ensureSeedScenarios() {
     const existing = loadJSON(SCENARIO_KEY, null);
     if (!Array.isArray(existing) || !existing.length) {
@@ -2720,8 +2862,8 @@
           + '<p class="scenario-desc">' + escapeHTML(item.description || '-') + '</p>'
           + '<div class="scenario-access">' + (item.access || []).map(v => '<span>' + escapeHTML(v) + '</span>').join('') + '</div>'
           + '<div class="scenario-actions">'
-          + '<a href="#" class="btn btn-outline" data-page="' + escapeHTML(item.detailId || 'booking') + '">' + escapeHTML(t.explore) + '</a>'
-          + '<a href="#" class="btn btn-primary"' + (isAvailable ? ' data-page="booking"' : ' aria-disabled="true" tabindex="-1"') + '>' + escapeHTML(isAvailable ? t.book : t.unavailable) + '</a>'
+          + '<a href="#" class="btn btn-outline" data-page="' + escapeHTML((item.detailId || 'page-booking').replace(/^page-/, '')) + '">' + escapeHTML(t.explore) + '</a>'
+          + '<' + (isAvailable ? 'button type="button" class="btn btn-primary" data-open-booking data-scenario="' + escapeHTML(item.bookingName || item.name) + '"' : 'span class="btn btn-primary" aria-disabled="true" tabindex="-1"') + '>' + escapeHTML(isAvailable ? t.book : t.unavailable) + '</' + (isAvailable ? 'button' : 'span') + '>'
           + '</div>'
           + '</div>'
           + '</article>';
@@ -2768,6 +2910,8 @@
       if (currentTime && times.includes(currentTime)) modalTime.value = currentTime;
     }
 
+    refreshBookingAvailability();
+
     if (scenarios.length) {
       scenarios.forEach(item => {
         if (!item.detailId) return;
@@ -2798,8 +2942,9 @@
           reserveBtn.setAttribute('aria-disabled', String(!active));
         }
       });
-      document.querySelectorAll('.detail-page').forEach(page => {
-        page.style.display = activeIds.has(page.id) ? '' : 'none';
+      document.querySelectorAll('.detail-page').forEach(div => {
+        const section = div.closest('[id]');
+        div.style.display = (!section || activeIds.has(section.id)) ? '' : 'none';
       });
     }
   }
@@ -2824,6 +2969,23 @@
       }
     }
     return true;
+  }
+
+  function validateSelectedSlot() {
+    const scenario = (modalScen || {}).value || '';
+    const dateValue = (modalDate || {}).value || getSelectedBookingDate();
+    const slotValue = (modalTime || {}).value || '';
+    if (!scenario || !dateValue || !slotValue) return true;
+
+    const restriction = getSlotRestriction(dateValue, scenario, slotValue);
+    if (restriction.reason !== 'reserved' && restriction.reason !== 'too-soon') return true;
+
+    showBookingRestriction(restriction.reason);
+    if (modalTime && restriction.reason === 'too-soon') {
+      modalTime.value = '';
+      modalTime.focus();
+    }
+    return false;
   }
 
   function updateBookingSummary() {
@@ -2852,6 +3014,7 @@
     if (bookingStepBack) bookingStepBack.disabled = bookingStepIndex === 0;
     if (bookingStepNext) bookingStepNext.hidden = bookingStepIndex === modalStepPanes.length - 1;
     if (bookingStepSubmit) bookingStepSubmit.hidden = bookingStepIndex !== modalStepPanes.length - 1;
+    if (bookingStepIndex === 1) refreshModalTimeOptions();
     updateBookingSummary();
   }
 
@@ -2956,10 +3119,27 @@
   }
   datePrev && datePrev.addEventListener('click', () => shiftDate(-1));
   dateNext && dateNext.addEventListener('click', () => shiftDate(1));
-  resDate && resDate.addEventListener('change', () => { if (modalDate) modalDate.value = resDate.value; });
+  resDate && resDate.addEventListener('change', () => {
+    if (modalDate) modalDate.value = resDate.value;
+    refreshBookingAvailability();
+  });
+  modalDate && modalDate.addEventListener('change', () => {
+    if (resDate) resDate.value = modalDate.value;
+    refreshBookingAvailability();
+  });
+  modalScen && modalScen.addEventListener('change', refreshBookingAvailability);
 
   /* ── MODAL ──────────────────────── */
   function openModal(scenario, time) {
+    const dateValue = (modalDate && modalDate.value) || (resDate && resDate.value) || getSelectedBookingDate();
+    if (scenario && time) {
+      const restriction = getSlotRestriction(dateValue, scenario, time);
+      if (restriction.blocked) {
+        showBookingRestriction(restriction.reason);
+        return;
+      }
+    }
+
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
     if (modalScen && scenario) modalScen.value = scenario;
@@ -2969,6 +3149,7 @@
     }
     if (modalDate && resDate && resDate.value) modalDate.value = resDate.value;
     setBookingStep(0);
+    refreshBookingAvailability();
     window.requestAnimationFrame(() => {
       const firstField = document.getElementById('modal-name');
       if (firstField) firstField.focus();
@@ -2984,15 +3165,24 @@
     const bookingBtn = e.target.closest('[data-open-booking]');
     if (!bookingBtn) return;
     e.preventDefault();
-    openModal(bookingBtn.dataset.scenario || '', bookingBtn.dataset.time || '');
+    const scenario = bookingBtn.dataset.scenario || '';
+    const time = bookingBtn.dataset.time || '';
+    const selectedDate = getSelectedBookingDate();
+    const restriction = getSlotRestriction(selectedDate, scenario, time);
+    if (restriction.reason === 'reserved' || restriction.reason === 'too-soon') {
+      showBookingRestriction(restriction.reason);
+      return;
+    }
+    openModal(scenario, time);
   });
   closeModalBtn && closeModalBtn.addEventListener('click', closeModal);
   modal && modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-  window.handleBooking = function(e) {
+  window.handleBooking = async function(e) {
     e.preventDefault();
     if (!validateBookingStep(bookingStepIndex)) return;
+    if (!validateSelectedSlot()) return;
     if (bookingStepIndex < modalStepPanes.length - 1) {
       setBookingStep(bookingStepIndex + 1);
       return;
@@ -3018,14 +3208,50 @@
       status: 'new'
     };
     try {
-      const key = 'ROOM_RESERVATIONS_V1';
+      const key = RESERVATION_KEY;
       const raw = localStorage.getItem(key);
       const list = raw ? JSON.parse(raw) : [];
       list.unshift(reservation);
       localStorage.setItem(key, JSON.stringify(list));
-    } catch (_) {
-      // Keep booking UX working even if localStorage is blocked.
-    }
+    } catch (_) {}
+
+    const dateTime = reservation.date && reservation.time
+      ? reservation.date + 'T' + reservation.time.split(' - ')[0].trim() + ':00'
+      : new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 19);
+
+    try {
+      const resp = await fetch('http://localhost:8081/api/reservations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          scenarioName: reservation.scenario || 'Unknown',
+          customerName: reservation.name,
+          customerEmail: reservation.email,
+          customerPhone: reservation.phone,
+          numberOfPlayers: parseInt(reservation.players) || 1,
+          reservationDateTime: dateTime,
+          notes: reservation.message || ''
+        })
+      });
+      if (resp.ok) {
+        const saved = await resp.json();
+        // Stamp the backend ID onto the localStorage entry so fetchAndMergeReservations
+        // can match and keep it when the admin dashboard refreshes.
+        try {
+          const key = RESERVATION_KEY;
+          const list = JSON.parse(localStorage.getItem(key) || '[]');
+          const idx = list.findIndex(r => r.id === reservation.id);
+          if (idx >= 0) {
+            list[idx].backendId = saved.id;
+            list[idx].id = 'bk-' + saved.id;
+            localStorage.setItem(key, JSON.stringify(list));
+          }
+        } catch (_) {}
+      }
+    } catch (_) {}
+
+    refreshBookingAvailability();
+
     const t = T[activeLang] || T.fr;
     alert(t.modalSuccess || 'Réservation envoyée ! Nous vous recontacterons rapidement.');
     e.target.reset();
@@ -3476,6 +3702,9 @@
       modalName: 'Nom complet', modalPhone: 'Numéro de téléphone', modalEmail: 'Email', modalScenario: 'Scénario', modalDate: 'Date', modalTime: 'Heure', modalPlayers: 'Nombre de joueurs', modalMessage: 'Message (optionnel)',
       modalNamePh: 'Votre nom', modalPhonePh: 'Votre numéro', modalEmailPh: 'Votre email', modalPlayersPh: '2 à 9', modalMessagePh: 'Informations complémentaires…',
       modalScenarioOpt: 'Choisir un scénario', modalTimeOpt: 'Choisir une heure', modalSubmit: 'Confirmer la réservation', modalSuccess: 'Réservation envoyée ! Nous vous recontacterons rapidement.',
+      bookingTooSoonMessage: 'Pour réserver ce créneau, vous devez nous appeler au 25 499 810.',
+      bookingReservedMessage: 'Ce créneau est déjà réservé. Choisissez un autre horaire.',
+      bookingCallUsHint: 'Appeler',
       faqItems:[
         ['🎯 Y a-t-il une limite d\'âge ?','Pas de limite d\'âge. Les enfants de 9 à 16 ans doivent être accompagnés d\'un adulte.'],
         ['🤰 Je suis enceinte. Puis-je jouer ?','L\'expérience n\'est pas physiquement intense et vous pouvez sortir à tout moment.'],
@@ -3589,6 +3818,9 @@
       modalName: 'Full name', modalPhone: 'Phone number', modalEmail: 'Email', modalScenario: 'Scenario', modalDate: 'Date', modalTime: 'Time', modalPlayers: 'Number of players', modalMessage: 'Message (optional)',
       modalNamePh: 'Your name', modalPhonePh: 'Your phone', modalEmailPh: 'Your email', modalPlayersPh: '2 to 9', modalMessagePh: 'Additional information…',
       modalScenarioOpt: 'Choose a scenario', modalTimeOpt: 'Choose a time', modalSubmit: 'Confirm booking', modalSuccess: 'Booking sent! We will contact you shortly.',
+      bookingTooSoonMessage: 'To book this slot, please call us at 25 499 810.',
+      bookingReservedMessage: 'This slot is already reserved. Please choose another time.',
+      bookingCallUsHint: 'Call',
       faqItems:[
         ['🎯 Is there an age limit?','No age limit. Children from 9 to 16 must be accompanied by an adult.'],
         ['🤰 I am pregnant. Can I play?','The experience is not physically intense and you can leave at any moment.'],
@@ -3717,6 +3949,7 @@
 
     // Scenarios
     renderScenarioCatalog(activeLang);
+    refreshBookingAvailability();
 
     // Blueprint room labels and briefs
     const bpMap = [
@@ -3832,8 +4065,12 @@
       ensureSeedScenarios();
       renderScenarioCatalog(getActiveLang());
       updateBookingSummary();
+    } else if (e.key === RESERVATION_KEY) {
+      refreshBookingAvailability();
     }
   });
+
+  window.setInterval(refreshBookingAvailability, 60000);
 
   // Unmute on first user gesture (browsers require this)
   const firstInteractionEvents = ['click', 'keydown', 'touchstart', 'pointerdown'];
