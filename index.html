@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    /* Auto-redirect: if opened via file://, go to the HTTP server instead */
+    if (window.location.protocol === 'file:') {
+      window.location.replace('http://localhost:8081/index.html');
+    }
+  </script>
   <title>The Room — Escape Game </title>
   <link rel="icon" type="image/webp" href="img/loc.webp" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -353,9 +359,9 @@
       color: var(--white);
       position: relative; z-index: 1;
       text-shadow:
-        0 0 10px rgba(255,255,255,.14),
-        0 0 34px rgba(220,38,38,.24),
-        0 0 90px rgba(110,0,0,.48);
+        0 0 10px rgba(255,255,255,.22),
+        0 0 34px rgba(255,255,255,.16),
+        0 0 90px rgba(255,255,255,.08);
       filter: drop-shadow(0 16px 42px rgba(0,0,0,.66));
     }
     .hero-title::before,
@@ -370,7 +376,7 @@
       line-height: .88;
     }
     .hero-title::before {
-      color: rgba(220,38,38,.6);
+      color: rgba(255,255,255,.55);
       transform: translate(-2px, 0);
       mix-blend-mode: screen;
       animation: titleSkew 4.2s infinite linear;
@@ -411,8 +417,8 @@
     }
     .hero-title { animation: glitch 9s infinite, heroPulse 5.5s ease-in-out infinite; }
     @keyframes heroPulse {
-      0%, 100% { text-shadow: 0 0 10px rgba(255,255,255,.14), 0 0 34px rgba(220,38,38,.24), 0 0 90px rgba(110,0,0,.48); }
-      50% { text-shadow: 0 0 14px rgba(255,255,255,.18), 0 0 46px rgba(220,38,38,.38), 0 0 118px rgba(110,0,0,.62); }
+      0%, 100% { text-shadow: 0 0 10px rgba(255,255,255,.22), 0 0 34px rgba(255,255,255,.16), 0 0 90px rgba(255,255,255,.08); }
+      50%       { text-shadow: 0 0 14px rgba(255,255,255,.30), 0 0 46px rgba(255,255,255,.22), 0 0 118px rgba(255,255,255,.12); }
     }
 
     .hero-sub {
@@ -604,7 +610,6 @@
     .location-actions { display: flex; gap: .75rem; flex-wrap: wrap; }
     .location-map iframe {
       width: 100%; height: 340px; border: 0; display: block;
-      filter: grayscale(100%) invert(92%) hue-rotate(180deg) brightness(.88) contrast(.92);
     }
 
     /* ─── PATHWAYS ──────────────────────────── */
@@ -870,6 +875,12 @@
     .scenarios-scroll::-webkit-scrollbar { height: 4px; }
     .scenarios-scroll::-webkit-scrollbar-thumb { background: var(--red); border-radius: 4px; }
 
+    /* 3D pop-out: give room above and below cards */
+    .scenarios-scroll {
+      padding-top: 2rem;
+      padding-bottom: 2.5rem;
+    }
+
     .scenario-card {
       flex: 0 0 min(310px, 84vw);
       scroll-snap-align: start;
@@ -878,12 +889,26 @@
       background: var(--s1);
       overflow: hidden;
       display: flex; flex-direction: column;
-      transition: border-color .25s, transform .3s, box-shadow .3s;
+      position: relative;
+      z-index: 1;
+      will-change: transform;
+      transition:
+        border-color .25s ease,
+        transform .35s cubic-bezier(.23,1,.32,1),
+        box-shadow .35s cubic-bezier(.23,1,.32,1),
+        z-index 0s;
     }
     .scenario-card:hover {
       border-color: var(--br-red);
-      transform: translateY(-5px);
-      box-shadow: 0 24px 50px rgba(0,0,0,.5), 0 0 30px rgba(220,38,38,.08);
+      z-index: 20;
+      transform:
+        perspective(800px)
+        translateZ(30px)
+        scale(1.07);
+      box-shadow:
+        0 28px 55px rgba(0,0,0,.75),
+        0 0   35px rgba(220,38,38,.35),
+        0 0   70px rgba(220,38,38,.14);
     }
     .scenario-card-unavailable {
       opacity: .72;
@@ -894,11 +919,13 @@
       position: relative;
       aspect-ratio: 3/2; overflow: hidden;
     }
-    .scenario-image img {
+    .scenario-image img,
+    .scenario-image video {
       width: 100%; height: 100%; object-fit: cover;
       transition: transform .4s ease;
     }
-    .scenario-card:hover .scenario-image img { transform: scale(1.06); }
+    .scenario-card:hover .scenario-image img,
+    .scenario-card:hover .scenario-image video { transform: scale(1.06); }
 
     .scenario-overlay {
       position: absolute; inset: 0;
@@ -948,6 +975,22 @@
       min-height: 100vh;
       padding: calc(var(--nav-h) + 2.5rem) 0 5rem;
     }
+    .detail-back-btn {
+      display: inline-flex; align-items: center; gap: .45rem;
+      background: transparent; border: 1px solid rgba(255,255,255,.18);
+      color: var(--off); font-family: var(--fl); font-size: .85rem;
+      letter-spacing: .06em; text-transform: uppercase;
+      padding: .45rem .9rem; border-radius: 6px;
+      cursor: pointer; margin-bottom: 1.25rem;
+      transition: border-color .2s, color .2s, background .2s;
+    }
+    .detail-back-btn:hover {
+      border-color: rgba(255,255,255,.45);
+      color: var(--white);
+      background: rgba(255,255,255,.05);
+    }
+    .detail-back-btn svg { width: 16px; height: 16px; }
+
     .detail-card {
       display: grid; grid-template-columns: 1fr;
       gap: 2rem;
@@ -960,7 +1003,17 @@
       aspect-ratio: 16/9; border-radius: calc(var(--r) - 4px);
       overflow: hidden; position: relative;
     }
-    .detail-media img { width: 100%; height: 100%; object-fit: cover; }
+    .detail-media img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .detail-media video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
     .detail-media::after {
       content: '';
       position: absolute; inset: 0;
@@ -1354,6 +1407,145 @@
       display: grid; place-items: center; font-size: 1rem; flex-shrink: 0;
     }
 
+    /* ─── TOAST ──────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(1rem);
+      padding: .85rem 1.6rem; border-radius: 8px;
+      font-size: .95rem; font-weight: 600; color: #fff;
+      background: #1a1a2e; border: 1px solid var(--border);
+      box-shadow: 0 8px 32px rgba(0,0,0,.5);
+      z-index: 9999; opacity: 0;
+      transition: opacity .3s ease, transform .3s ease;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.success { border-color: #22c55e; background: #052e16; }
+    .toast.error   { border-color: var(--red); background: #1f0a0a; }
+
+    /* ─── PHONE CALL POPUP ───────────────────── */
+    .phone-popup-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.65); backdrop-filter: blur(4px);
+      z-index: 10000; align-items: center; justify-content: center;
+    }
+    .phone-popup-overlay.open { display: flex; }
+    .phone-popup {
+      background: #12122a; border: 1px solid rgba(255,255,255,.1);
+      border-radius: 18px; padding: 2.4rem 2.8rem 2rem;
+      max-width: 360px; width: 90%; text-align: center;
+      box-shadow: 0 24px 64px rgba(0,0,0,.7);
+      animation: ppSlideIn .3s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes ppSlideIn {
+      from { opacity: 0; transform: scale(.85) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .phone-popup-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.2rem; box-shadow: 0 0 0 8px rgba(220,38,38,.15);
+    }
+    .phone-popup-icon svg { width: 32px; height: 32px; fill: #fff; }
+    .phone-popup h4 {
+      font-size: 1.3rem; font-weight: 700; color: #fff;
+      margin: 0 0 .5rem; letter-spacing: .02em;
+    }
+    .phone-popup p {
+      font-size: .93rem; color: #a0a0b8; margin: 0 0 1.4rem; line-height: 1.5;
+    }
+    .phone-popup-number {
+      font-size: 2rem; font-weight: 800; letter-spacing: .08em;
+      color: #dc2626; margin-bottom: 1.6rem;
+      display: block;
+    }
+    .phone-popup-close {
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.15);
+      color: #ccc; border-radius: 8px; padding: .6rem 2rem;
+      font-size: .95rem; cursor: pointer; transition: background .2s;
+    }
+    .phone-popup-close:hover { background: rgba(255,255,255,.14); }
+
+    /* ─── CONTACT PAGE ──────────────────────── */
+    .contact-page-wrap {
+      min-height: calc(100vh - var(--nav-h));
+      padding: calc(var(--nav-h) + 3rem) 0 5rem;
+    }
+    .contact-hero { margin-bottom: 3rem; }
+    .contact-page-title {
+      font-family: var(--fd);
+      font-size: clamp(3rem, 8vw, 6rem);
+      letter-spacing: .04em;
+      margin: .4rem 0 .8rem; line-height: 1;
+    }
+    .contact-page-copy { color: var(--muted); font-size: 1rem; max-width: 55ch; line-height: 1.65; }
+    .contact-info-grid {
+      display: grid; grid-template-columns: 1fr;
+      gap: 1.25rem; margin-bottom: 1.5rem;
+    }
+    @media (min-width: 700px) { .contact-info-grid { grid-template-columns: 1fr 1fr; } }
+    .contact-info-card {
+      background: var(--s1); border: 1px solid rgba(255,255,255,.07);
+      border-radius: var(--r); padding: 1.8rem;
+    }
+    .contact-info-card h3 { font-size: 1.4rem; margin-bottom: 1.4rem; color: var(--white); }
+    .contact-right-col { display: flex; flex-direction: column; gap: 1.25rem; }
+    .contact-info-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: .9rem 0; border-bottom: 1px solid rgba(255,255,255,.05);
+      text-decoration: none; color: inherit; transition: color .2s;
+    }
+    a.contact-info-item:hover .cii-value { color: #dc2626; }
+    .contact-info-item:last-child { border-bottom: none; }
+    .cii-icon {
+      width: 40px; height: 40px; border-radius: var(--rs);
+      background: rgba(220,38,38,.08); border: 1px solid rgba(220,38,38,.2);
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .cii-icon svg { width: 18px; height: 18px; fill: #dc2626; }
+    .cii-text { display: flex; flex-direction: column; gap: .1rem; }
+    .cii-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; font-weight: 700; }
+    .cii-value { font-size: .95rem; color: var(--off); font-weight: 500; }
+    .contact-hours-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: .9rem 0; border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .chr-days { color: var(--off); font-size: .93rem; }
+    .chr-time { color: var(--white); font-weight: 700; font-family: var(--fl); font-size: 1.1rem; }
+    .contact-open-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      margin-top: 1.1rem; font-size: .82rem; color: #22c55e; font-weight: 600;
+    }
+    .cob-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.2);
+      animation: blink 1.5s ease infinite;
+    }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+    .contact-cta-card {
+      background: linear-gradient(135deg, rgba(220,38,38,.1), rgba(220,38,38,.04));
+      border: 1px solid rgba(220,38,38,.22);
+      border-radius: var(--r); padding: 1.8rem; flex: 1;
+    }
+    .contact-cta-card h3 { font-size: 1.4rem; margin-bottom: .6rem; }
+    .contact-cta-card p { color: var(--muted); font-size: .93rem; line-height: 1.6; margin-bottom: 1.4rem; }
+    .contact-map {
+      border-radius: var(--r); border: 1px solid rgba(255,255,255,.07);
+      background: var(--s1); overflow: hidden; margin-bottom: 1.5rem;
+    }
+    .contact-map-inner {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 3rem 2rem; text-align: center; gap: .5rem;
+    }
+    .contact-map-pin {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: rgba(220,38,38,.1); border: 1px solid rgba(220,38,38,.25);
+      display: grid; place-items: center; margin-bottom: .5rem;
+    }
+    .contact-map-pin svg { width: 28px; height: 28px; fill: #dc2626; }
+    .contact-map-inner strong { font-size: 1.1rem; color: var(--white); }
+    .contact-map-inner span { color: var(--muted); font-size: .9rem; }
+
     /* ─── FOOTER ─────────────────────────────── */
     .site-footer {
       position: relative;
@@ -1361,7 +1553,7 @@
       border-top: 1px solid var(--border);
       background:
         linear-gradient(180deg, rgba(6,6,9,.88), rgba(6,6,9,.9)),
-        url('img/keys.jpp') center/cover no-repeat;
+        url('img/scary.png') center/cover no-repeat;
     }
     .site-footer::before {
       content: '';
@@ -1371,32 +1563,6 @@
       pointer-events: none;
     }
     .site-footer .container { position: relative; z-index: 1; }
-    .footer-contact-head { margin-bottom: 1.2rem; }
-    .footer-contact-head h2 { font-size: clamp(2rem, 4.8vw, 3rem); margin-bottom: .35rem; }
-    .footer-contact-head p { color: var(--muted); max-width: 60ch; }
-    .footer-contact-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1rem;
-      margin-bottom: 1.3rem;
-    }
-    .footer-contact-card {
-      padding: 1.15rem;
-      border-radius: var(--r);
-      border: 1px solid var(--border);
-      background: rgba(13,13,22,.85);
-      backdrop-filter: blur(3px);
-    }
-    .footer-contact-card h3 { font-size: 1.45rem; margin-bottom: .8rem; }
-    .footer-row {
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-      padding: .45rem 0;
-      color: var(--off);
-      border-bottom: 1px solid rgba(255,255,255,.06);
-    }
-    .footer-row:last-child { border-bottom: none; }
     .footer-inner {
       display: flex;
       justify-content: space-between;
@@ -1429,7 +1595,6 @@
       .nav-links { display: flex; }
       .features-grid { grid-template-columns: repeat(3, 1fr); }
       .detail-card { grid-template-columns: 1fr 1fr; }
-      .footer-contact-grid { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 759px) {
       .h-scroll-controls { display: none; }
@@ -1471,7 +1636,7 @@
       <a href="#" class="nav-link" data-page="scenarios">Scénarios</a>
       <a href="#" class="nav-link" data-page="booking">Réservation</a>
       <a href="#" class="nav-link" data-page="tarifs">Tarifs</a>
-      <a href="#site-footer-contact" class="nav-link">Contact</a>
+      <a href="#" class="nav-link" data-page="contact">Contact</a>
     </nav>
     <div class="nav-right">
       <div class="lang-switcher">
@@ -1498,7 +1663,7 @@
     <li><a href="#" class="mobile-sidebar-link" data-page="scenarios" data-mobile-nav="1">Scénarios</a></li>
     <li><a href="#" class="mobile-sidebar-link" data-page="booking" data-mobile-nav="2">Réservation</a></li>
     <li><a href="#" class="mobile-sidebar-link" data-page="tarifs" data-mobile-nav="3">Tarifs</a></li>
-    <li><a href="#site-footer-contact" class="mobile-sidebar-link" data-mobile-nav="4">Contact</a></li>
+    <li><a href="#" class="mobile-sidebar-link" data-page="contact" data-mobile-nav="4">Contact</a></li>
   </ul>
   <div class="lang-switcher" style="margin-top:auto">
     <span class="lang-label">Lang</span>
@@ -1859,7 +2024,7 @@
   <div class="detail-page">
     <div class="container">
       <article class="detail-card">
-        <div class="detail-media"><img src="img/saw1.jpg" alt="Saw Chapter 1" /></div>
+        <div class="detail-media"><video src="videos/saw1.mp4" autoplay muted loop playsinline preload="auto"></video></div>
         <div class="detail-content">
           <h2>SAW CHAPTER 1</h2>
           <div class="detail-eyebrow">Scénario · Salle 1</div>
@@ -1892,7 +2057,7 @@
   <div class="detail-page">
     <div class="container">
       <article class="detail-card">
-        <div class="detail-media"><img src="img/saw2.png" alt="Saw Chapter 2" /></div>
+        <div class="detail-media"><video src="videos/saw.mp4" autoplay muted loop playsinline preload="auto"></video></div>
         <div class="detail-content">
           <h2>SAW CHAPTER 2</h2>
           <div class="detail-eyebrow">Scénario · Salle 2</div>
@@ -1925,7 +2090,9 @@
   <div class="detail-page">
     <div class="container">
       <article class="detail-card">
-        <div class="detail-media"><img src="img/pirates.png" alt="Pirates des Caraïbes" /></div>
+        <div class="detail-media">
+          <video src="videos/pirates.mp4" autoplay muted loop playsinline preload="auto"></video>
+        </div>
         <div class="detail-content">
           <h2>PIRATES DES CARAÏBES</h2>
           <div class="detail-eyebrow">Scénario · Aventure</div>
@@ -1958,7 +2125,7 @@
   <div class="detail-page">
     <div class="container">
       <article class="detail-card">
-        <div class="detail-media"><img src="img/cannibal.png" alt="Le Cannibal" /></div>
+        <div class="detail-media"><video src="videos/cannibal.mp4" autoplay muted loop playsinline preload="auto"></video></div>
         <div class="detail-content">
           <h2>LE CANNIBAL</h2>
           <div class="detail-eyebrow">Scénario · Horreur</div>
@@ -1991,7 +2158,7 @@
   <div class="detail-page">
     <div class="container">
       <article class="detail-card">
-        <div class="detail-media"><img src="img/gaw.png" alt="Guantanamo" /></div>
+        <div class="detail-media"><video src="videos/quantanamo.mp4" autoplay muted loop playsinline preload="auto"></video></div>
         <div class="detail-content">
           <h2>GUANTÁNAMO</h2>
           <div class="detail-eyebrow">Scénario · Évasion</div>
@@ -2024,7 +2191,7 @@
   <div class="detail-page">
     <div class="container">
       <article class="detail-card">
-        <div class="detail-media"><img src="img/mafia.png" alt="Mafia" /></div>
+        <div class="detail-media"><video src="videos/mafia.mp4" autoplay muted loop playsinline preload="auto"></video></div>
         <div class="detail-content">
           <h2>MAFIA</h2>
           <div class="detail-eyebrow">Scénario · Infiltration</div>
@@ -2266,6 +2433,105 @@
 </section>
 
 
+<!-- ══════ CONTACT PAGE ══════════════════════ -->
+<section class="page" id="page-contact">
+  <div class="contact-page-wrap">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="contact-hero reveal">
+        <span class="section-eyebrow" id="contact-page-eye">Contact</span>
+        <h1 class="contact-page-title" id="contact-page-title">NOUS JOINDRE.</h1>
+        <p class="contact-page-copy" id="contact-page-copy">Pour réserver, demander un devis ou organiser un événement privé.</p>
+      </div>
+
+      <!-- Info grid -->
+      <div class="contact-info-grid">
+
+        <!-- Coordonnées -->
+        <article class="contact-info-card reveal">
+          <h3 id="contact-coords-label">Coordonnées</h3>
+
+          <a class="contact-info-item" href="tel:+21625499810">
+            <div class="cii-icon">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+            </div>
+            <div class="cii-text">
+              <span class="cii-label" id="contact-phone-label">Téléphone</span>
+              <span class="cii-value">+216 25 499 810</span>
+            </div>
+          </a>
+
+          <a class="contact-info-item" href="mailto:contact@theroom.tn">
+            <div class="cii-icon">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            </div>
+            <div class="cii-text">
+              <span class="cii-label" id="contact-email-label">Email</span>
+              <span class="cii-value">contact@theroom.tn</span>
+            </div>
+          </a>
+
+          <div class="contact-info-item">
+            <div class="cii-icon">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            </div>
+            <div class="cii-text">
+              <span class="cii-label" id="contact-addr-label">Adresse</span>
+              <span class="cii-value">Tunis, Tunisie</span>
+            </div>
+          </div>
+
+          <a class="contact-info-item" href="https://www.instagram.com/the_room_escape_game/" target="_blank" rel="noopener noreferrer">
+            <div class="cii-icon">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+            </div>
+            <div class="cii-text">
+              <span class="cii-label">Instagram</span>
+              <span class="cii-value">@the_room_escape_game</span>
+            </div>
+          </a>
+        </article>
+
+        <!-- Horaires + CTA -->
+        <div class="contact-right-col">
+          <article class="contact-info-card reveal" style="transition-delay:.08s">
+            <h3 id="contact-hours-label">Horaires</h3>
+            <div class="contact-hours-row">
+              <span class="chr-days" id="contact-days">Lundi – Dimanche</span>
+              <span class="chr-time" id="contact-time">10h00 – 22h00</span>
+            </div>
+            <div class="contact-open-badge">
+              <span class="cob-dot"></span>
+              <span id="contact-open-label">Ouvert tous les jours</span>
+            </div>
+          </article>
+
+          <div class="contact-cta-card reveal" style="transition-delay:.16s">
+            <h3 id="contact-cta-title">Prêts pour l'aventure ?</h3>
+            <p id="contact-cta-copy">Réservez votre session dès maintenant et découvrez l'expérience The Room.</p>
+            <a href="#" class="btn btn-primary" data-page="booking" id="contact-reserve-btn">Réserver maintenant</a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Map placeholder -->
+      <div class="contact-map reveal" style="transition-delay:.2s">
+        <div class="contact-map-inner">
+          <div class="contact-map-pin">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          </div>
+          <strong>The Room Escape Game</strong>
+          <span id="contact-map-address">Tunis, Tunisie</span>
+          <a href="https://maps.google.com/?q=The+Room+Escape+Game+Tunis" target="_blank" rel="noopener" class="btn btn-outline" style="margin-top:1rem" id="contact-map-btn">📍 Voir sur la carte</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 </main>
 
 <!-- ──── BOOKING MODAL ───────────────────── -->
@@ -2276,7 +2542,7 @@
       <button class="modal-close" id="closeBookingModal" type="button" aria-label="Fermer">×</button>
     </div>
     <div class="modal-body">
-      <form id="bookingModalForm" onsubmit="handleBooking(event)">
+      <form id="bookingModalForm" onsubmit="handleBooking(event)" novalidate>
         <div class="booking-stepper">
           <div class="stepper-head">
             <div>
@@ -2378,30 +2644,23 @@
   </div>
 </div>
 
-<!-- ──── FOOTER ──────────────────────────── -->
-<footer class="site-footer" id="site-footer-contact">
-  <div class="container">
-    <div class="footer-contact-head">
-      <h2 id="footer-contact-title">Nous joindre.</h2>
+<!-- ──── PHONE CALL POPUP ────────────────── -->
+<div class="phone-popup-overlay" id="phoneCallPopup" role="dialog" aria-modal="true" aria-labelledby="phoneCallTitle">
+  <div class="phone-popup">
+    <div class="phone-popup-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/>
+      </svg>
     </div>
-    <div class="footer-contact-grid">
-      <article class="footer-contact-card">
-        <h3 id="footer-coords-title">Coordonnées</h3>
-        <div class="footer-row"><span>📞</span><span>+216 12 345 678</span></div>
-        <div class="footer-row"><span>✉️</span><span>contact@theroom.tn</span></div>
-        <div class="footer-row"><span>📍</span><span>Tunis, Tunisie</span></div>
-        <div class="footer-row"><span>📷</span><a id="footer-instagram-link" href="https://www.instagram.com/the_room_escape_game/?utm_source=ig_embed&amp;ig_rid=bf3a239c-ea6b-41dc-98c4-1c2401427adc" target="_blank" rel="noopener noreferrer">Instagram</a></div>
-      </article>
-      <article class="footer-contact-card">
-        <h3 id="footer-hours-title">Horaires</h3>
-        <div class="footer-row"><span>📅</span><span id="footer-days">Lundi – Dimanche</span></div>
-        <div class="footer-row"><span>⏰</span><span id="footer-hours">10h00 – 22h00</span></div>
-        <div style="margin-top:1rem">
-          <a href="#" class="btn btn-primary" data-page="booking" id="footer-reserve-btn">Réserver maintenant</a>
-        </div>
-      </article>
-    </div>
+    <h4 id="phoneCallTitle">Appelez-nous !</h4>
+    <p>Ce créneau est dans moins de 90 minutes.<br>Pour toute réservation de dernière minute,<br>veuillez nous appeler directement.</p>
+    <span class="phone-popup-number">25 499 810</span>
+    <button class="phone-popup-close" id="closePhonePopup" type="button">Fermer</button>
   </div>
+</div>
+
+<!-- ──── FOOTER ──────────────────────────── -->
+<footer class="site-footer">
   <div class="container footer-inner">
     <span class="footer-brand">THE ROOM ESCAPE GAME</span>
     <span class="footer-copy">© 2026 The Room Escape Game — Tunis, Tunisie. Tous droits réservés.</span>
@@ -2465,6 +2724,7 @@
       detailId: 'page-scenario-jigsaw-1',
       name: 'Saw Chapter 1',
       image: 'img/saw1.jpg',
+      video: 'videos/saw1.mp4',
       players: '2 – 8 joueurs',
       duration: '60 min',
       difficulty: 'Medium',
@@ -2487,6 +2747,7 @@
       detailId: 'page-scenario-jigsaw',
       name: 'Saw Chapter 2',
       image: 'img/saw2.png',
+      video: 'videos/saw.mp4',
       players: '2 – 8 joueurs',
       duration: '60 min',
       difficulty: 'Hard',
@@ -2509,6 +2770,7 @@
       detailId: 'page-scenario-pirates',
       name: 'Pirates des Caraïbes',
       image: 'img/pirates.png',
+      video: 'videos/pirates.mp4',
       players: '2 – 6 joueurs',
       duration: '60 min',
       difficulty: 'Aventure',
@@ -2531,6 +2793,7 @@
       detailId: 'page-scenario-lecter',
       name: 'Le Cannibal',
       image: 'img/cannibal.png',
+      video: 'videos/cannibal.mp4',
       players: '3 – 8 joueurs',
       duration: '60 min',
       difficulty: 'Horreur',
@@ -2553,6 +2816,7 @@
       detailId: 'page-scenario-guantanamo',
       name: 'Guantánamo',
       image: 'img/gaw.png',
+      video: 'videos/quantanamo.mp4',
       players: '4 – 9 joueurs',
       duration: '60 min',
       difficulty: 'Évasion',
@@ -2575,6 +2839,7 @@
       detailId: 'page-scenario-mafia',
       name: 'Mafia',
       image: 'img/mafia.png',
+      video: 'videos/mafia.mp4',
       players: '3 – 9 joueurs',
       duration: '60 min',
       difficulty: 'Hard',
@@ -2651,6 +2916,7 @@
       detailId,
       name,
       image: String(item.image || fallback.image || '').trim(),
+      video: String(item.video || fallback.video || '').trim() || undefined,
       players: String(item.players || fallback.players || '').trim(),
       duration: String(item.duration || fallback.duration || '60 min').trim(),
       difficulty: String(item.difficulty || fallback.difficulty || '').trim(),
@@ -2700,26 +2966,39 @@
     return hours * 60 + minutes;
   }
 
+  function normalizeBookingScenarioName(value) {
+    return String(value || '').trim().toLowerCase();
+  }
+
+  function getSlotStartLabel(slot) {
+    return getScenarioTimeLabel(slot);
+  }
+
   function getSlotDateTime(dateValue, slot) {
     if (!dateValue || !slot) return null;
     const minutes = parseSlotStartMinutes(slot);
     if (minutes == null) return null;
-    const hour = String(Math.floor(minutes / 60)).padStart(2, '0');
+    const hourNum = Math.floor(minutes / 60);
+    const hour = String(hourNum).padStart(2, '0');
     const minute = String(minutes % 60).padStart(2, '0');
-    return new Date(dateValue + 'T' + hour + ':' + minute + ':00');
+    const d = new Date(dateValue + 'T' + hour + ':' + minute + ':00');
+    // Slots at 00:00 or early AM (after midnight) belong to the next calendar day
+    // relative to the selected date (the room runs past midnight, e.g. 22:30→00:00→01:30)
+    if (hourNum < 6) d.setDate(d.getDate() + 1);
+    return d;
   }
 
   function getReservationMatch(dateValue, scenarioName, slot) {
     const targetDate = String(dateValue || '').trim();
-    const targetScenario = String(scenarioName || '').trim();
-    const targetSlot = String(slot || '').trim();
+    const targetScenario = normalizeBookingScenarioName(scenarioName);
+    const targetSlot = getSlotStartLabel(slot);
 
     return getBookingReservations().find(reservation => {
       const status = String(reservation.status || 'new').toLowerCase();
       if (status === 'cancelled') return false;
       if (targetDate && String(reservation.date || '').trim() !== targetDate) return false;
-      if (targetScenario && String(reservation.scenario || '').trim() !== targetScenario) return false;
-      return String(reservation.time || '').trim() === targetSlot;
+      if (targetScenario && normalizeBookingScenarioName(reservation.scenario) !== targetScenario) return false;
+      return getSlotStartLabel(reservation.time) === targetSlot;
     }) || null;
   }
 
@@ -2747,10 +3026,11 @@
   function showBookingRestriction(reason) {
     const t = T[getActiveLang()] || T.fr;
     if (reason === 'too-soon') {
-      alert(t.bookingTooSoonMessage || 'To make Reservation before 90 Min you must call us 25 499 810');
+      const overlay = document.getElementById('phoneCallPopup');
+      if (overlay) { overlay.classList.add('open'); overlay.setAttribute('aria-hidden', 'false'); }
       return;
     }
-    alert(t.bookingReservedMessage || 'Ce créneau est déjà réservé. Choisissez un autre horaire.');
+    showToast(t.bookingReservedMessage || 'Ce créneau est déjà réservé. Choisissez un autre horaire.', 'error');
   }
 
   function getScenarioForBookingName(name) {
@@ -2780,7 +3060,7 @@
     modalTime.innerHTML = ['<option value="">' + escapeHTML(t.modalTimeOpt || 'Choisir une heure') + '</option>']
       .concat(options.map(slot => {
         const restriction = currentScenario ? getSlotRestriction(currentDate, currentScenario, slot) : { blocked: false, reason: '' };
-        const disabled = restriction.reason === 'reserved' ? ' disabled' : '';
+        const disabled = restriction.blocked ? ' disabled' : '';
         return '<option value="' + escapeHTML(slot) + '"' + disabled + '>' + escapeHTML(slot) + '</option>';
       }))
       .join('');
@@ -2805,7 +3085,7 @@
         const restriction = getSlotRestriction(selectedDate, scenarioName, slot);
         const isReserved = restriction.reason === 'reserved';
         const isTooSoon = restriction.reason === 'too-soon';
-        button.disabled = isReserved;
+        button.disabled = isReserved || isTooSoon;
         button.classList.toggle('reserved', isReserved);
         button.classList.toggle('pending', isTooSoon);
         button.dataset.blockedReason = isReserved || isTooSoon ? restriction.reason : '';
@@ -2875,7 +3155,7 @@
         const isAvailable = item.available !== false;
         const slots = Array.isArray(item.slots) ? item.slots : [];
         const slotMarkup = slots.length
-          ? slots.map(slot => '<li><button class="slot-btn" type="button" data-open-booking data-scenario="' + escapeHTML(item.bookingName || item.name) + '" data-time="' + escapeHTML(slot) + '"' + (isAvailable ? '' : ' disabled') + '>' + escapeHTML(getScenarioTimeLabel(slot)) + '</button></li>').join('')
+          ? slots.map(slot => '<li><button class="slot-btn" type="button" data-open-booking data-scenario="' + escapeHTML(item.bookingName || item.name) + '" data-time="' + escapeHTML(slot) + '"' + (isAvailable ? '' : ' disabled') + '>' + escapeHTML(slot) + '</button></li>').join('')
           : '<li><button class="slot-btn" type="button" disabled>' + escapeHTML(t.unavailable) + '</button></li>';
         return '<article class="slot-card' + (isAvailable ? '' : ' slot-card-unavailable') + '">'
           + '<img src="' + escapeHTML(item.image || '') + '" alt="' + escapeHTML(item.name) + '" />'
@@ -2950,7 +3230,13 @@
   }
 
   const SPECIAL = new Set(['scenario-jigsaw','scenario-jigsaw-1','scenario-pirates','scenario-lecter','scenario-guantanamo','scenario-mafia']);
-  let bookingStepIndex = 0;
+  let bookingStepIndex = 0;   // actual pane index (0, 1 or 2)
+  let bookingSkipStep1  = false; // true when scenario+time already chosen
+  let bookingSlotValidated = false;
+
+  function markBookingSlotDirty() {
+    bookingSlotValidated = false;
+  }
 
   function getActiveLang() {
     if (langSelect && langSelect.value === 'en') return 'en';
@@ -2975,11 +3261,18 @@
     const scenario = (modalScen || {}).value || '';
     const dateValue = (modalDate || {}).value || getSelectedBookingDate();
     const slotValue = (modalTime || {}).value || '';
-    if (!scenario || !dateValue || !slotValue) return true;
+    if (!scenario || !dateValue || !slotValue) {
+      bookingSlotValidated = false;
+      return true;
+    }
 
     const restriction = getSlotRestriction(dateValue, scenario, slotValue);
-    if (restriction.reason !== 'reserved' && restriction.reason !== 'too-soon') return true;
+    if (restriction.reason !== 'reserved' && restriction.reason !== 'too-soon') {
+      bookingSlotValidated = true;
+      return true;
+    }
 
+    bookingSlotValidated = false;
     showBookingRestriction(restriction.reason);
     if (modalTime && restriction.reason === 'too-soon') {
       modalTime.value = '';
@@ -2998,31 +3291,57 @@
     bookingSummary.innerHTML = '<strong>' + scenario + '</strong><br />' + date + ' · ' + time + ' · ' + players + ' ' + (t.bookingPlayersUnit || 'players');
   }
 
-  function setBookingStep(stepIndex) {
+  // Returns ordered list of visible pane indices based on skip flag
+  function visiblePanes() {
+    return bookingSkipStep1 ? [0, 2] : [0, 1, 2];
+  }
+
+  function setBookingStep(paneIndex) {
     if (!modalStepPanes.length) return;
-    bookingStepIndex = Math.max(0, Math.min(stepIndex, modalStepPanes.length - 1));
-    modalStepPanes.forEach((pane, index) => pane.classList.toggle('active', index === bookingStepIndex));
+    const steps = visiblePanes();
+    // Snap to nearest valid pane if needed
+    if (!steps.includes(paneIndex)) paneIndex = steps[steps.length - 1];
+    bookingStepIndex = paneIndex;
 
-    const t = T[getActiveLang()] || T.fr;
-    const titles = t.bookingStepTitles || ['Vos coordonnées', 'Choix du créneau', 'Finalisation'];
-    const kickers = t.bookingStepKickers || ['Étape 1 sur 3', 'Étape 2 sur 3', 'Étape 3 sur 3'];
+    modalStepPanes.forEach((pane, i) => pane.classList.toggle('active', i === bookingStepIndex));
 
-    if (modalStepTitle) modalStepTitle.textContent = titles[bookingStepIndex] || titles[0];
-    if (modalStepKicker) modalStepKicker.textContent = kickers[bookingStepIndex] || kickers[0];
-    if (modalStepCounter) modalStepCounter.textContent = (bookingStepIndex + 1) + '/' + modalStepPanes.length;
-    if (modalStepFill) modalStepFill.style.width = ((bookingStepIndex + 1) / modalStepPanes.length * 100) + '%';
-    if (bookingStepBack) bookingStepBack.disabled = bookingStepIndex === 0;
-    if (bookingStepNext) bookingStepNext.hidden = bookingStepIndex === modalStepPanes.length - 1;
-    if (bookingStepSubmit) bookingStepSubmit.hidden = bookingStepIndex !== modalStepPanes.length - 1;
+    const t       = T[getActiveLang()] || T.fr;
+    const allTitles  = t.bookingStepTitles  || ['Vos coordonnées', 'Choix du créneau', 'Finalisation'];
+    const stepPos    = steps.indexOf(bookingStepIndex);          // 0-based position in visible steps
+    const totalSteps = steps.length;
+
+    if (bookingSkipStep1) {
+      const titles2  = [allTitles[0], allTitles[2]];
+      const labels2  = ['Étape 1 sur 2', 'Étape 2 sur 2'];
+      if (modalStepTitle)   modalStepTitle.textContent  = titles2[stepPos]  || titles2[0];
+      if (modalStepKicker)  modalStepKicker.textContent = labels2[stepPos]  || labels2[0];
+    } else {
+      const kickers = t.bookingStepKickers || ['Étape 1 sur 3', 'Étape 2 sur 3', 'Étape 3 sur 3'];
+      if (modalStepTitle)   modalStepTitle.textContent  = allTitles[bookingStepIndex] || allTitles[0];
+      if (modalStepKicker)  modalStepKicker.textContent = kickers[bookingStepIndex]   || kickers[0];
+    }
+
+    if (modalStepCounter) modalStepCounter.textContent = (stepPos + 1) + '/' + totalSteps;
+    if (modalStepFill)    modalStepFill.style.width    = ((stepPos + 1) / totalSteps * 100) + '%';
+    if (bookingStepBack)   bookingStepBack.disabled    = stepPos === 0;
+    if (bookingStepNext)   bookingStepNext.hidden       = stepPos === totalSteps - 1;
+    if (bookingStepSubmit) bookingStepSubmit.hidden     = stepPos !== totalSteps - 1;
     if (bookingStepIndex === 1) refreshModalTimeOptions();
     updateBookingSummary();
   }
 
   modalForm && modalForm.addEventListener('input', updateBookingSummary);
-  bookingStepBack && bookingStepBack.addEventListener('click', () => setBookingStep(bookingStepIndex - 1));
+  bookingStepBack && bookingStepBack.addEventListener('click', () => {
+    const steps = visiblePanes();
+    const pos = steps.indexOf(bookingStepIndex);
+    if (pos > 0) setBookingStep(steps[pos - 1]);
+  });
   bookingStepNext && bookingStepNext.addEventListener('click', () => {
     if (!validateBookingStep(bookingStepIndex)) return;
-    setBookingStep(bookingStepIndex + 1);
+    if (bookingStepIndex === 1 && !validateSelectedSlot()) return;
+    const steps = visiblePanes();
+    const pos = steps.indexOf(bookingStepIndex);
+    if (pos < steps.length - 1) setBookingStep(steps[pos + 1]);
   });
 
   function openMobileNav() {
@@ -3047,10 +3366,30 @@
   mobileNavClose && mobileNavClose.addEventListener('click', closeMobileNav);
 
   /* ── PAGE NAVIGATION ────────────── */
-  function showPage(name) {
-    pages.forEach(p => p.classList.remove('active'));
+  let _popStateNav = false; // prevent double history push on popstate
+
+  function showPage(name, pushHistory) {
+    if (pushHistory === undefined) pushHistory = true;
+
+    // pause all videos in pages being hidden
+    pages.forEach(p => {
+      p.classList.remove('active');
+      p.querySelectorAll('video').forEach(v => { v.pause(); v.currentTime = 0; });
+    });
     const t = document.getElementById('page-' + name);
-    if (t) t.classList.add('active');
+    if (t) {
+      t.classList.add('active');
+      // Wait for the browser to render the page (display:block) before playing
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          t.querySelectorAll('video').forEach(v => {
+            v.muted = true;
+            v.currentTime = 0;
+            v.play().catch(() => {});
+          });
+        });
+      });
+    }
 
     navLinks.forEach(l => {
       const lp = l.dataset.page;
@@ -3069,7 +3408,27 @@
 
     closeMobileNav();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // ── History API: record navigation so browser back/forward works ──
+    if (pushHistory && !_popStateNav) {
+      history.pushState({ page: name }, '', '#' + name);
+    }
   }
+
+  // Handle browser back / forward / mouse back button
+  window.addEventListener('popstate', (e) => {
+    _popStateNav = true;
+    const page = (e.state && e.state.page)
+      || (window.location.hash ? window.location.hash.slice(1) : 'home');
+    showPage(page, false);
+    _popStateNav = false;
+  });
+
+  // Handle direct URL with hash (e.g. bookmark to #scenario-pirates)
+  const _initHash = window.location.hash ? window.location.hash.slice(1) : 'home';
+  const _validPage = document.getElementById('page-' + _initHash) ? _initHash : 'home';
+  history.replaceState({ page: _validPage }, '', '#' + _validPage);
+  if (_validPage !== 'home') showPage(_validPage, false);
 
   window.navigateTo = showPage;
 
@@ -3082,11 +3441,7 @@
     showPage(pg);
   });
 
-  document.addEventListener('click', e => {
-    const contactLink = e.target.closest('.mobile-sidebar-link[href="#site-footer-contact"]');
-    if (!contactLink) return;
-    closeMobileNav();
-  });
+  // Contact is now a proper SPA page — no special click handler needed.
 
   /* ── SCROLL HEADER ──────────────── */
   window.addEventListener('scroll', () => {
@@ -3121,17 +3476,24 @@
   dateNext && dateNext.addEventListener('click', () => shiftDate(1));
   resDate && resDate.addEventListener('change', () => {
     if (modalDate) modalDate.value = resDate.value;
+    markBookingSlotDirty();
     refreshBookingAvailability();
   });
   modalDate && modalDate.addEventListener('change', () => {
     if (resDate) resDate.value = modalDate.value;
+    markBookingSlotDirty();
     refreshBookingAvailability();
   });
-  modalScen && modalScen.addEventListener('change', refreshBookingAvailability);
+  modalScen && modalScen.addEventListener('change', () => {
+    markBookingSlotDirty();
+    refreshBookingAvailability();
+  });
+  modalTime && modalTime.addEventListener('change', markBookingSlotDirty);
 
   /* ── MODAL ──────────────────────── */
   function openModal(scenario, time) {
     const dateValue = (modalDate && modalDate.value) || (resDate && resDate.value) || getSelectedBookingDate();
+    bookingSlotValidated = false;
     if (scenario && time) {
       const restriction = getSlotRestriction(dateValue, scenario, time);
       if (restriction.blocked) {
@@ -3148,6 +3510,9 @@
       if (opt) modalTime.value = opt.value || opt.text;
     }
     if (modalDate && resDate && resDate.value) modalDate.value = resDate.value;
+    // Skip the scenario/time step when both are already pre-selected (from booking page)
+    bookingSkipStep1 = !!(scenario && time);
+    bookingSlotValidated = !!(scenario && time);
     setBookingStep(0);
     refreshBookingAvailability();
     window.requestAnimationFrame(() => {
@@ -3159,6 +3524,8 @@
   function closeModal() {
     modal.classList.remove('open');
     modal.setAttribute('aria-hidden', 'true');
+    bookingSkipStep1 = false; // reset so next open starts fresh
+    bookingSlotValidated = false;
   }
 
   document.addEventListener('click', e => {
@@ -3182,11 +3549,13 @@
   window.handleBooking = async function(e) {
     e.preventDefault();
     if (!validateBookingStep(bookingStepIndex)) return;
-    if (!validateSelectedSlot()) return;
-    if (bookingStepIndex < modalStepPanes.length - 1) {
-      setBookingStep(bookingStepIndex + 1);
+    const _steps = visiblePanes();
+    const _pos   = _steps.indexOf(bookingStepIndex);
+    if (_pos < _steps.length - 1) {
+      setBookingStep(_steps[_pos + 1]);
       return;
     }
+    if (!bookingSlotValidated && !validateSelectedSlot()) return;
     const activeLang = getActiveLang();
     const reservation = {
       id: Date.now() + '-' + Math.random().toString(36).slice(2, 8),
@@ -3220,7 +3589,7 @@
       : new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 19);
 
     try {
-      const resp = await fetch('http://localhost:8081/api/reservations', {
+      const resp = await fetch('/api/reservations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -3247,16 +3616,29 @@
             localStorage.setItem(key, JSON.stringify(list));
           }
         } catch (_) {}
+        await syncAvailabilityFromBackend().catch(() => {});
+      } else {
+        try {
+          const key = RESERVATION_KEY;
+          const list = JSON.parse(localStorage.getItem(key) || '[]');
+          const filtered = list.filter(r => r.id !== reservation.id);
+          localStorage.setItem(key, JSON.stringify(filtered));
+        } catch (_) {}
+        const errorData = await resp.json().catch(() => ({}));
+        showToast(errorData.error || 'This time slot is already booked.', 'error');
+        refreshBookingAvailability();
+        return;
       }
     } catch (_) {}
 
     refreshBookingAvailability();
 
     const t = T[activeLang] || T.fr;
-    alert(t.modalSuccess || 'Réservation envoyée ! Nous vous recontacterons rapidement.');
     e.target.reset();
     setBookingStep(0);
     closeModal();
+    // Toast notification — no blocking alert()
+    showToast(t.modalSuccess || 'Réservation envoyée ! Nous vous recontacterons rapidement.', 'success');
   };
 
   /* ── SCROLL CONTROLS ────────────── */
@@ -3646,9 +4028,15 @@
       explore: 'Explorer', book: 'Réserver',
       tarifsTitle: 'Tarifs par équipe', tarifsEye: 'Nos Tarifs',
       tarifsCopy: 'Tarification claire et transparente. Payez moins en jouant à plus.',
-      bookTitle: 'Réservation', contactTitle: 'Nous joindre.',
+      bookTitle: 'Réservation', contactTitle: 'NOUS JOINDRE.',
       contactEye: 'Contact', contactCopy: 'Pour réserver, demander un devis ou organiser un événement privé.',
       coords: 'Coordonnées', hours: 'Horaires',
+      phoneLbl: 'Téléphone', emailLbl: 'Email', addrLbl: 'Adresse',
+      contactDays: 'Lundi – Dimanche', contactTime: '10h00 – 22h00',
+      contactOpen: 'Ouvert tous les jours',
+      contactCtaTitle: 'Prêts pour l\'aventure ?',
+      contactCtaCopy: 'Réservez votre session dès maintenant et découvrez l\'expérience The Room.',
+      contactMapBtn: '📍 Voir sur la carte',
       reserveNow: 'Réserver maintenant',
       available: 'Disponible', unavailable: 'Indisponible', pending: 'En attente', reserved: 'Réservé',
       modalTitle: 'Formulaire de réservation',
@@ -3762,9 +4150,15 @@
       explore: 'Explore', book: 'Book',
       tarifsTitle: 'Pricing by Team Size', tarifsEye: 'Pricing',
       tarifsCopy: 'Simple, transparent pricing. The more players, the less you pay.',
-      bookTitle: 'Booking', contactTitle: 'Get in touch.',
+      bookTitle: 'Booking', contactTitle: 'GET IN TOUCH.',
       contactEye: 'Contact', contactCopy: 'Book a room, request a quote, or organise a private event.',
       coords: 'Contact Info', hours: 'Opening Hours',
+      phoneLbl: 'Phone', emailLbl: 'Email', addrLbl: 'Address',
+      contactDays: 'Monday – Sunday', contactTime: '10:00 AM – 10:00 PM',
+      contactOpen: 'Open every day',
+      contactCtaTitle: 'Ready for the adventure?',
+      contactCtaCopy: 'Book your session now and discover The Room experience.',
+      contactMapBtn: '📍 View on map',
       reserveNow: 'Book Now',
       available: 'Available', unavailable: 'Unavailable', pending: 'Pending', reserved: 'Reserved',
       modalTitle: 'Booking Form',
@@ -3993,13 +4387,23 @@
     if (legP) legP.textContent = t.pending;
     if (legR) legR.textContent = t.reserved;
 
-    // Footer contact
-    setText('#footer-contact-title', t.contactTitle);
-    setText('#footer-coords-title', t.coords);
-    setText('#footer-hours-title', t.hours);
-    const cBtn = document.getElementById('footer-reserve-btn');
-    if (cBtn) cBtn.textContent = t.reserveNow;
-    setText('#footer-instagram-link', t.igLabel);
+    // Contact page
+    setText('#contact-page-eye', t.contactEye || 'Contact');
+    setText('#contact-page-title', t.contactTitle || 'NOUS JOINDRE.');
+    setText('#contact-page-copy', t.contactCopy || '');
+    setText('#contact-coords-label', t.coords || 'Coordonnées');
+    setText('#contact-phone-label', t.phoneLbl || 'Téléphone');
+    setText('#contact-email-label', t.emailLbl || 'Email');
+    setText('#contact-addr-label', t.addrLbl || 'Adresse');
+    setText('#contact-hours-label', t.hours || 'Horaires');
+    setText('#contact-days', t.contactDays || 'Lundi – Dimanche');
+    setText('#contact-time', t.contactTime || '10h00 – 22h00');
+    setText('#contact-open-label', t.contactOpen || 'Ouvert tous les jours');
+    setText('#contact-cta-title', t.contactCtaTitle || 'Prêts pour l\'aventure ?');
+    setText('#contact-cta-copy', t.contactCtaCopy || 'Réservez votre session dès maintenant.');
+    const cBtn = document.getElementById('contact-reserve-btn');
+    if (cBtn) cBtn.textContent = t.reserveNow || 'Réserver maintenant';
+    setText('#contact-map-btn', t.contactMapBtn || '📍 Voir sur la carte');
 
     // Modal
     setText('#modalTitle', t.modalTitle);
@@ -4070,7 +4474,163 @@
     }
   });
 
-  window.setInterval(refreshBookingAvailability, 60000);
+  // Sync slot availability from backend so reservations made in other browsers
+  // are reflected here without requiring the admin dashboard to be open.
+  async function syncAvailabilityFromBackend() {
+    try {
+      const resp = await fetch('/api/availability');
+      if (!resp.ok) return;
+      const slots = await resp.json(); // [{scenario, date, time}]
+      if (!Array.isArray(slots) || !slots.length) return;
+
+      const current = loadJSON(RESERVATION_KEY, []);
+      // Build a set of already-known slot keys
+      const known = new Set(current.map(r => (r.scenario || '') + '|' + (r.date || '') + '|' + (r.time || '')));
+      const toAdd = slots.filter(s => s.scenario && s.date && s.time && !known.has(s.scenario + '|' + s.date + '|' + s.time));
+
+      if (toAdd.length > 0) {
+        const newList = current.concat(toAdd.map(s => ({
+          id: 'srv-' + s.date + '-' + s.time.replace(/[: ]/g, '') + '-' + (s.scenario || '').replace(/\s/g, ''),
+          date: s.date,
+          time: s.time,
+          scenario: s.scenario,
+          status: 'confirmed',
+          source: 'server'
+        })));
+        saveJSON(RESERVATION_KEY, newList);
+        refreshBookingAvailability();
+      }
+    } catch (_) {}
+  }
+
+  syncAvailabilityFromBackend();
+  window.setInterval(syncAvailabilityFromBackend, 60000);
+
+  let reservationEventSource = null;
+  function setupReservationAvailabilityStream() {
+    if (!window.EventSource) return;
+    try {
+      reservationEventSource = new EventSource('/api/events');
+      const refresh = () => {
+        syncAvailabilityFromBackend();
+        refreshBookingAvailability();
+      };
+      reservationEventSource.addEventListener('new-reservation', refresh);
+      reservationEventSource.addEventListener('reservation-updated', refresh);
+      reservationEventSource.onerror = () => {
+        if (reservationEventSource) {
+          reservationEventSource.close();
+          reservationEventSource = null;
+        }
+      };
+    } catch (_) {}
+  }
+
+  setupReservationAvailabilityStream();
+
+  // ── Sync scenarios from backend so admin edits are immediately visible ───
+  async function syncScenariosFromBackend() {
+    try {
+      const resp = await fetch('/api/scenarios');
+      if (!resp.ok) return;
+      const list = await resp.json();
+      if (!Array.isArray(list) || !list.length) return;
+      const current = JSON.stringify(loadJSON(SCENARIO_KEY, []));
+      const incoming = JSON.stringify(list);
+      if (current !== incoming) {
+        saveJSON(SCENARIO_KEY, list);
+        // Re-render any scenario-dependent UI (booking buttons, detail pages)
+        ensureSeedScenarios();
+        renderScenarioCatalog(getActiveLang());
+      }
+    } catch (_) {}
+  }
+  syncScenariosFromBackend();
+  window.setInterval(syncScenariosFromBackend, 120000); // re-check every 2 min
+
+  // ── Toast notification (replaces alert()) ────────────────────────────────
+  function showToast(message, type) {
+    let toast = document.getElementById('site-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'site-toast';
+      toast.className = 'toast';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.className = 'toast ' + (type || '');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => { toast.classList.add('show'); });
+    });
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 4000);
+  }
+
+  // ── Back arrow on every scenario detail page ──────────────────────────────
+  document.querySelectorAll('.detail-page').forEach(detailPage => {
+    const container = detailPage.querySelector('.container');
+    if (!container) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'detail-back-btn';
+    btn.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<polyline points="15 18 9 12 15 6"></polyline>' +
+      '</svg>' +
+      '<span>Retour aux scénarios</span>';
+    btn.addEventListener('click', () => showPage('scenarios'));
+    container.insertBefore(btn, container.firstChild);
+  });
+
+  // ── 3-D card tilt on mouse-move ───────────────────────────────────────────
+  function attach3DTilt(card) {
+    card.addEventListener('mousemove', (e) => {
+      const rect  = card.getBoundingClientRect();
+      const cx    = rect.left + rect.width  / 2;
+      const cy    = rect.top  + rect.height / 2;
+      const dx    = (e.clientX - cx) / (rect.width  / 2);   // –1 … +1
+      const dy    = (e.clientY - cy) / (rect.height / 2);   // –1 … +1
+      const rotX  = (-dy * 8).toFixed(2);    // tilt up/down   max ±8°
+      const rotY  = ( dx * 10).toFixed(2);   // tilt left/right max ±10°
+      card.style.transform =
+        `perspective(800px) translateZ(30px) scale(1.07) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  }
+
+  // ── Fix static slot button labels to show full range (e.g. "12:00 - 13:30") ──
+  document.querySelectorAll('[data-open-booking][data-time]').forEach(btn => {
+    const t = btn.dataset.time || '';
+    if (t && !btn.textContent.includes(' - ')) btn.textContent = t;
+  });
+
+  // ── Phone call popup close ────────────────────────────────────────────────
+  (function() {
+    const overlay = document.getElementById('phoneCallPopup');
+    const closeBtn = document.getElementById('closePhonePopup');
+    function closePhonePopup() {
+      if (overlay) { overlay.classList.remove('open'); overlay.setAttribute('aria-hidden', 'true'); }
+    }
+    closeBtn && closeBtn.addEventListener('click', closePhonePopup);
+    overlay && overlay.addEventListener('click', e => { if (e.target === overlay) closePhonePopup(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay && overlay.classList.contains('open')) closePhonePopup(); });
+  })();
+
+  function attachTiltToAll() {
+    document.querySelectorAll('.scenario-card').forEach(attach3DTilt);
+  }
+
+  // attach now and re-attach whenever the catalog is re-rendered
+  attachTiltToAll();
+  const _origRender = renderScenarioCatalog;
+  renderScenarioCatalog = function(...args) {
+    _origRender(...args);   // don't pass wrong `this` — function doesn't use it
+    attachTiltToAll();
+  };
 
   // Unmute on first user gesture (browsers require this)
   const firstInteractionEvents = ['click', 'keydown', 'touchstart', 'pointerdown'];

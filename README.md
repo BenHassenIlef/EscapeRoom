@@ -36,14 +36,38 @@ The admin side includes:
 - `index.html`: Main public website (home, scenarios, pricing, booking, contact)
 - `admin.html`: Admin dashboard and management interface
 - `img/`: Visual assets used by the website
+- `server.js`: Canonical backend entrypoint for this workspace
+- `escape - Copie/`: Duplicate backup copy of the project; keep it unchanged unless you explicitly want a mirrored copy
 
 ## How to Run Locally
 
 1. Clone or download this repository.
 2. Open `index.html` in your browser for the public website.
 3. Open `admin.html` in your browser for the admin dashboard.
+4. Run `npm start` from the workspace root if you want the backend and admin APIs.
 
 Because this is a static project, no package installation or build step is required.
+
+Note:
+
+- The nested `escape - Copie/` folder is a duplicate workspace copy kept for reference.
+- Use the root files as the source of truth when editing or running the app.
+
+## Email Sending Setup
+
+The admin dashboard can send reservation emails through the backend, but Gmail requires an App Password.
+
+Set these environment variables before starting the server:
+
+- `EMAIL_USER`: the Gmail address that will send the emails
+- `EMAIL_PASS`: a Google App Password, not your normal Gmail password
+- `EMAIL_FROM`: optional sender display name/address, for example `"The Room Escape Game" <your_email@gmail.com>`
+
+Important:
+
+- Enable 2-step verification on the Gmail account first.
+- Then create an App Password in Google Account settings.
+- If you use the normal account password, Gmail will reject the login with `535-5.7.8`.
 
 ## Admin Access (Default)
 

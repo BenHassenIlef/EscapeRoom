@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    /* Auto-redirect: if opened via file://, go to the HTTP server instead */
+    if (window.location.protocol === 'file:') {
+      window.location.replace('http://localhost:8081/admin.html');
+    }
+  </script>
   <title>Tableau de bord Admin - The Room</title>
   <link rel="icon" type="image/webp" href="img/loc.webp" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -244,6 +250,56 @@
       align-items: center;
       gap: .45rem;
       flex-wrap: wrap;
+    }
+    .session-profile {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: .28rem .55rem .28rem .35rem;
+      background: linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.02));
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+    }
+    .session-profile-text {
+      display: grid;
+      line-height: 1.15;
+    }
+    .session-profile-name {
+      color: var(--text);
+      font-size: .82rem;
+      letter-spacing: .01em;
+    }
+    .session-profile-email {
+      font-size: .7rem;
+      color: var(--muted);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .session-avatar {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 999px;
+      object-fit: cover;
+      flex: 0 0 auto;
+      background: rgba(255,255,255,.8);
+      border: 1px solid rgba(0,0,0,.08);
+    }
+    .session-avatar-fallback {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(37,99,235,.12);
+      color: #1d4ed8;
+      font-weight: 800;
+      font-size: .8rem;
+      flex: 0 0 auto;
     }
     .session-chip {
       display: inline-flex;
@@ -656,6 +712,22 @@
         transition-duration: .01ms !important;
       }
     }
+
+    /* ── Admin Toast ── */
+    #admin-toast {
+      position: fixed; bottom: 1.5rem; left: 50%;
+      transform: translateX(-50%) translateY(1rem);
+      padding: .7rem 1.5rem; border-radius: 8px;
+      font-size: .9rem; font-weight: 600; color: #fff;
+      background: #1e293b; border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 8px 24px rgba(0,0,0,.35);
+      z-index: 99999; opacity: 0; pointer-events: none;
+      transition: opacity .25s ease, transform .25s ease;
+      white-space: nowrap; max-width: 90vw;
+    }
+    #admin-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #admin-toast.ok   { background: #065f46; border-color: #10b981; }
+    #admin-toast.err  { background: #7f1d1d; border-color: #ef4444; }
   </style>
 </head>
 <body>
@@ -709,7 +781,14 @@
             <h2 id="view-title">Réservations</h2>
           </div>
           <div class="topbar-meta">
-            <div class="session-chip">Connecté en tant que <strong id="session-email">-</strong></div>
+            <div class="session-profile" id="session-profile-chip">
+              <span class="session-avatar-fallback" id="session-avatar-fallback">A</span>
+              <img class="session-avatar" id="session-avatar" alt="Photo de profil" style="display:none" />
+              <span class="session-profile-text">
+                <strong class="session-profile-name" id="session-name">-</strong>
+                <span class="session-profile-email" id="session-email">-</span>
+              </span>
+            </div>
           </div>
         </header>
 
@@ -794,6 +873,12 @@
                     <option value="true">Disponible</option>
                     <option value="false">Indisponible</option>
                   </select>
+                </div>
+                <div class="field full">
+                  <label for="scenario-image">Photo du scénario</label>
+                  <input id="scenario-image" type="text" placeholder="URL de l'image ou data URI" />
+                  <input id="scenario-image-file" type="file" accept="image/*" />
+                  <div class="scenario-image-preview" id="scenario-image-preview"></div>
                 </div>
                 <div class="field full">
                   <label for="scenario-description">Description</label>
@@ -918,28 +1003,90 @@
   </section>
 
   <script>
-  /* ── EMAIL : mailto (opens default mail client — zero config needed) ────── */
-  function sendConfirmationEmail(reservation) {
-    if (!reservation || !reservation.email) return;
-    var subject = encodeURIComponent('Confirmation de votre réservation — The Room Escape Game');
-    var body = encodeURIComponent(
-      'Bonjour ' + (reservation.name || '') + ',\n\n' +
-      'Votre réservation a été CONFIRMÉE par notre équipe.\n\n' +
-      '--- RÉCAPITULATIF ---\n' +
-      'Scénario  : ' + (reservation.scenario || '') + '\n' +
-      'Date      : ' + (reservation.date || '') + '\n' +
-      'Heure     : ' + (reservation.time || '') + '\n' +
-      'Joueurs   : ' + (reservation.players || '') + '\n' +
-      'Téléphone : ' + (reservation.phone || '') + '\n' +
-      (reservation.message ? 'Message   : ' + reservation.message + '\n' : '') +
-      '\nMerci de vous présenter 15 minutes avant le début de la session.\n\n' +
-      'À bientôt !\nThe Room — Escape Game'
-    );
-    window.open('mailto:' + encodeURIComponent(reservation.email) + '?subject=' + subject + '&body=' + body);
+  /* ── EMAIL : server-side send (admin button) ───────────────────────────── */
+  function getReservationEmail(reservation) {
+    return (reservation && (reservation.email || reservation.customerEmail || reservation.customer_email)) || '';
+  }
+
+  function getReservationName(reservation) {
+    return (reservation && (reservation.name || reservation.customerName || reservation.customer_name)) || '';
+  }
+
+  async function sendConfirmationEmail(reservation, resIdx) {
+    if (!reservation) return;
+    const email = getReservationEmail(reservation);
+    if (!email) {
+      adminToast('Pas d\'adresse e-mail pour cette réservation.', 'err');
+      return;
+    }
+
+    const token = await ensureJWT();
+    if (!token) {
+      adminToast('Connexion admin expirée. Reconnectez-vous puis réessayez.', 'err');
+      return;
+    }
+
+    const template = getEmailTemplate();
+    const customerName = getReservationName(reservation);
+    const subject = template.subject
+      .replace(/{customerName}/g, customerName)
+      .replace(/{scenarioName}/g, reservation.scenario || reservation.scenarioName || '')
+      .replace(/{date}/g, reservation.date || '')
+      .replace(/{time}/g, reservation.time || '')
+      .replace(/{players}/g, reservation.players || '');
+    const body = template.body
+      .replace(/{customerName}/g, customerName)
+      .replace(/{scenarioName}/g, reservation.scenario || reservation.scenarioName || '')
+      .replace(/{date}/g, reservation.date || '')
+      .replace(/{time}/g, reservation.time || '')
+      .replace(/{players}/g, reservation.players || '');
+
+    try {
+      const r = await fetch(BACKEND + '/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ to: email, subject, body })
+      });
+
+      if (r.ok) {
+        adminToast('E-mail envoyé à ' + email, 'ok');
+        if (typeof resIdx === 'number') {
+          const list = getReservations();
+          if (list[resIdx]) {
+            list[resIdx].emailSent = new Date().toISOString();
+            saveReservations(list);
+            refreshAll();
+          }
+        }
+        return;
+      }
+
+      const data = await r.json().catch(() => ({}));
+      adminToast('Échec de l\'envoi de l\'e-mail : ' + (data.error || 'Erreur inconnue'), 'err');
+    } catch (err) {
+      adminToast('Impossible de joindre le serveur e-mail.', 'err');
+    }
+  }
+
+  /* ── Admin Toast (replaces all alert() calls) ─────────────────────────── */
+  function adminToast(message, type) {
+    var el = document.getElementById('admin-toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'admin-toast';
+      document.body.appendChild(el);
+    }
+    el.textContent = message;
+    el.className = type === 'ok' ? 'ok' : type === 'err' ? 'err' : '';
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() { el.classList.add('show'); });
+    });
+    clearTimeout(el._t);
+    el._t = setTimeout(function() { el.classList.remove('show'); }, 4500);
   }
 
   /* ── BACKEND SYNC ──────────────────────────────────────────────────────── */
-  var BACKEND = 'http://localhost:8081/api';
+  var BACKEND = '/api';
 
   // Tracks status changes the user just made locally so the polling fetch
   // doesn't overwrite them before the backend PUT has been processed.
@@ -962,6 +1109,24 @@
   function mapBackendReservation(r) {
     var dt = r.reservationDateTime || r.reservation_date_time || '';
     var statusMap = { PENDING: 'new', CONFIRMED: 'confirmed', CANCELLED: 'cancelled', COMPLETED: 'escaped' };
+
+    // Reconstruct the full 90-minute slot range (e.g. "12:00 - 13:30") from the
+    // stored start time.  The booking page stores slots in this "start - end" format
+    // so the match must be identical, otherwise reserved slots aren't blocked.
+    var timeSlot = '';
+    if (dt) {
+      var tPart = dt.split('T')[1] || '';
+      var startTime = tPart.slice(0, 5); // "12:00"
+      if (startTime.includes(':')) {
+        var parts = startTime.split(':');
+        var startMins = Number(parts[0]) * 60 + Number(parts[1]);
+        var endMins   = (startMins + 90) % (24 * 60);
+        var endH = String(Math.floor(endMins / 60)).padStart(2, '0');
+        var endM = String(endMins % 60).padStart(2, '0');
+        timeSlot = startTime + ' - ' + endH + ':' + endM; // "12:00 - 13:30"
+      }
+    }
+
     return {
       id: 'bk-' + r.id,
       backendId: r.id,
@@ -972,7 +1137,7 @@
       scenario: r.scenarioName || r.scenario_name || '',
       players: String(r.numberOfPlayers || r.number_of_players || ''),
       date: dt ? dt.split('T')[0] : '',
-      time: dt ? dt.split('T')[1].slice(0, 5) : '',
+      time: timeSlot,
       message: r.notes || '',
       status: statusMap[r.status] || 'new',
       source: 'backend'
@@ -988,36 +1153,79 @@
       var now = Date.now();
       var mapped = backendList.map(function(item) {
         var res = mapBackendReservation(item);
-        // If the user changed this status locally in the last 15 s, keep their
-        // value — the backend PUT may not have committed yet.
         var p = pendingStatusChanges[res.backendId];
         if (p) {
           if (now - p.ts < 15000) {
             res.status = p.status;
           } else {
-            delete pendingStatusChanges[res.backendId]; // expired, trust backend
+            delete pendingStatusChanges[res.backendId];
           }
         }
         return res;
       });
-      localStorage.setItem('ROOM_RESERVATIONS_V1', JSON.stringify(mapped));
+
+      // MERGE: keep local-only reservations (no backendId) so bookings made from
+      // the same browser (or when backend was temporarily down) stay visible.
+      var existing = [];
+      try { existing = JSON.parse(localStorage.getItem('ROOM_RESERVATIONS_V1') || '[]'); } catch (_) {}
+      var backendIds = new Set(mapped.map(function(m) { return String(m.backendId || ''); }).filter(Boolean));
+      var localOnly = existing.filter(function(r) {
+        // Keep entries that have no backend ID, or whose ID isn't in the backend list yet
+        return !r.backendId || !backendIds.has(String(r.backendId));
+      });
+
+      localStorage.setItem('ROOM_RESERVATIONS_V1', JSON.stringify(mapped.concat(localOnly)));
     } catch (_) {}
   }
 
 
-  async function ensureJWT() {
-    var token = sessionStorage.getItem('ADMIN_JWT');
-    if (token) return token;
+  /* Decode a JWT payload safely — handles base64url (no padding, - and _ chars) */
+  function decodeJWTPayload(token) {
     try {
-      var email = localStorage.getItem('ROOM_ADMIN_SESSION_V1');
-      if (!email) return null;
-      var admins = JSON.parse(localStorage.getItem('ROOM_ADMINS_V2') || '[]');
-      var admin = admins.find(function(a) { return a.email === email; });
-      if (!admin || !admin.password) return null;
-      token = await backendLogin(email, admin.password);
-      if (token) sessionStorage.setItem('ADMIN_JWT', token);
+      var b64 = token.split('.')[1] || '';
+      b64 = b64.replace(/-/g, '+').replace(/_/g, '/');
+      var rem = b64.length % 4;
+      if (rem) b64 += '='.repeat(4 - rem);
+      return JSON.parse(atob(b64));
+    } catch (_) { return null; }
+  }
+
+  async function ensureJWT() {
+    var token = localStorage.getItem('ROOM_JWT_V1');
+    if (!token) return null;
+    var payload = decodeJWTPayload(token);
+    if (payload && payload.exp * 1000 < Date.now()) {
+      localStorage.removeItem('ROOM_JWT_V1');
+      localStorage.removeItem('ROOM_USER_ROLE');
+      return null;
+    }
+    return token;
+  }
+
+  async function loadBackendAdmins(token) {
+    if (!token) token = await ensureJWT();
+    if (!token) return;
+    try {
+      var r = await fetch(BACKEND + '/admins', { headers: { 'Authorization': 'Bearer ' + token } });
+      if (!r.ok) return;
+      var list = await r.json();
+      // Store WITHOUT passwords — credentials never live in localStorage
+      var mapped = list.map(function(a) {
+        return { id: a.id, email: a.email, role: a.role, name: a.name || a.email, photo: a.photo || '' };
+      });
+      localStorage.setItem('ROOM_ADMINS_V2', JSON.stringify(mapped));
     } catch (_) {}
-    return token || null;
+  }
+
+  async function loadBackendScenarios() {
+    try {
+      var r = await fetch(BACKEND + '/scenarios');
+      if (!r.ok) return;
+      var list = await r.json();
+      if (Array.isArray(list) && list.length) {
+        localStorage.setItem('ROOM_SCENARIOS_V2', JSON.stringify(list));
+      }
+    } catch (_) {}
   }
 
   async function updateBackendStatus(backendId, frontendStatus) {
@@ -1057,6 +1265,9 @@
       const adminListEl = document.getElementById('admin-list');
       const sideMenu = document.getElementById('side-menu');
       const sessionEmailEl = document.getElementById('session-email');
+      const sessionNameEl = document.getElementById('session-name');
+      const sessionAvatarEl = document.getElementById('session-avatar');
+      const sessionAvatarFallbackEl = document.getElementById('session-avatar-fallback');
       const resSearch = document.getElementById('res-search');
       const resStatusFilter = document.getElementById('res-status-filter');
       const resScenarioFilter = document.getElementById('res-scenario-filter');
@@ -1296,7 +1507,17 @@
       }
 
       function saveScenarios(list) {
-        saveJSON(SCENARIO_KEY, list.map((item, index) => normalizeScenario(item, index)).filter(Boolean));
+        const normalized = list.map((item, index) => normalizeScenario(item, index)).filter(Boolean);
+        saveJSON(SCENARIO_KEY, normalized);
+        // Sync to backend asynchronously so changes propagate across all browsers
+        ensureJWT().then(function(token) {
+          if (!token) return;
+          fetch(BACKEND + '/scenarios', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify(normalized)
+          }).catch(function() {});
+        });
       }
 
       function ensureSeedScenarios() {
@@ -1516,34 +1737,54 @@
       }
 
       function ensureSeedAdmin() {
-        const REQUIRED = [
-          { email: 'superadmin@gmail.com', password: 'superadmin', role: 'SUPER_ADMIN', name: 'Super Admin', photo: '' },
-          { email: 'admin@gmail.com',      password: 'admin',      role: 'ADMIN',       name: 'Admin',       photo: '' }
-        ];
-        let admins = loadJSON(ADM_KEY, []);
-        // Remove any old/stale emails that are not in the required list
-        const requiredEmails = REQUIRED.map(a => a.email.toLowerCase());
-        admins = admins.filter(a => requiredEmails.includes(a.email.toLowerCase()));
-        // Add or reset each required admin — always restore the correct password
-        REQUIRED.forEach(req => {
-          const idx = admins.findIndex(a => a.email.toLowerCase() === req.email.toLowerCase());
-          if (idx < 0) admins.push(req);
-          else admins[idx] = { ...admins[idx], ...req }; // always sync role, name, and password
-        });
-        saveJSON(ADM_KEY, admins);
+        // Admins are managed exclusively via the backend (bcrypt-hashed passwords).
+        // Plaintext passwords are never seeded into localStorage.
       }
 
       function getAdmins() { return loadJSON(ADM_KEY, []); }
       
       function getUserRole(email) {
-        const admins = getAdmins();
-        const admin = admins.find(a => a.email.toLowerCase() === String(email).toLowerCase());
-        return admin ? admin.role : 'USER';
+        const key = String(email || '').toLowerCase();
+        // 1. localStorage admin list (accurate after loadBackendAdmins)
+        const admin = getAdmins().find(a => a.email.toLowerCase() === key);
+        if (admin && admin.role) return admin.role;
+        // 2. Role stored explicitly on login (instant, no decode needed)
+        const storedRole = localStorage.getItem('ROOM_USER_ROLE');
+        if (storedRole) return storedRole;
+        // 3. Decode from JWT with proper base64url handling
+        const token = localStorage.getItem('ROOM_JWT_V1');
+        if (token) {
+          const payload = decodeJWTPayload(token);
+          if (payload && String(payload.email || '').toLowerCase() === key) {
+            return payload.role || 'ADMIN';
+          }
+        }
+        return 'USER';
       }
       
       function getUserProfile(email) {
         const admins = getAdmins();
         return admins.find(a => a.email.toLowerCase() === String(email).toLowerCase()) || null;
+      }
+
+      function updateHeaderProfile() {
+        const email = getSession();
+        const profile = getUserProfile(email);
+        if (sessionEmailEl) sessionEmailEl.textContent = email || '-';
+        if (sessionNameEl) sessionNameEl.textContent = profile && profile.name ? profile.name : 'Profil admin';
+        if (sessionAvatarEl && sessionAvatarFallbackEl) {
+          const photo = profile && profile.photo ? String(profile.photo) : '';
+          if (photo) {
+            sessionAvatarEl.src = photo;
+            sessionAvatarEl.style.display = 'block';
+            sessionAvatarFallbackEl.style.display = 'none';
+          } else {
+            sessionAvatarEl.removeAttribute('src');
+            sessionAvatarEl.style.display = 'none';
+            sessionAvatarFallbackEl.textContent = (profile && profile.name ? profile.name : email || 'A').trim().charAt(0).toUpperCase() || 'A';
+            sessionAvatarFallbackEl.style.display = 'inline-flex';
+          }
+        }
       }
       function getReservations() { return loadJSON(RES_KEY, []); }
       function saveReservations(list) { saveJSON(RES_KEY, list); }
@@ -1559,6 +1800,7 @@
           const email = getSession();
           sessionEmailEl.textContent = email || '-';
           const userRole = getUserRole(email);
+          updateHeaderProfile();
           filterMenuByRole(userRole);
           // Hide stats for admin users, show only for super admin
           const statsSection = document.querySelector('.stats');
@@ -1610,7 +1852,35 @@
         }
       }
 
-      function saveProfile() {
+      function readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result || ''));
+          reader.onerror = () => reject(new Error('Impossible de lire le fichier.'));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      const profilePhotoInput = document.getElementById('profile-photo');
+      if (profilePhotoInput) {
+        profilePhotoInput.addEventListener('change', async () => {
+          const preview = document.getElementById('profile-photo-preview');
+          const file = profilePhotoInput.files && profilePhotoInput.files[0];
+          if (!preview) return;
+          if (!file) {
+            populateProfileForm();
+            return;
+          }
+          try {
+            const dataUrl = await readFileAsDataURL(file);
+            preview.innerHTML = '<img src="' + escapeHTML(dataUrl) + '" alt="Photo de profil" />';
+          } catch (_) {
+            preview.innerHTML = '<div class="empty">Impossible de lire la photo sélectionnée.</div>';
+          }
+        });
+      }
+
+      async function saveProfile() {
         const email = getSession();
         const admins = getAdmins();
         const idx = admins.findIndex(a => a.email.toLowerCase() === email.toLowerCase());
@@ -1619,30 +1889,56 @@
         const nameEl = document.getElementById('profile-name');
         const name = nameEl ? nameEl.value.trim() : '';
         const photoEl = document.getElementById('profile-photo');
+        const token = await ensureJWT();
         
         if (!name) {
           const err = document.getElementById('profile-error');
           if (err) err.textContent = 'Le nom est requis.';
           return false;
         }
-        
-        admins[idx].name = name;
-        
+        let photo = admins[idx].photo || '';
         if (photoEl && photoEl.files && photoEl.files[0]) {
-          const reader = new FileReader();
-          reader.onload = () => {
-            admins[idx].photo = String(reader.result || '');
-            saveJSON(ADM_KEY, admins);
-            if (document.getElementById('profile-error')) document.getElementById('profile-error').textContent = '';
-            populateProfileForm();
-          };
-          reader.readAsDataURL(photoEl.files[0]);
+          photo = await readFileAsDataURL(photoEl.files[0]);
+        }
+
+        admins[idx].name = name;
+        admins[idx].photo = photo;
+        saveJSON(ADM_KEY, admins);
+        populateProfileForm();
+
+        if (!token) {
+          const err = document.getElementById('profile-error');
+          if (err) err.textContent = 'Profil enregistré localement. Reconnectez-vous pour synchroniser le serveur.';
           return true;
         }
-        
-        saveJSON(ADM_KEY, admins);
-        if (document.getElementById('profile-error')) document.getElementById('profile-error').textContent = '';
-        return true;
+
+        try {
+          const resp = await fetch(BACKEND + '/admins/me/profile', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ name, photo })
+          });
+          if (!resp.ok) {
+            const d = await resp.json().catch(() => ({}));
+            const err = document.getElementById('profile-error');
+            if (err) err.textContent = d.error || 'Impossible de sauvegarder le profil.';
+            return false;
+          }
+
+          const updated = await resp.json();
+          admins[idx].name = updated.name || name;
+          admins[idx].photo = updated.photo || photo;
+          saveJSON(ADM_KEY, admins);
+          if (document.getElementById('profile-error')) document.getElementById('profile-error').textContent = '';
+          populateProfileForm();
+          updateHeaderProfile();
+          return true;
+        } catch (err) {
+          const e = document.getElementById('profile-error');
+          if (e) e.textContent = 'Profil enregistré localement, mais la synchronisation serveur a échoué.';
+          updateHeaderProfile();
+          return true;
+        }
       }
 
       const NOTIFICATIONS_KEY = 'ROOM_NOTIFICATIONS_V1';
@@ -1788,25 +2084,27 @@
       }
 
       async function sendReservationEmail(reservation, resIdx) {
-        if (!reservation.email) {
-          alert('Pas d\'adresse e-mail pour cette réservation.');
+        const email = (reservation && (reservation.email || reservation.customerEmail || reservation.customer_email)) || '';
+        const customerName = (reservation && (reservation.name || reservation.customerName || reservation.customer_name)) || '';
+        if (!email) {
+          adminToast('Pas d\'adresse e-mail pour cette réservation.', 'err');
           return;
         }
         const token = await ensureJWT();
         if (!token) {
-          alert('Le backend est hors ligne. Démarrez le serveur puis réessayez.');
+          adminToast('Le backend est hors ligne. Démarrez le serveur puis réessayez.', 'err');
           return;
         }
         const template = getEmailTemplate();
         const subject = template.subject
-          .replace(/{customerName}/g, reservation.name || '')
-          .replace(/{scenarioName}/g, reservation.scenario || '')
+          .replace(/{customerName}/g, customerName)
+          .replace(/{scenarioName}/g, reservation.scenario || reservation.scenarioName || '')
           .replace(/{date}/g, reservation.date || '')
           .replace(/{time}/g, reservation.time || '')
           .replace(/{players}/g, reservation.players || '');
         const body = template.body
-          .replace(/{customerName}/g, reservation.name || '')
-          .replace(/{scenarioName}/g, reservation.scenario || '')
+          .replace(/{customerName}/g, customerName)
+          .replace(/{scenarioName}/g, reservation.scenario || reservation.scenarioName || '')
           .replace(/{date}/g, reservation.date || '')
           .replace(/{time}/g, reservation.time || '')
           .replace(/{players}/g, reservation.players || '');
@@ -1814,10 +2112,10 @@
           const r = await fetch(BACKEND + '/send-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-            body: JSON.stringify({ to: reservation.email, subject, body })
+            body: JSON.stringify({ to: email, subject, body })
           });
           if (r.ok) {
-            alert('E-mail envoyé à ' + reservation.email);
+            adminToast('E-mail envoyé à ' + email, 'ok');
             const list = getReservations();
             if (list[resIdx]) {
               list[resIdx].emailSent = new Date().toISOString();
@@ -1826,10 +2124,10 @@
             }
           } else {
             const d = await r.json();
-            alert('Échec de l\'envoi de l\'e-mail : ' + (d.error || 'Erreur inconnue'));
+            adminToast('Échec de l\'envoi de l\'e-mail : ' + (d.error || 'Erreur inconnue'), 'err');
           }
         } catch (err) {
-          alert('Impossible de joindre le serveur. Est-il en cours d\'exécution ?');
+          adminToast('Impossible de joindre le serveur. Est-il en cours d\'exécution ?', 'err');
         }
       }
       const DEFAULT_EMAIL_TEMPLATE = {
@@ -1957,8 +2255,14 @@
 
       function isUpcoming(r) {
         if (!r.date) return false;
-        const d = new Date(r.date + 'T23:59:59');
+        // Use the actual slot start time so sessions that already started today
+        // are correctly excluded from the "upcoming" manifest.
+        const startTime = r.time ? r.time.split(' - ')[0].trim() : '23:59';
+        const d = new Date(r.date + 'T' + (startTime || '23:59') + ':00');
         if (Number.isNaN(d.getTime())) return false;
+        // Midnight/early-AM slots (00:xx, 01:xx) belong to the next calendar day
+        const h = parseInt((startTime || '0').split(':')[0], 10);
+        if (h < 6) d.setDate(d.getDate() + 1);
         return d >= new Date();
       }
 
@@ -2153,6 +2457,15 @@
             if (!res) return;
             await createActionNotification(res, 'deleted');
             const token = await ensureJWT();
+            const next = listNow.slice();
+            if (res.backendId) {
+              const backendId = String(res.backendId);
+              const filtered = next.filter(item => String(item.backendId || '') !== backendId);
+              saveReservations(filtered);
+            } else {
+              next.splice(i, 1);
+              saveReservations(next);
+            }
             if (res.backendId) {
               await fetch(BACKEND + '/reservations/' + res.backendId, {
                 method: 'DELETE',
@@ -2339,10 +2652,23 @@
         }).join('');
 
         adminListEl.querySelectorAll('[data-del-admin]').forEach(btn => {
-          btn.addEventListener('click', () => {
+          btn.addEventListener('click', async () => {
             const email = btn.getAttribute('data-del-admin');
-            const next = getAdmins().filter(a => a.email !== email);
-            saveJSON(ADM_KEY, next);
+            const admins = getAdmins();
+            const target = admins.find(a => a.email === email);
+            const token = await ensureJWT();
+            if (token && target && target.id) {
+              try {
+                await fetch(BACKEND + '/admins/' + target.id, {
+                  method: 'DELETE',
+                  headers: { 'Authorization': 'Bearer ' + token }
+                });
+              } catch (_) {}
+              await loadBackendAdmins(token);
+            } else {
+              // Fallback: remove locally (e.g. backend offline)
+              saveJSON(ADM_KEY, admins.filter(a => a.email !== email));
+            }
             refreshAll();
           });
         });
@@ -2358,9 +2684,30 @@
         renderRevenueView();
         renderAdmins();
       }
+      // ── Real-time push via SSE + 30-second fallback polling ─────────────────
       let _pollTimer = null;
+      let _sseSource = null;
+
       function startPolling() {
-        if (_pollTimer) clearInterval(_pollTimer);
+        stopPolling();
+
+        // SSE connection: instant notification when a new reservation arrives
+        try {
+          _sseSource = new EventSource(BACKEND + '/events');
+          _sseSource.addEventListener('new-reservation', async () => {
+            const tok = await ensureJWT();
+            await fetchAndMergeReservations(tok);
+            await loadBackendNotifications();
+            updateNotifBadge();
+            refreshAll();
+          });
+          _sseSource.onerror = () => {
+            // SSE disconnected — close quietly; fallback poll will keep data fresh
+            if (_sseSource) { _sseSource.close(); _sseSource = null; }
+          };
+        } catch (_) {}
+
+        // 30-second fallback poll (covers status changes, multi-tab updates, etc.)
         _pollTimer = setInterval(async function() {
           const tok = await ensureJWT();
           await fetchAndMergeReservations(tok);
@@ -2370,10 +2717,12 @@
             renderNotifications();
           }
           refreshAll();
-        }, 3000);
+        }, 30000);
       }
+
       function stopPolling() {
         if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+        if (_sseSource) { _sseSource.close(); _sseSource = null; }
       }
 
       function switchView(id) {
@@ -2427,8 +2776,9 @@
         }
       }
 
-      function tryLogin(email, password) {
-        return getAdmins().some(a => a.email.toLowerCase() === String(email).toLowerCase() && a.password === password);
+      function tryLogin(_email, _password) {
+        // Offline password fallback removed — authentication is exclusively via the backend.
+        return false;
       }
 
       function setupReservationTools() {
@@ -2467,8 +2817,8 @@
 
       function exportPdfReservations() {
         const list = getReservations();
-        if (!list.length) { alert('Aucune réservation à exporter.'); return; }
-        if (!window.jspdf || !window.jspdf.jsPDF) { alert('Bibliothèque PDF non disponible.'); return; }
+        if (!list.length) { adminToast('Aucune réservation à exporter.', 'err'); return; }
+        if (!window.jspdf || !window.jspdf.jsPDF) { adminToast('Bibliothèque PDF non disponible.', 'err'); return; }
 
         const { jsPDF } = window.jspdf;
         // Landscape A4 gives ~842 pt width — enough for all columns
@@ -2598,45 +2948,29 @@
         const email = (document.getElementById('login-email').value || '').trim();
         const password = document.getElementById('login-password').value || '';
 
-        // Try backend auth first — syncs reservations from database
         const token = await backendLogin(email, password);
-        if (token) {
-          sessionStorage.setItem('ADMIN_JWT', token);
-          // Save the actual password used so ensureJWT() can re-authenticate after token expiry
-          const admins = getAdmins();
-          const existing = admins.find(a => a.email.toLowerCase() === email.toLowerCase());
-          if (existing) {
-            existing.password = password; // always update with the password that just worked
-            saveJSON(ADM_KEY, admins);
-          } else {
-            const role = email === 'superadmin@gmail.com' ? 'SUPER_ADMIN' : 'ADMIN';
-            admins.push({ email, password, role, name: email, photo: '' });
-            saveJSON(ADM_KEY, admins);
-          }
-          setSession(email);
-          showApp(true);
-          await fetchAndMergeReservations(token);
-          await loadBackendNotifications();
-          updateNotifBadge();
-          refreshAll();
-          startPolling();
+        if (!token) {
+          loginErr.textContent = 'Identifiants incorrects ou serveur hors ligne.';
           return;
         }
 
-        // Fallback: localStorage-only auth (works offline)
-        if (!tryLogin(email, password)) {
-          loginErr.textContent = 'Identifiants incorrects.';
-          return;
-        }
+        // Store JWT + role — role available instantly before any async fetch
+        localStorage.setItem('ROOM_JWT_V1', token);
+        const _p = decodeJWTPayload(token);
+        if (_p && _p.role) localStorage.setItem('ROOM_USER_ROLE', _p.role);
         setSession(email);
         showApp(true);
-        await fetchAndMergeReservations(null);
+        await loadBackendAdmins(token);
+        await loadBackendScenarios();
+        filterMenuByRole(getUserRole(email)); // re-apply after full admin list loaded
+        await fetchAndMergeReservations(token);
+        await loadBackendNotifications();
         updateNotifBadge();
         refreshAll();
         startPolling();
       });
 
-      addAdminForm.addEventListener('submit', (e) => {
+      addAdminForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         adminErr.textContent = '';
 
@@ -2650,17 +2984,28 @@
           return;
         }
 
-        const admins = getAdmins();
-        if (admins.some(a => a.email.toLowerCase() === email)) {
-          adminErr.textContent = 'Cet admin existe déjà.';
+        const token = await ensureJWT();
+        if (!token) {
+          adminErr.textContent = 'Non authentifié — reconnectez-vous.';
           return;
         }
 
-        admins.push({ email: email, password: password });
-        saveJSON(ADM_KEY, admins);
-        emailInput.value = '';
-        passInput.value = '';
-        refreshAll();
+        try {
+          const r = await fetch(BACKEND + '/admins', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ email, password, role: 'ADMIN', name: email })
+          });
+          if (r.status === 409) { adminErr.textContent = 'Cet admin existe déjà.'; return; }
+          if (!r.ok) { adminErr.textContent = 'Erreur serveur — réessayez.'; return; }
+          emailInput.value = '';
+          passInput.value = '';
+          await loadBackendAdmins(token);
+          refreshAll();
+          adminToast('Admin ajouté avec succès.', 'ok');
+        } catch (_) {
+          adminErr.textContent = 'Impossible de joindre le serveur.';
+        }
       });
 
       sideMenu.querySelectorAll('button[data-view]').forEach(btn => {
@@ -2669,9 +3014,9 @@
 
       const profileForm = document.getElementById('profile-form');
       if (profileForm) {
-        profileForm.addEventListener('submit', (e) => {
+        profileForm.addEventListener('submit', async (e) => {
           e.preventDefault();
-          const success = saveProfile();
+          const success = await saveProfile();
           const msg = document.getElementById('profile-success');
           if (msg && success) {
             msg.textContent = 'Profil mis à jour avec succès !';
@@ -2703,24 +3048,33 @@
 
       document.getElementById('logout-btn').addEventListener('click', () => {
         stopPolling();
-        sessionStorage.removeItem('ADMIN_JWT');
+        localStorage.removeItem('ROOM_JWT_V1');
+        localStorage.removeItem('ROOM_USER_ROLE');
         clearSession();
         showApp(false);
       });
 
 
       const session = getSession();
-      const storedAdmin = session ? getAdmins().find(a => a.email === session) : null;
-      if (storedAdmin) {
-        showApp(true);
-        refreshAll();
-        // Re-authenticate against backend so polling has a valid JWT even after page refresh
-        backendLogin(session, storedAdmin.password || '').then(async tok => {
-          if (tok) sessionStorage.setItem('ADMIN_JWT', tok);
-          await fetchAndMergeReservations(tok || null);
+      if (session) {
+        // Check stored JWT; if expired force re-login rather than re-sending passwords
+        ensureJWT().then(async function(token) {
+          if (!token) {
+            clearSession();
+            showApp(false);
+            return;
+          }
+          // Ensure role is cached for instant menu rendering
+          const _rp = decodeJWTPayload(token);
+          if (_rp && _rp.role) localStorage.setItem('ROOM_USER_ROLE', _rp.role);
+          showApp(true);
+          await loadBackendAdmins(token);
+          await loadBackendScenarios();
+          filterMenuByRole(getUserRole(session));
+          await fetchAndMergeReservations(token);
+          await loadBackendNotifications();
+          updateNotifBadge();
           refreshAll();
-          startPolling();
-        }).catch(() => {
           startPolling();
         });
       } else {

@@ -6,10 +6,10 @@ const { Pool } = require('pg');
 const path = require('path');
 const nodemailer = require('nodemailer');
 
-// ── Email config — fill in your Gmail credentials ────────────────────────────
-const EMAIL_USER = 'your_email@gmail.com';      // your Gmail address
-const EMAIL_PASS = 'your_app_password';          // Gmail App Password (not regular password)
-const EMAIL_FROM = '"The Room Escape Game" <your_email@gmail.com>';
+// ── Config (env vars override hardcoded defaults) ────────────────────────────
+const EMAIL_USER = process.env.EMAIL_USER || 'your_email@gmail.com';
+const EMAIL_PASS = process.env.EMAIL_PASS || 'your_app_password';
+const EMAIL_FROM = process.env.EMAIL_FROM || '"The Room Escape Game" <your_email@gmail.com>';
 
 const mailer = nodemailer.createTransport({
   service: 'gmail',
@@ -17,17 +17,39 @@ const mailer = nodemailer.createTransport({
 });
 
 const app = express();
-const PORT = 8081;
-const JWT_SECRET = 'your_jwt_secret_key_minimum_256_bits_long_for_security_purposes_change_this_in_production';
+const PORT = process.env.PORT || 8081;
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key_minimum_256_bits_long_for_security_purposes_change_this_in_production';
 const JWT_EXPIRES = '24h';
+
+// ── CORS ──────────────────────────────────────────────────────────────────────
+// Set ALLOWED_ORIGINS env var to a comma-separated list of trusted origins.
+// E.g. ALLOWED_ORIGINS=https://theroom.tn,https://www.theroom.tn
+// If unset, only same-origin and localhost requests are allowed (dev mode).
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
+  .split(',').map(s => s.trim()).filter(Boolean);
+
+app.use(cors({
+  origin: (origin, cb) => {
+    // Same-origin requests served by Express itself have no Origin header
+    if (!origin) return cb(null, true);
+    // Explicit whitelist takes priority
+    if (ALLOWED_ORIGINS.length && ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    // Dev fallback: allow any localhost port when no whitelist is configured
+    if (!ALLOWED_ORIGINS.length && /^https?:\/\/localhost(:\d+)?$/.test(origin)) return cb(null, true);
+    cb(new Error('CORS: origin not allowed — set ALLOWED_ORIGINS env var'));
+  },
+  credentials: true
+}));
+app.use(express.json({ limit: '4mb' })); // allow larger payloads for scenario images
+app.use(express.static(path.join(__dirname)));
 
 // ── Database ──────────────────────────────────────────────────────────────────
 const pool = new Pool({
-  host: 'localhost',
-  port: 5433,
-  database: 'escape_room',
-  user: 'postgres',
-  password: 'postgres123'
+  host:     process.env.DB_HOST     || 'localhost',
+  port:     parseInt(process.env.DB_PORT) || 5433,
+  database: process.env.DB_NAME     || 'escape_room',
+  user:     process.env.DB_USER     || 'postgres',
+  password: process.env.DB_PASS     || 'postgres123'
 });
 
 async function initDB() {
@@ -73,8 +95,16 @@ async function initDB() {
       updated_at TIMESTAMPTZ
     )
   `);
-  // Add updated_at to existing tables that were created before this column existed
   await pool.query(`ALTER TABLE reservations ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ`);
+
+  // Scenarios stored as JSONB — one row per scenario
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS scenarios (
+      id VARCHAR(100) PRIMARY KEY,
+      data JSONB NOT NULL,
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
 
   // Seed default admins if none exist
   const { rowCount } = await pool.query('SELECT 1 FROM admins LIMIT 1');
@@ -92,14 +122,7 @@ async function initDB() {
   }
 }
 
-// ── Middleware ────────────────────────────────────────────────────────────────
-app.use(cors({
-  origin: (origin, cb) => cb(null, true),
-  credentials: true
-}));
-app.use(express.json());
-app.use(express.static(path.join(__dirname)));
-
+// ── Auth Middleware ───────────────────────────────────────────────────────────
 function requireAuth(req, res, next) {
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith('Bearer ')) {
@@ -109,8 +132,17 @@ function requireAuth(req, res, next) {
     req.user = jwt.verify(auth.slice(7), JWT_SECRET);
     next();
   } catch {
-    res.status(401).json({ error: 'Invalid token' });
+    res.status(401).json({ error: 'Invalid or expired token' });
   }
+}
+
+function requireSuperAdmin(req, res, next) {
+  requireAuth(req, res, () => {
+    if (req.user.role !== 'SUPER_ADMIN') {
+      return res.status(403).json({ error: 'Forbidden: Super Admin access required' });
+    }
+    next();
+  });
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
@@ -127,11 +159,116 @@ app.post('/api/auth/login', async (req, res) => {
     const valid = await bcrypt.compare(password, admin.password);
     if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: admin.id, email: admin.email, role: admin.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
-    res.json({ token, role: admin.role });
+    const token = jwt.sign(
+      { id: admin.id, email: admin.email, role: admin.role },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES }
+    );
+    res.json({ token, role: admin.role, name: admin.name });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ── Admins CRUD (backend is the source of truth) ──────────────────────────────
+app.get('/api/admins', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, email, role, name, photo FROM admins ORDER BY created_at'
+    );
+    // Never return password hashes
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.put('/api/admins/me/profile', requireAuth, async (req, res) => {
+  const { name, photo } = req.body || {};
+  const safeName = String(name || '').trim();
+  if (!safeName) return res.status(400).json({ error: 'Name is required' });
+  try {
+    const { rows } = await pool.query(
+      'UPDATE admins SET name=$1, photo=$2 WHERE id=$3 RETURNING id, email, role, name, photo',
+      [safeName, photo || '', req.user.id]
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Admin not found' });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.post('/api/admins', requireSuperAdmin, async (req, res) => {
+  const { email, password, role, name } = req.body || {};
+  if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+  const safeRole = ['ADMIN', 'SUPER_ADMIN'].includes(role) ? role : 'ADMIN';
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    const { rows } = await pool.query(
+      'INSERT INTO admins (email, password, role, name) VALUES ($1,$2,$3,$4) RETURNING id, email, role, name',
+      [email.toLowerCase().trim(), hash, safeRole, name || email]
+    );
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    if (err.code === '23505') return res.status(409).json({ error: 'Admin with this email already exists' });
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.delete('/api/admins/:id', requireSuperAdmin, async (req, res) => {
+  if (String(req.params.id) === String(req.user.id)) {
+    return res.status(400).json({ error: 'Cannot delete your own account' });
+  }
+  try {
+    const { rowCount } = await pool.query('DELETE FROM admins WHERE id=$1', [req.params.id]);
+    if (rowCount === 0) return res.status(404).json({ error: 'Admin not found' });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ── Scenarios CRUD ────────────────────────────────────────────────────────────
+// Public GET — frontend and booking page can read scenarios from DB
+app.get('/api/scenarios', async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT data FROM scenarios ORDER BY data->>\'order\' NULLS LAST, id');
+    res.json(rows.map(r => r.data));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Bulk replace — admin saves the full array
+app.put('/api/scenarios', requireSuperAdmin, async (req, res) => {
+  const list = req.body;
+  if (!Array.isArray(list)) return res.status(400).json({ error: 'Array expected' });
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query('DELETE FROM scenarios');
+    for (const scenario of list) {
+      if (!scenario || !scenario.id) continue;
+      await client.query(
+        'INSERT INTO scenarios (id, data, updated_at) VALUES ($1,$2,NOW())',
+        [scenario.id, JSON.stringify(scenario)]
+      );
+    }
+    await client.query('COMMIT');
+    res.json({ success: true, count: list.length });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  } finally {
+    client.release();
   }
 });
 
@@ -159,7 +296,7 @@ function broadcastSSE(event, data) {
 }
 
 // ── Reservations ──────────────────────────────────────────────────────────────
-app.get('/api/reservations', async (req, res) => {
+app.get('/api/reservations', requireAuth, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM reservations ORDER BY created_at DESC');
     res.json(rows.map(r => ({
@@ -184,6 +321,20 @@ app.post('/api/reservations', async (req, res) => {
   const { scenarioName, customerName, customerEmail, customerPhone, numberOfPlayers, reservationDateTime, notes } = req.body || {};
   if (!customerName) return res.status(400).json({ error: 'Customer name is required' });
   try {
+    const slotTime = reservationDateTime || new Date().toISOString();
+    const conflict = await pool.query(
+      `SELECT id
+       FROM reservations
+       WHERE LOWER(COALESCE(scenario_name, '')) = LOWER($1)
+         AND reservation_date_time = $2::timestamptz
+         AND status NOT IN ('CANCELLED')
+       LIMIT 1`,
+      [scenarioName || 'Unknown', slotTime]
+    );
+    if (conflict.rowCount > 0) {
+      return res.status(409).json({ error: 'This time slot is already booked' });
+    }
+
     const { rows } = await pool.query(
       `INSERT INTO reservations (customer_name, customer_email, customer_phone, scenario_name, number_of_players, reservation_date_time, notes, status, created_at)
        VALUES ($1,$2,$3,$4,$5,$6,$7,'PENDING',NOW()) RETURNING *`,
@@ -193,7 +344,7 @@ app.post('/api/reservations', async (req, res) => {
         customerPhone || '',
         scenarioName || 'Unknown',
         numberOfPlayers || 1,
-        reservationDateTime || new Date().toISOString(),
+        slotTime,
         notes || ''
       ]
     );
@@ -222,6 +373,7 @@ app.put('/api/reservations/:id/status', requireAuth, async (req, res) => {
   try {
     const { rowCount } = await pool.query('UPDATE reservations SET status=$1, updated_at=NOW() WHERE id=$2', [status, id]);
     if (rowCount === 0) return res.status(404).json({ error: 'Reservation not found' });
+    broadcastSSE('reservation-updated', { id: Number(id), status });
     res.json({ success: true });
   } catch (err) {
     console.error(err);
@@ -239,6 +391,34 @@ app.delete('/api/reservations/:id', requireAuth, async (req, res) => {
   }
 });
 
+// ── Public availability (no auth) ─────────────────────────────────────────────
+app.get('/api/availability', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT scenario_name, reservation_date_time
+       FROM reservations
+       WHERE status NOT IN ('CANCELLED')
+       ORDER BY reservation_date_time`
+    );
+    const slots = rows.map(r => {
+      const dt = r.reservation_date_time;
+      if (!dt) return null;
+      const pad = n => String(n).padStart(2, '0');
+      const dateStr = dt.toISOString().split('T')[0];
+      const startH  = dt.getUTCHours();
+      const startM  = dt.getUTCMinutes();
+      const startTime = pad(startH) + ':' + pad(startM);
+      const endTotalMins = (startH * 60 + startM + 90) % (24 * 60);
+      const endTime = pad(Math.floor(endTotalMins / 60)) + ':' + pad(endTotalMins % 60);
+      return { scenario: r.scenario_name, date: dateStr, time: startTime + ' - ' + endTime };
+    }).filter(Boolean);
+    res.json(slots);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // ── Email ─────────────────────────────────────────────────────────────────────
 app.post('/api/send-email', requireAuth, async (req, res) => {
   const { to, subject, body } = req.body || {};
@@ -248,7 +428,10 @@ app.post('/api/send-email', requireAuth, async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error('Email error:', err.message);
-    res.status(500).json({ error: 'Failed to send email: ' + err.message });
+    const authHint = /(?:EAUTH|Invalid login|Username and Password not accepted)/i.test(err.message)
+      ? ' Gmail rejected the login. Use a Google App Password with 2-step verification enabled, not your normal account password.'
+      : '';
+    res.status(500).json({ error: 'Failed to send email: ' + err.message + authHint });
   }
 });
 

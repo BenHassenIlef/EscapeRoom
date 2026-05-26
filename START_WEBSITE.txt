@@ -22,6 +22,10 @@ Ouvrir PowerShell dans le dossier du projet et exécuter :
 
 Le serveur tourne sur :  http://localhost:8081
 
+Important :
+  Utiliser les fichiers à la racine du workspace comme version principale.
+  Le dossier "escape - Copie" imbriqué est une copie de secours et ne doit pas être lancé en parallèle.
+
 
 ÉTAPE 3 — Ouvrir le site
 --------------------------
