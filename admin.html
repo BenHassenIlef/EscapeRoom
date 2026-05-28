@@ -147,6 +147,9 @@
     .btn.ghost:hover { background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.2); }
     .btn.danger { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
     .btn.small { font-size: .78rem; padding: .36rem .55rem; border-radius: 8px; }
+    .btn.icon-btn { font-size: 1.15rem; padding: .28rem .42rem; border-radius: 8px; line-height: 1; min-width: 2rem; cursor: pointer; }
+    .btn.icon-btn.sent { opacity: .55; }
+    .btn-row { display: flex; gap: .3rem; align-items: center; flex-wrap: wrap; }
 
     .error { margin-top: .55rem; min-height: 1.1rem; color: #991b1b; font-size: .9rem; }
     .success { margin-top: .55rem; min-height: 1.1rem; color: #065f46; font-size: .9rem; }
@@ -397,6 +400,26 @@
       background: rgba(245,158,11,.1);
       border-color: rgba(245,158,11,.3);
     }
+    .status-emoji-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.4rem;
+      height: 2.4rem;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      background: transparent;
+      font-size: 1.35rem;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      margin: 0 auto;
+    }
+    .status-emoji-btn:hover { transform: scale(1.18); box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+    .status-emoji-btn.s-confirmed { border-color: rgba(22,163,74,.35); background: rgba(22,163,74,.08); }
+    .status-emoji-btn.s-new       { border-color: rgba(220,38,38,.35); background: rgba(220,38,38,.08); }
+    .status-emoji-btn.s-cancelled { border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.08); }
+    .status-emoji-btn.s-escaped   { border-color: rgba(16,185,129,.35); background: rgba(16,185,129,.08); }
+    .status-emoji-btn.s-failed    { border-color: rgba(239,68,68,.35);  background: rgba(239,68,68,.08);  }
 
     .stats {
       display: grid;
@@ -433,36 +456,56 @@
     .table-wrap {
       border: 1px solid var(--line);
       border-radius: 10px;
-      overflow: auto;
+      overflow-y: auto;
+      overflow-x: hidden;
       max-height: 62vh;
       background: rgba(0,0,0,.01);
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 980px;
+      table-layout: fixed;
     }
+    /* Column widths — 10 cols totalling ~100% */
+    table th:nth-child(1),  table td:nth-child(1)  { width: 12%; }   /* Nom */
+    table th:nth-child(2),  table td:nth-child(2)  { width: 9%; }    /* Téléphone */
+    table th:nth-child(3),  table td:nth-child(3)  { width: 14%; }   /* E-mail */
+    table th:nth-child(4),  table td:nth-child(4)  { width: 9%; }    /* Scénario */
+    table th:nth-child(5),  table td:nth-child(5)  { width: 12%; }   /* Session */
+    table th:nth-child(6),  table td:nth-child(6)  { width: 5%; }    /* Joueurs */
+    table th:nth-child(7),  table td:nth-child(7)  { width: 9%; }    /* Notes */
+    table th:nth-child(8),  table td:nth-child(8)  { width: 6%; }    /* Décharge */
+    table th:nth-child(9),  table td:nth-child(9)  { width: 11%; }   /* Statut */
+    table th:nth-child(10), table td:nth-child(10) { width: 7%; }    /* Actions */
     th, td {
-      padding: .5rem .55rem;
+      padding: .38rem .4rem;
       border-bottom: 1px solid var(--line);
-      font-size: .85rem;
-      vertical-align: top;
+      font-size: .78rem;
+      vertical-align: middle;
       text-align: left;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
+    td { white-space: normal; word-break: break-word; }
+    td.td-nowrap { white-space: nowrap; }
+    .td-sub { font-size: .68rem; color: var(--muted); display: block; margin-top: .1rem; }
     th {
       background: #e5e7eb;
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: .08em;
-      font-size: .7rem;
+      font-size: .65rem;
       position: sticky;
       top: 0;
       z-index: 2;
+      white-space: nowrap;
     }
     tbody tr:nth-child(even) { background: rgba(0,0,0,.01); }
     tbody tr:hover { background: rgba(59,130,246,.05); }
     td select,
     td input[type="checkbox"] { accent-color: #2563eb; }
+    td select { font-size: .72rem; padding: .2rem .25rem; max-width: 100%; }
 
     .pill {
       display: inline-block;
@@ -498,6 +541,68 @@
       flex-wrap: wrap;
     }
     .manifest-meta { color: var(--muted); font-size: .84rem; }
+
+    /* ── Email template editor ─────────────────────────────────────────── */
+    .var-chip {
+      display: inline-block;
+      background: rgba(59,130,246,.09);
+      border: 1px solid rgba(59,130,246,.28);
+      border-radius: 999px;
+      padding: .22rem .6rem;
+      font-size: .72rem;
+      cursor: pointer;
+      color: #1d4ed8;
+      margin: .15rem .15rem 0 0;
+      transition: background .14s, transform .1s;
+      user-select: none;
+    }
+    .var-chip:hover { background: rgba(59,130,246,.2); transform: translateY(-1px); }
+    .email-editor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      align-items: start;
+    }
+    @media (max-width: 860px) { .email-editor-grid { grid-template-columns: 1fr; } }
+    .email-char-count {
+      font-size: .68rem;
+      color: var(--muted);
+      text-align: right;
+    }
+    .email-preview-box {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      min-height: 320px;
+      overflow-y: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .email-preview-subject {
+      background: #f3f4f6;
+      border-bottom: 1px solid #e5e7eb;
+      padding: .65rem 1rem;
+      font-size: .78rem;
+      font-weight: 700;
+      color: #374151;
+      letter-spacing: .02em;
+    }
+    .email-preview-body {
+      padding: 1rem 1.2rem;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: .9rem;
+      color: #1f2937;
+      line-height: 1.75;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .email-preview-body .tpl-var {
+      background: rgba(59,130,246,.12);
+      color: #1d4ed8;
+      border-radius: 3px;
+      padding: 0 .2rem;
+      font-family: monospace;
+      font-size: .85em;
+    }
 
     .waiver-row {
       display: flex;
@@ -770,6 +875,7 @@
         </div>
         <div class="sidebar-actions">
           <button class="btn ghost" id="export-pdf-btn" data-role="SUPER_ADMIN" type="button" style="display:none">Exporter PDF</button>
+          <button class="btn ghost" id="export-csv-btn" data-role="SUPER_ADMIN" type="button" style="display:none">Exporter Excel </button>
           <button class="btn ghost" id="logout-btn" type="button">Déconnexion</button>
         </div>
       </aside>
@@ -934,30 +1040,50 @@
         <section class="view" id="view-email-templates">
           <div class="panel">
             <div class="eyebrow">Gestion des e-mails</div>
-            <h3 style="margin-bottom:.6rem">E-mail de confirmation de réservation</h3>
+            <h3 style="margin-bottom:.2rem">Modèle d'e-mail de confirmation</h3>
+            <p style="color:var(--muted);font-size:.82rem;margin-bottom:1.1rem">Personnalisez le message envoyé automatiquement à chaque client lors de la confirmation de sa réservation.</p>
+
             <form id="email-template-form">
-              <div class="field full">
-                <label for="email-template-subject">Sujet</label>
-                <input id="email-template-subject" type="text" placeholder="Sujet de l'e-mail" />
+              <!-- Subject -->
+              <div class="field full" style="margin-bottom:.9rem">
+                <label for="email-template-subject">✉️ Sujet de l'e-mail</label>
+                <input id="email-template-subject" type="text" placeholder="Ex : Votre réservation The Room est confirmée !" />
               </div>
-              <div class="field full">
-                <label for="email-template-body">Corps de l'e-mail</label>
-                <textarea id="email-template-body" rows="8" placeholder="Contenu de l'e-mail. Utilisez {customerName}, {scenarioName}, {date}, {time}, {players} comme variables"></textarea>
+
+              <!-- Variable chips -->
+              <div style="margin-bottom:.55rem">
+                <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-right:.4rem">Insérer une variable :</span>
+                <span class="var-chip" data-var="{customerName}">👤 Nom client</span>
+                <span class="var-chip" data-var="{scenarioName}">🎭 Scénario</span>
+                <span class="var-chip" data-var="{date}">📅 Date</span>
+                <span class="var-chip" data-var="{time}">🕐 Heure</span>
+                <span class="var-chip" data-var="{players}">👥 Joueurs</span>
               </div>
-              <button class="btn" type="submit">Enregistrer le modèle</button>
-              <p class="error" id="email-template-error"></p>
-              <p class="success" id="email-template-success"></p>
+
+              <!-- Editor + Preview side by side -->
+              <div class="email-editor-grid">
+                <div style="display:flex;flex-direction:column;gap:.35rem">
+                  <label for="email-template-body" style="margin-bottom:0">📝 Corps de l'e-mail</label>
+                  <textarea id="email-template-body" rows="16" placeholder="Rédigez votre message ici…" style="flex:1;resize:vertical;min-height:320px"></textarea>
+                  <div class="email-char-count" id="email-char-count">0 caractère</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:.35rem">
+                  <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)">👁 Aperçu (exemple)</div>
+                  <div class="email-preview-box" id="email-preview-box">
+                    <div class="email-preview-subject" id="email-preview-subject"></div>
+                    <div class="email-preview-body" id="email-preview-body"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.8rem;align-items:center">
+                <button class="btn" type="submit">💾 Enregistrer le modèle</button>
+                <button class="btn ghost" type="button" id="reset-template-btn">↺ Restaurer par défaut</button>
+                <p class="error" id="email-template-error" style="margin:0"></p>
+                <p class="success" id="email-template-success" style="margin:0"></p>
+              </div>
             </form>
-            <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--line)">
-              <h4>Variables disponibles</h4>
-              <p style="color:var(--muted);font-size:.85rem;line-height:1.5">
-                {customerName} - Nom du client<br />
-                {scenarioName} - Titre du scénario<br />
-                {date} - Date de réservation<br />
-                {time} - Heure de réservation<br />
-                {players} - Nombre de joueurs
-              </p>
-            </div>
           </div>
         </section>
 
@@ -1834,6 +1960,8 @@
 
         const exportBtn = document.getElementById('export-pdf-btn');
         if (exportBtn) exportBtn.style.display = role === 'SUPER_ADMIN' ? '' : 'none';
+        const exportCsvBtn = document.getElementById('export-csv-btn');
+        if (exportCsvBtn) exportCsvBtn.style.display = role === 'SUPER_ADMIN' ? '' : 'none';
       }
 
       function populateProfileForm() {
@@ -2148,13 +2276,83 @@
         saveJSON(EMAIL_TEMPLATE_KEY, { subject, body });
       }
 
+      const SAMPLE_VARS = {
+        '{customerName}': 'Ahmed Ben Ali',
+        '{scenarioName}': 'Saw Chapter 2',
+        '{date}':         '2026-06-15',
+        '{time}':         '18:00 - 19:30',
+        '{players}':      '4'
+      };
+
+      function renderEmailPreview() {
+        const subjectEl = document.getElementById('email-template-subject');
+        const bodyEl    = document.getElementById('email-template-body');
+        const previewS  = document.getElementById('email-preview-subject');
+        const previewB  = document.getElementById('email-preview-body');
+        const charCount = document.getElementById('email-char-count');
+        if (!bodyEl) return;
+
+        const rawBody    = bodyEl.value || '';
+        const rawSubject = subjectEl ? subjectEl.value : '';
+        const n = rawBody.length;
+        if (charCount) charCount.textContent = n + ' caractère' + (n > 1 ? 's' : '');
+
+        function applyVars(txt) {
+          return txt.replace(/\{customerName\}|\{scenarioName\}|\{date\}|\{time\}|\{players\}/g,
+            m => '<span class="tpl-var">' + (SAMPLE_VARS[m] || m) + '</span>');
+        }
+        function highlightVars(txt) {
+          const escaped = txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          return applyVars(escaped);
+        }
+
+        if (previewS) previewS.innerHTML = rawSubject ? '📧 ' + highlightVars(rawSubject) : '<span style="color:#9ca3af;font-style:italic">Sujet vide</span>';
+        if (previewB) previewB.innerHTML = rawBody   ? highlightVars(rawBody) : '<span style="color:#9ca3af;font-style:italic">Corps vide</span>';
+      }
+
       function populateEmailTemplateForm() {
         const template = getEmailTemplate();
         const subjectEl = document.getElementById('email-template-subject');
-        const bodyEl = document.getElementById('email-template-body');
-        
+        const bodyEl    = document.getElementById('email-template-body');
         if (subjectEl) subjectEl.value = template.subject;
-        if (bodyEl) bodyEl.value = template.body;
+        if (bodyEl)    bodyEl.value    = template.body;
+        renderEmailPreview();
+
+        // Wire up live preview + char count
+        [subjectEl, bodyEl].forEach(el => {
+          if (el && !el._tplListenerAdded) {
+            el.addEventListener('input', renderEmailPreview);
+            el._tplListenerAdded = true;
+          }
+        });
+
+        // Variable chips: insert at cursor
+        document.querySelectorAll('.var-chip').forEach(chip => {
+          if (chip._chipListenerAdded) return;
+          chip._chipListenerAdded = true;
+          chip.addEventListener('click', () => {
+            const varText = chip.getAttribute('data-var');
+            if (!bodyEl) return;
+            const start = bodyEl.selectionStart;
+            const end   = bodyEl.selectionEnd;
+            bodyEl.value = bodyEl.value.slice(0, start) + varText + bodyEl.value.slice(end);
+            bodyEl.selectionStart = bodyEl.selectionEnd = start + varText.length;
+            bodyEl.focus();
+            renderEmailPreview();
+          });
+        });
+
+        // Reset to default
+        const resetBtn = document.getElementById('reset-template-btn');
+        if (resetBtn && !resetBtn._resetListenerAdded) {
+          resetBtn._resetListenerAdded = true;
+          resetBtn.addEventListener('click', () => {
+            if (!confirm('Restaurer le modèle par défaut ?')) return;
+            if (subjectEl) subjectEl.value = DEFAULT_EMAIL_TEMPLATE.subject;
+            if (bodyEl)    bodyEl.value    = DEFAULT_EMAIL_TEMPLATE.body;
+            renderEmailPreview();
+          });
+        }
       }
 
       function renderNotifications() {
@@ -2321,6 +2519,17 @@
         reservationState.scenario = resScenarioFilter.value;
       }
 
+      function statusEmojiBtn(status, idx) {
+        const cur = normalizeText(status || 'new');
+        const isConfirmed  = cur === 'confirmed';
+        const isCancelled  = cur === 'cancelled';
+        const acceptActive = isConfirmed  ? ' s-confirmed' : '';
+        const declineActive= isCancelled  ? ' s-cancelled' : '';
+        const accept  = '<button class="status-emoji-btn' + acceptActive  + '" type="button" data-status-idx="' + idx + '" data-next-status="confirmed" title="Confirmer">✅</button>';
+        const decline = '<button class="status-emoji-btn' + declineActive + '" type="button" data-status-idx="' + idx + '" data-next-status="cancelled"  title="Refuser">❌</button>';
+        return '<div class="btn-row" style="justify-content:center">' + accept + decline + '</div>';
+      }
+
       function renderStats() {
         // Only show stats for super admin
         const userRole = getUserRole(getSession());
@@ -2387,26 +2596,22 @@
           const created = r.createdAt ? new Date(r.createdAt).toLocaleString() : '-';
           const statusClass = getStatusClass(r.status || 'new');
           const userRole = getUserRole(getSession());
-          const emailSentLabel = r.emailSent ? ' ✓' : '';
+          const emailSent = !!r.emailSent;
           const emailBtn = (userRole === 'SUPER_ADMIN' || userRole === 'ADMIN')
-            ? '<button class="btn small" type="button" data-send-email="' + idx + '">Envoyer e-mail' + emailSentLabel + '</button>'
+            ? '<button class="btn small icon-btn' + (emailSent ? ' sent' : '') + '" type="button" data-send-email="' + idx + '" title="' + (emailSent ? 'E-mail déjà envoyé' : 'Envoyer e-mail') + '">' + (emailSent ? '✅' : '✉️') + '</button>'
             : '';
+          const session = escapeHTML(r.date || '-') + (r.time ? '<br><span class="td-sub">' + escapeHTML(r.time) + '</span>' : '');
           return '<tr>' +
-            '<td>' + escapeHTML(r.id || '-') + '</td>' +
-            '<td>' + escapeHTML(created) + '</td>' +
-            '<td>' + escapeHTML(r.name) + '</td>' +
-            '<td>' + escapeHTML(r.phone) + '</td>' +
-            '<td>' + escapeHTML(r.email) + '</td>' +
-            '<td>' + escapeHTML(r.scenario) + '</td>' +
-            '<td>' + escapeHTML(r.date) + '</td>' +
-            '<td>' + escapeHTML(r.time) + '</td>' +
-            '<td>' + escapeHTML(r.players) + '</td>' +
-            '<td>' + escapeHTML(getSpecialNote(r)) + '</td>' +
-            '<td><input type="checkbox" data-waiver-idx="' + idx + '" ' + (r.waiverSigned ? 'checked' : '') + ' /></td>' +
-            '<td><span class="status-pill ' + statusClass + '">' + escapeHTML(getStatusLabel(r.status)) + '</span><br /><select data-status-idx="' + idx + '">' 
-              + [{v:'confirmed',l:'Confirmé'},{v:'cancelled',l:'Annulé'}].map(s => '<option value="' + s.v + '"' + (r.status === s.v ? ' selected' : '') + '>' + s.l + '</option>').join('')
-              + '</select></td>' +
-            '<td>' + emailBtn + '<button class="btn danger small" type="button" data-del-res="' + idx + '">Supprimer</button></td>' +
+            '<td>' + escapeHTML(r.name) + '<span class="td-sub">' + escapeHTML(r.id || '') + ' · ' + escapeHTML(created) + '</span></td>' +
+            '<td class="td-nowrap">' + escapeHTML(r.phone) + '</td>' +
+            '<td title="' + escapeHTML(r.email) + '">' + escapeHTML(r.email) + '</td>' +
+            '<td title="' + escapeHTML(r.scenario) + '">' + escapeHTML(r.scenario) + '</td>' +
+            '<td class="td-nowrap">' + session + '</td>' +
+            '<td style="text-align:center">' + escapeHTML(r.players) + '</td>' +
+            '<td title="' + escapeHTML(getSpecialNote(r)) + '">' + escapeHTML(getSpecialNote(r)) + '</td>' +
+            '<td style="text-align:center"><input type="checkbox" data-waiver-idx="' + idx + '" ' + (r.waiverSigned ? 'checked' : '') + ' /></td>' +
+            '<td style="text-align:center">' + statusEmojiBtn(r.status, idx) + '</td>' +
+            '<td><div class="btn-row">' + emailBtn + '<button class="btn danger small icon-btn" type="button" data-del-res="' + idx + '" title="Supprimer">🗑️</button></div></td>' +
           '</tr>';
         }).join('');
 
@@ -2417,15 +2622,12 @@
         wrap.innerHTML =
           '<table>'
           + '<thead><tr>'
-          + '<th>ID</th>'
-          + renderSortHeader('Créé', 'createdAt')
           + renderSortHeader('Nom', 'name')
           + '<th>Téléphone</th><th>E-mail</th>'
           + renderSortHeader('Scénario', 'scenario')
-          + renderSortHeader('Date', 'dateTime')
-          + '<th>Heure</th>'
+          + renderSortHeader('Session', 'dateTime')
           + renderSortHeader('Joueurs', 'players')
-          + '<th>Notes spéciales</th><th>Décharge</th>'
+          + '<th>Notes</th><th>Décharge</th>'
           + renderSortHeader('Statut', 'status')
           + '<th>Actions</th>'
           + '</tr></thead>'
@@ -2477,26 +2679,21 @@
           });
         });
 
-        wrap.querySelectorAll('[data-status-idx]').forEach(sel => {
-          sel.addEventListener('change', async () => {
-            const i = Number(sel.getAttribute('data-status-idx'));
+        wrap.querySelectorAll('[data-status-idx]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const i = Number(btn.getAttribute('data-status-idx'));
             const listNow = getReservations();
             if (!listNow[i]) return;
-            const newStatus = sel.value;
-            console.log('[status] change fired — idx:', i, 'newStatus:', newStatus, 'backendId:', listNow[i].backendId);
-            // Guard against poll overwriting this before the PUT reaches the backend
+            const newStatus = btn.getAttribute('data-next-status') || 'confirmed';
             if (listNow[i].backendId) {
               pendingStatusChanges[listNow[i].backendId] = { status: newStatus, ts: Date.now() };
             }
-            // Optimistic save so re-render never reverts the user's choice
             listNow[i].status = newStatus;
             saveReservations(listNow);
             refreshAll();
             await detectReservationDecline(listNow[i], newStatus);
             if (listNow[i].backendId) {
               await updateBackendStatus(listNow[i].backendId, newStatus);
-            } else {
-              console.error('[status] No backendId on reservation — PUT skipped', listNow[i]);
             }
           });
         });
@@ -2936,6 +3133,120 @@
         doc.save('the-room-reservations-' + new Date().toISOString().slice(0, 10) + '.pdf');
       }
 
+      function exportCsvReservations() {
+        const list = getReservations();
+        if (!list.length) { adminToast('Aucune réservation à exporter.', 'err'); return; }
+
+        const SEP = ';';
+
+        function cell(val) {
+          const s = String(val == null ? '' : val).replace(/"/g, '""');
+          return /[;,"\n\r]/.test(s) ? '"' + s + '"' : s;
+        }
+
+        // ── 19 columns in 5 logical groups ────────────────────────────────────
+        const headers = [
+          // Identification
+          'ID Réservation', '#', 'Créé le (date)', 'Créé le (heure)',
+          // Client
+          'Nom complet', 'E-mail', 'Téléphone', 'Premier passage',
+          // Session
+          'Scénario', 'Date de session', 'Heure de début', 'Heure de fin', 'Durée (min)', 'Nb joueurs',
+          // Statut & Finance
+          'Statut', 'Revenu estimé (TND)', 'E-mail envoyé',
+          // Extras
+          'Décharge signée', 'Occasion spéciale', 'Message client', 'Notes spéciales'
+        ];
+
+        const rows = list.map((r, idx) => {
+          // ── Dates ────────────────────────────────────────────────────────────
+          const createdDt  = r.createdAt ? new Date(r.createdAt) : null;
+          const createdDate = createdDt ? createdDt.toLocaleDateString('fr-FR')               : '-';
+          const createdTime = createdDt ? createdDt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '-';
+
+          // ── Time slot parsing ("17:00 - 18:30") ──────────────────────────────
+          const timeParts  = (r.time || '').split(' - ');
+          const timeStart  = timeParts[0] ? timeParts[0].trim() : (r.time || '-');
+          const timeEnd    = timeParts[1] ? timeParts[1].trim() : '-';
+          let duration     = '-';
+          if (timeParts[0] && timeParts[1]) {
+            const toMins = t => { const [h, m] = t.trim().split(':').map(Number); return h * 60 + m; };
+            const diff = toMins(timeParts[1]) - toMins(timeParts[0]);
+            if (diff > 0) duration = String(diff);
+          }
+
+          // ── Finance ──────────────────────────────────────────────────────────
+          const revenue = estimateBookingRevenue(r);
+
+          // ── Occasion & notes ─────────────────────────────────────────────────
+          const occasion     = r.occasion   ? String(r.occasion)   : '-';
+          const message      = r.message    ? String(r.message)    : '-';
+          const specialNotes = getSpecialNote(r);
+
+          return [
+            // Identification
+            r.id          || '-',
+            idx + 1,
+            createdDate,
+            createdTime,
+            // Client
+            r.name        || '-',
+            r.email       || '-',
+            r.phone       || '-',
+            r.firstTimer  ? 'Oui' : 'Non',
+            // Session
+            r.scenario    || '-',
+            r.date        || '-',
+            timeStart,
+            timeEnd,
+            duration,
+            r.players     || '-',
+            // Statut & Finance
+            getStatusLabel(r.status || 'new'),
+            revenue > 0   ? revenue.toFixed(2) : '-',
+            r.emailSent   ? 'Oui' : 'Non',
+            // Extras
+            r.waiverSigned ? 'Oui' : 'Non',
+            occasion,
+            message,
+            specialNotes
+          ].map(cell).join(SEP);
+        });
+
+        // ── Summary rows ──────────────────────────────────────────────────────
+        const totalRevenue = list.reduce((s, r) => s + estimateBookingRevenue(r), 0);
+        const totalPlayers = list.reduce((s, r) => s + Math.max(0, Number(r.players) || 0), 0);
+        const confirmed    = list.filter(r => r.status === 'confirmed').length;
+        const waivers      = list.filter(r => r.waiverSigned).length;
+
+        const blankRow  = Array(headers.length).fill('').join(SEP);
+        const totalRow  = ['TOTAL', list.length, '', '', '', '', '', '', '', '', '', '', '', totalPlayers, confirmed + ' confirmés', totalRevenue.toFixed(2) + ' TND', '', waivers + ' signées', '', '', ''].map(cell).join(SEP);
+
+        // UTF-8 BOM ensures Excel opens with correct encoding
+        const now = new Date().toLocaleString('fr-FR');
+        const metaRow = cell('Exporté le : ' + now + '  |  The Room Escape Game') + Array(headers.length - 1).fill('').join(SEP);
+
+        const csv = '﻿'
+          + metaRow + '\r\n'
+          + blankRow + '\r\n'
+          + headers.map(cell).join(SEP) + '\r\n'
+          + rows.join('\r\n') + '\r\n'
+          + blankRow + '\r\n'
+          + totalRow;
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url  = URL.createObjectURL(blob);
+        const a    = Object.assign(document.createElement('a'), {
+          href: url,
+          download: 'the-room-reservations-' + new Date().toISOString().slice(0, 10) + '.csv'
+        });
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        adminToast('Export Excel (CSV) — ' + list.length + ' réservation(s) téléchargées.', 'ok');
+      }
+
       ensureSeedAdmin();
       ensureSeedScenarios();
       setupReservationTools();
@@ -3044,6 +3355,10 @@
 
       document.getElementById('export-pdf-btn').addEventListener('click', () => {
         exportPdfReservations();
+      });
+
+      document.getElementById('export-csv-btn').addEventListener('click', () => {
+        exportCsvReservations();
       });
 
       document.getElementById('logout-btn').addEventListener('click', () => {

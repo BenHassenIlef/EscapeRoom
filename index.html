@@ -365,28 +365,15 @@
       filter: drop-shadow(0 16px 42px rgba(0,0,0,.66));
     }
     .hero-title::before,
-    .hero-title::after {
-      content: attr(data-text);
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: -1;
-      opacity: .25;
-      letter-spacing: .04em;
-      line-height: .88;
-    }
-    .hero-title::before {
-      color: rgba(255,255,255,.55);
-      transform: translate(-2px, 0);
-      mix-blend-mode: screen;
-      animation: titleSkew 4.2s infinite linear;
-    }
-    .hero-title::after {
-      color: rgba(255,255,255,.23);
-      transform: translate(2px, 0);
-      animation: titleFlicker 2.8s infinite steps(2, end);
-    }
+    .hero-title::after { content: none; }
     .hero-title .red { color: var(--red); display: block; }
+    .hero-title .oo-svg {
+      display: inline-block;
+      height: 0.80em;
+      width: 1.25em;
+      vertical-align: 0.02em;
+      overflow: visible;
+    }
     .hero-title-sub {
       display: block;
       font-size: clamp(1.6rem, 6vw, 4.4rem);
@@ -1335,6 +1322,75 @@
       transform: none;
       box-shadow: none;
     }
+    .players-stepper-ui {
+      display: flex;
+      align-items: center;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      overflow: hidden;
+      height: 3.4rem;
+      user-select: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .players-stepper-ui:focus-within {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(220,38,38,.15);
+    }
+    .players-btn {
+      width: 3.4rem;
+      height: 100%;
+      background: transparent;
+      border: none;
+      color: var(--white);
+      font-size: 1.6rem;
+      font-weight: 300;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      flex-shrink: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+    }
+    .players-btn:hover:not(:disabled) { background: rgba(220,38,38,.22); color: #fff; }
+    .players-btn:active:not(:disabled) { background: rgba(220,38,38,.38); }
+    .players-btn:disabled { opacity: .28; cursor: not-allowed; }
+    .players-divider { width: 1px; height: 60%; background: var(--border); flex-shrink: 0; }
+    .players-display-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .08rem;
+    }
+    .players-num {
+      font-family: var(--fd);
+      font-size: 1.7rem;
+      letter-spacing: .04em;
+      color: var(--white);
+      line-height: 1;
+    }
+    .players-unit {
+      font-family: var(--fl);
+      font-size: .6rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .players-range-hint {
+      display: flex;
+      justify-content: space-between;
+      font-size: .65rem;
+      color: var(--muted);
+      font-family: var(--fl);
+      margin-top: .3rem;
+      padding: 0 .2rem;
+      letter-spacing: .04em;
+    }
 
     .form-group { margin-bottom: 1.1rem; }
     label {
@@ -1692,7 +1748,7 @@
       <span class="hero-badge-dot"></span>
       Escape Game — Tunis, Tunisie
     </div>
-    <h1 class="hero-title" data-text="THE ROOM">THE<span class="red">ROOM</span><span class="hero-title-sub">ESCAPE GAME</span></h1>
+    <h1 class="hero-title" data-text="THE ROOM">THE<span class="red">R<svg class="oo-svg" viewBox="0 0 88 54" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><clipPath id="hero-oo-rc"><circle cx="61" cy="27" r="23"/></clipPath><clipPath id="hero-oo-top"><rect x="0" y="0" width="88" height="27"/></clipPath></defs><circle cx="27" cy="27" r="23" fill="none" stroke="currentColor" stroke-width="6"/><circle cx="61" cy="27" r="23" fill="none" stroke="currentColor" stroke-width="6"/><g clip-path="url(#hero-oo-rc)"><g clip-path="url(#hero-oo-top)"><circle cx="27" cy="27" r="23" fill="none" stroke="currentColor" stroke-width="6"/></g></g><path d="M40.5 26 L40.5 18.5 A3.5 3.5 0 0 1 47.5 18.5 L47.5 26" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="37.5" y="25.5" width="13" height="11" rx="2.5" ry="2.5" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="44" cy="30" r="2" fill="currentColor"/><rect x="43" y="30" width="2" height="3.2" rx="0.6" fill="currentColor"/></svg>M</span><span class="hero-title-sub">ESCAPE GAME</span></h1>
     <p class="hero-sub">Osez entrer. <em>Essayez d'en sortir.</em></p>
     <p class="hero-tagline" id="hero-tagline">60 Minutes. One Goal. Can You Get Out?</p>
     <div class="hero-actions">
@@ -2602,15 +2658,27 @@
                   <option>00:00 - 01:30</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label for="modal-players">Nombre de joueurs</label>
-                <input id="modal-players" type="number" min="2" max="9" placeholder="2 à 9" required />
-              </div>
             </div>
 
             <div class="step-pane" data-step-pane="2">
               <div class="step-summary" id="bookingSummary"></div>
               <div class="form-group" style="margin-top:1rem;">
+                <label for="modal-players">Nombre de joueurs</label>
+                <div class="players-stepper-ui" role="group" aria-label="Nombre de joueurs">
+                  <button type="button" class="players-btn" id="players-minus-btn" aria-label="Réduire">−</button>
+                  <div class="players-divider"></div>
+                  <div class="players-display-wrap">
+                    <span class="players-num" id="players-num-display" aria-live="polite">2</span>
+                    <span class="players-unit">joueur(s)</span>
+                  </div>
+                  <div class="players-divider"></div>
+                  <button type="button" class="players-btn" id="players-plus-btn" aria-label="Augmenter">+</button>
+                </div>
+                <div class="players-range-hint"><span>min 2</span><span>max 9</span></div>
+                <input id="modal-players" type="number" min="2" max="9" value="2" required
+                  style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;" />
+              </div>
+              <div class="form-group">
                 <label for="modal-message">Message (optionnel)</label>
                 <textarea id="modal-message" rows="3" placeholder="Informations complémentaires…"></textarea>
               </div>
@@ -3344,6 +3412,27 @@
     if (pos < steps.length - 1) setBookingStep(steps[pos + 1]);
   });
 
+  // ── Players stepper ────────────────────────────────────────────────────────
+  (function () {
+    const playersInput = document.getElementById('modal-players');
+    const numDisplay   = document.getElementById('players-num-display');
+    const minusBtn     = document.getElementById('players-minus-btn');
+    const plusBtn      = document.getElementById('players-plus-btn');
+    if (!playersInput || !numDisplay || !minusBtn || !plusBtn) return;
+    const MIN = 2, MAX = 9;
+    function setPlayers(n) {
+      n = Math.max(MIN, Math.min(MAX, n));
+      playersInput.value     = n;
+      numDisplay.textContent = n;
+      minusBtn.disabled      = n <= MIN;
+      plusBtn.disabled       = n >= MAX;
+      playersInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    minusBtn.addEventListener('click', () => setPlayers(Number(playersInput.value) - 1));
+    plusBtn.addEventListener('click',  () => setPlayers(Number(playersInput.value) + 1));
+    setPlayers(2);
+  })();
+
   function openMobileNav() {
     document.body.classList.add('mobile-nav-open');
     if (mobileMenuBtn) mobileMenuBtn.setAttribute('aria-expanded', 'true');
@@ -3457,13 +3546,25 @@
   revealEls.forEach(el => ro.observe(el));
 
   /* ── DATE HELPERS ───────────────── */
-  function isoDate(d) { return d.toISOString().split('T')[0]; }
+  function isoDate(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
   function shiftDate(days) {
-    if (!resDate.value) return;
-    const d = new Date(resDate.value + 'T00:00:00');
+    if (!resDate) return;
+    const base = resDate.value || isoDate(new Date());
+    const d = new Date(base + 'T00:00:00');
     d.setDate(d.getDate() + days);
-    resDate.value = isoDate(d);
-    if (modalDate) modalDate.value = resDate.value;
+    const next = isoDate(d);
+    const today = isoDate(new Date());
+    // Only block going backward past today
+    if (days < 0 && next < today) return;
+    resDate.value = next;
+    if (modalDate) modalDate.value = next;
+    resDate.dispatchEvent(new Event('change', { bubbles: true }));
+    if (datePrev) datePrev.disabled = next <= today;
   }
 
   if (resDate) {
@@ -3471,6 +3572,7 @@
     resDate.min = today;
     resDate.value = today;
     if (modalDate) modalDate.value = today;
+    if (datePrev) datePrev.disabled = true;
   }
   datePrev && datePrev.addEventListener('click', () => shiftDate(-1));
   dateNext && dateNext.addEventListener('click', () => shiftDate(1));

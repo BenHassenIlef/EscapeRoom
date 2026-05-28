@@ -156,7 +156,7 @@ app.post('/api/auth/login', async (req, res) => {
     const admin = rows[0];
     if (!admin) return res.status(401).json({ error: 'Invalid credentials' });
 
-    const valid = await bcrypt.compare(password, admin.password);
+    const valid = await bcrypt.compare(password, admin.password_hash);
     if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
 
     const token = jwt.sign(
@@ -164,7 +164,7 @@ app.post('/api/auth/login', async (req, res) => {
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES }
     );
-    res.json({ token, role: admin.role, name: admin.name });
+    res.json({ token, role: admin.role, name: admin.username });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
