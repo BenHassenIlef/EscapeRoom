@@ -270,8 +270,72 @@
       transition: all .22s ease;
       border: 1px solid transparent;
     }
-    .btn-primary { background: #f5f5f5; color: #090909; border-color: #f5f5f5; }
-    .btn-primary:hover { background: #ffffff; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,255,255,.15); }
+    .btn-primary { background: #f97316; color: #ffffff; border-color: #f97316; }
+    .btn-primary:hover { background: #ea6c0a; border-color: #ea6c0a; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(249,115,22,.35); }
+
+    /* ─── FLOATING RESERVE BUTTON ───────────────── */
+    @keyframes fab-float {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-7px); }
+    }
+    @keyframes fab-pulse-ring {
+      0%   { transform: scale(1);    opacity: .7; }
+      100% { transform: scale(1.75); opacity: 0;  }
+    }
+    .fab-reserve {
+      position: fixed;
+      bottom: 2.2rem;
+      right: 2.2rem;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .82rem 1.55rem;
+      background: linear-gradient(135deg, #ff9a3c 0%, #f97316 50%, #ea580c 100%);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      font-family: var(--fl);
+      font-weight: 800;
+      font-size: .88rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow:
+        0 0 0 0 rgba(249,115,22,.6),
+        0 8px 32px rgba(249,115,22,.55),
+        0 2px 8px rgba(0,0,0,.4),
+        inset 0 1px 0 rgba(255,255,255,.25);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .4s ease, background .2s, box-shadow .2s;
+      text-decoration: none;
+      animation: fab-float 3s ease-in-out infinite;
+    }
+    .fab-reserve::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50px;
+      background: linear-gradient(135deg, #ff9a3c, #ea580c);
+      animation: fab-pulse-ring 1.8s ease-out infinite;
+      z-index: -1;
+    }
+    .fab-reserve.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .fab-reserve:hover {
+      background: linear-gradient(135deg, #ffb347 0%, #ff8c00 50%, #f97316 100%);
+      box-shadow:
+        0 0 24px rgba(249,115,22,.9),
+        0 12px 40px rgba(249,115,22,.7),
+        0 2px 8px rgba(0,0,0,.4),
+        inset 0 1px 0 rgba(255,255,255,.3);
+      animation: none;
+      transform: translateY(-3px) scale(1.06);
+    }
+    .fab-reserve svg { flex-shrink: 0; filter: drop-shadow(0 0 3px rgba(255,255,255,.4)); }
     .btn-outline { background: transparent; color: var(--off); border-color: rgba(255,255,255,.18); }
     .btn-outline:hover { border-color: rgba(255,255,255,.45); background: rgba(255,255,255,.05); transform: translateY(-2px); }
     .btn-amber { background: #111111; color: #f5f5f5; border-color: #f5f5f5; }
@@ -1180,6 +1244,15 @@
     .slot-btn:hover:not([disabled]) { border-color: var(--red); background: rgba(220,38,38,.1); color: var(--white); }
     .slot-btn.pending  { background: rgba(245,158,11,.12); border-color: var(--amber); color: var(--amber); }
     .slot-btn.reserved { background: rgba(60,60,80,.3); border-color: transparent; color: #555; cursor: not-allowed; text-decoration: line-through; }
+    .slot-locations { display:flex; flex-direction:column; gap:.3rem; margin-bottom:.65rem; }
+    .slot-location-link {
+      display:inline-flex; align-items:center; gap:.3rem;
+      font-size:.75rem; color:var(--off); text-decoration:none;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+      border-radius:20px; padding:.18rem .65rem; width:fit-content;
+      transition:background .2s, border-color .2s;
+    }
+    .slot-location-link:hover { background:rgba(249,115,22,.15); border-color:rgba(249,115,22,.4); color:#f97316; }
 
     .booking-legend {
       display: flex; justify-content: center; gap: 1.5rem;
@@ -1672,6 +1745,121 @@
     @media (max-width: 1050px) {
       .h-scroll-controls { left: -2px; right: -2px; }
     }
+
+    /* ── MOBILE (≤ 480px) ────────────────────────────────── */
+    @media (max-width: 480px) {
+      /* FAB closer to edge */
+      .fab-reserve { bottom: 1rem; right: 1rem; padding: .6rem .9rem; font-size: .78rem; gap: .4rem; }
+      /* Prevent FAB animation from clipping */
+      .fab-reserve::before { display: none; }
+
+      /* Hero title smaller on tiny screens */
+      .hero-title { font-size: clamp(2.8rem, 16vw, 6rem) !important; line-height: 1.05 !important; }
+      .hero-sub, .hero-tagline { font-size: .9rem !important; }
+      .hero-actions { flex-direction: column; align-items: center; gap: .65rem; }
+      .hero-actions .btn { width: 100%; max-width: 320px; text-align: center; }
+
+      /* Pricing font */
+      .price { font-size: clamp(2rem, 10vw, 3.5rem) !important; }
+
+      /* ── Scenarios page: vertical stack instead of horizontal scroll ── */
+      .scenarios-scroll {
+        flex-direction: column !important;
+        overflow-x: visible !important;
+        scroll-snap-type: none !important;
+        padding-top: .5rem !important;
+        padding-bottom: 1rem !important;
+        gap: 1rem !important;
+      }
+      .scenario-card {
+        flex: none !important;
+        width: 100% !important;
+      }
+      .h-scroll-controls { display: none !important; }
+
+      /* ── Booking page: vertical stack instead of horizontal scroll ── */
+      .booking-grid {
+        flex-direction: column !important;
+        overflow-x: visible !important;
+        scroll-snap-type: none !important;
+        gap: 1rem !important;
+        padding-bottom: .5rem !important;
+      }
+      .slot-card {
+        flex: none !important;
+        width: 100% !important;
+      }
+      .slot-card img { aspect-ratio: 16/7 !important; }
+      .booking-carousel-wrap { overflow: visible !important; }
+      #page-booking .booking-carousel-wrap { padding-inline: 0 !important; }
+
+      /* Slot card times */
+      .slot-times { grid-template-columns: repeat(3, 1fr) !important; }
+      .slot-btn { font-size: .75rem !important; padding: .35rem .25rem !important; }
+
+      /* Slot card location links */
+      .slot-location-link { font-size: .7rem; }
+
+      /* Section titles */
+      .section-title { font-size: clamp(1.4rem, 7vw, 2.2rem) !important; }
+
+      /* Container padding */
+      .container { width: 96vw !important; }
+
+      /* Booking legend wrap */
+      .booking-legend { flex-wrap: wrap; gap: .4rem; }
+
+      /* Features section */
+      .features-grid { grid-template-columns: 1fr !important; }
+
+      /* FAQ */
+      .home-faq-question { font-size: .88rem; }
+
+      /* Booking modal full-screen on mobile */
+      .booking-modal { padding: 0 !important; align-items: flex-end !important; }
+      .booking-modal .modal-inner {
+        width: 100% !important; max-width: 100% !important;
+        max-height: 92vh; border-radius: 1.2rem 1.2rem 0 0 !important;
+        overflow-y: auto;
+      }
+
+      /* Booking date picker */
+      #reservation-date { font-size: .9rem; padding: .5rem .7rem; }
+
+      /* Slot title / players font */
+      .slot-title { font-size: .95rem !important; }
+      .slot-players { font-size: .75rem !important; }
+
+      /* Scenario detail pages */
+      .detail-card { flex-direction: column !important; }
+      .detail-media { max-height: 220px !important; }
+      .detail-badges { flex-wrap: wrap; gap: .4rem; }
+      .detail-badge { font-size: .78rem; padding: .25rem .6rem; }
+
+      /* Pricing page */
+      .pricing-grid { grid-template-columns: 1fr !important; }
+      .pricing-card { padding: 1.2rem !important; }
+
+      /* Contact page */
+      .contact-grid { grid-template-columns: 1fr !important; }
+
+      /* Tarifs page */
+      .tarif-table { font-size: .8rem; }
+      .tarif-table th, .tarif-table td { padding: .4rem .5rem !important; }
+
+      /* Location section on home */
+      .location-card { padding: 1rem !important; }
+      .location-card-top { flex-direction: column; gap: .75rem; }
+      .location-actions { flex-wrap: wrap; }
+      .location-map iframe { height: 200px !important; }
+
+      /* Pathways */
+      .pathways-grid { grid-template-columns: 1fr !important; }
+
+      /* Nav CTA reservation button in navbar: hide on tiny screens */
+      #nav-cta { display: none !important; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
     }
@@ -1946,6 +2134,9 @@
 <section class="page" id="page-scenarios">
   <div class="scenarios-page">
     <div class="container">
+      <div class="booking-header">
+        <h2 class="booking-title" id="scenarios-title">Scénarios</h2>
+      </div>
       <div class="h-scroll-shell">
         <div class="h-scroll-controls" aria-hidden="true">
           <button class="h-scroll-btn" type="button" data-scroll-target="scenarios-scroll" data-scroll-dir="left">&#8249;</button>
@@ -2549,21 +2740,9 @@
           </a>
         </article>
 
-        <!-- Horaires + CTA -->
+        <!-- CTA -->
         <div class="contact-right-col">
-          <article class="contact-info-card reveal" style="transition-delay:.08s">
-            <h3 id="contact-hours-label">Horaires</h3>
-            <div class="contact-hours-row">
-              <span class="chr-days" id="contact-days">Lundi – Dimanche</span>
-              <span class="chr-time" id="contact-time">10h00 – 22h00</span>
-            </div>
-            <div class="contact-open-badge">
-              <span class="cob-dot"></span>
-              <span id="contact-open-label">Ouvert tous les jours</span>
-            </div>
-          </article>
-
-          <div class="contact-cta-card reveal" style="transition-delay:.16s">
+          <div class="contact-cta-card reveal" style="transition-delay:.08s">
             <h3 id="contact-cta-title">Prêts pour l'aventure ?</h3>
             <p id="contact-cta-copy">Réservez votre session dès maintenant et découvrez l'expérience The Room.</p>
             <a href="#" class="btn btn-primary" data-page="booking" id="contact-reserve-btn">Réserver maintenant</a>
@@ -2720,8 +2899,8 @@
         <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/>
       </svg>
     </div>
-    <h4 id="phoneCallTitle">Appelez-nous !</h4>
-    <p>Ce créneau est dans moins de 90 minutes.<br>Pour toute réservation de dernière minute,<br>veuillez nous appeler directement.</p>
+    <h4 id="phoneCallTitle">Réservation par téléphone</h4>
+    <p>Toutes les réservations de moins de 90 minutes doivent être effectuées par téléphone au</p>
     <span class="phone-popup-number">25 499 810</span>
     <button class="phone-popup-close" id="closePhonePopup" type="button">Fermer</button>
   </div>
@@ -3209,6 +3388,12 @@
           + '</div>'
           + '<p class="scenario-desc">' + escapeHTML(item.description || '-') + '</p>'
           + '<div class="scenario-access">' + (item.access || []).map(v => '<span>' + escapeHTML(v) + '</span>').join('') + '</div>'
+          + (Array.isArray(item.locations) && item.locations.length
+              ? '<div style="margin:.5rem 0 .3rem;display:flex;flex-wrap:wrap;gap:.3rem">'
+                + item.locations.map(l => '<a href="' + escapeHTML(l.url) + '" target="_blank" rel="noopener" class="slot-location-link">'
+                  + (l.url.includes('google.com/maps') ? '🗺️ ' : '📍 ') + escapeHTML(l.name || l.url) + '</a>').join('')
+                + '</div>'
+              : '')
           + '<div class="scenario-actions">'
           + '<a href="#" class="btn btn-outline" data-page="' + escapeHTML((item.detailId || 'page-booking').replace(/^page-/, '')) + '">' + escapeHTML(t.explore) + '</a>'
           + '<' + (isAvailable ? 'button type="button" class="btn btn-primary" data-open-booking data-scenario="' + escapeHTML(item.bookingName || item.name) + '"' : 'span class="btn btn-primary" aria-disabled="true" tabindex="-1"') + '>' + escapeHTML(isAvailable ? t.book : t.unavailable) + '</' + (isAvailable ? 'button' : 'span') + '>'
@@ -3225,6 +3410,14 @@
         const slotMarkup = slots.length
           ? slots.map(slot => '<li><button class="slot-btn" type="button" data-open-booking data-scenario="' + escapeHTML(item.bookingName || item.name) + '" data-time="' + escapeHTML(slot) + '"' + (isAvailable ? '' : ' disabled') + '>' + escapeHTML(slot) + '</button></li>').join('')
           : '<li><button class="slot-btn" type="button" disabled>' + escapeHTML(t.unavailable) + '</button></li>';
+        const locMarkup = (Array.isArray(item.locations) && item.locations.length)
+          ? '<div class="slot-locations">'
+            + item.locations.map(l => '<a href="' + escapeHTML(l.url) + '" target="_blank" rel="noopener" class="slot-location-link">'
+              + (l.url.includes('google.com/maps') ? '🗺️ ' : '📍 ')
+              + escapeHTML(l.name || l.url)
+              + '</a>').join('')
+            + '</div>'
+          : '';
         return '<article class="slot-card' + (isAvailable ? '' : ' slot-card-unavailable') + '">'
           + '<img src="' + escapeHTML(item.image || '') + '" alt="' + escapeHTML(item.name) + '" />'
           + '<div class="slot-body">'
@@ -3233,6 +3426,7 @@
           + '<div class="scenario-badges" style="justify-content:center;margin-bottom:.75rem">'
           + '<span class="pill">' + escapeHTML(isAvailable ? t.available : t.unavailable) + '</span>'
           + '</div>'
+          + locMarkup
           + '<ul class="slot-times">' + slotMarkup + '</ul>'
           + '</div>'
           + '</article>';
@@ -3279,6 +3473,13 @@
         if (eyebrow) eyebrow.textContent = item.detailEyebrow || 'Scénario';
         if (badges[0]) badges[0].textContent = item.detailPlayers || item.players || '-';
         if (badges[1]) badges[1].textContent = item.detailDifficulty || item.difficulty || '-';
+        if (badges[3] && Array.isArray(item.locations) && item.locations.length) {
+          badges[3].innerHTML = item.locations.map(l =>
+            '<a href="' + escapeHTML(l.url) + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">'
+            + (l.url.includes('google.com/maps') ? '🗺️ ' : '📍 ')
+            + escapeHTML(l.name || 'Localisation') + '</a>'
+          ).join(' &nbsp;·&nbsp; ');
+        }
         if (description) description.textContent = item.detailDescription || item.description || '-';
         if (pricing) pricing.innerHTML = item.pricingHtml || pricing.innerHTML;
         if (successVal) successVal.textContent = item.successRate || '0%';
@@ -4749,6 +4950,41 @@
     document.addEventListener(evt, unmuteOnce, { once: false, passive: true })
   );
 
+})();
+</script>
+
+<!-- Floating reservation button -->
+<a href="#" class="fab-reserve" id="fab-reserve" data-page="booking" aria-label="Réserver">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+  Réserver
+</a>
+
+<script>
+(function () {
+  const fab = document.getElementById('fab-reserve');
+  if (!fab) return;
+
+  function updateFab() {
+    const homePage = document.getElementById('page-home');
+    const onHome = homePage && homePage.classList.contains('active');
+    fab.classList.toggle('visible', !!onHome);
+  }
+
+  // Show on load
+  updateFab();
+  document.addEventListener('scroll', updateFab, { passive: true });
+
+  // Re-check whenever the page changes (SPA navigation)
+  const observer = new MutationObserver(updateFab);
+  document.querySelectorAll('.page').forEach(p =>
+    observer.observe(p, { attributes: true, attributeFilter: ['class'] })
+  );
+
+  fab.addEventListener('click', function (e) {
+    e.preventDefault();
+    const trigger = document.querySelector('[data-page="booking"]');
+    if (trigger) trigger.click();
+  });
 })();
 </script>
 

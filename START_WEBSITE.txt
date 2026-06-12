@@ -1,80 +1,116 @@
 ===============================================================
-  THE ROOM — ESCAPE GAME  |  COMMENT DÉMARRER LE SITE
+  THE ROOM — ESCAPE GAME  |  GUIDE DE DÉMARRAGE
 ===============================================================
 
-ÉTAPE 1 — Démarrer PostgreSQL (la base de données)
-----------------------------------------------------
-Ouvrir PowerShell et exécuter :
 
-  & "C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe" start -D "C:\Program Files\PostgreSQL\18\data"
+═══════════════════════════════════════════════════════════════
+  OPTION A — UN SEUL DOUBLE-CLIC (recommandé)
+═══════════════════════════════════════════════════════════════
 
-Pour arrêter PostgreSQL :
+  Double-cliquer sur :  START_ALL.bat
 
-  & "C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe" stop -D "C:\Program Files\PostgreSQL\18\data"
-
-
-ÉTAPE 2 — Démarrer le backend Node.js
----------------------------------------
-Ouvrir PowerShell dans le dossier du projet et exécuter :
-
-  cd "c:\Users\LENOVO\Desktop\escape - Copie"
-  npm start
-
-Le serveur tourne sur :  http://localhost:8081
-
-Important :
-  Utiliser les fichiers à la racine du workspace comme version principale.
-  Le dossier "escape - Copie" imbriqué est une copie de secours et ne doit pas être lancé en parallèle.
+  → Lance automatiquement PostgreSQL + le serveur backend.
+    Ne pas fermer la fenêtre noire — c'est le serveur.
 
 
-ÉTAPE 3 — Ouvrir le site
---------------------------
-Ouvrir index.html dans le navigateur pour le site public.
-Ouvrir admin.html dans le navigateur pour le tableau de bord admin.
+═══════════════════════════════════════════════════════════════
+  OPTION B — Commandes manuelles (PowerShell)
+═══════════════════════════════════════════════════════════════
+
+  1. Démarrer PostgreSQL (si pas déjà actif) :
+     Ouvrir PowerShell EN ADMINISTRATEUR, puis :
+
+     net start postgresql-x64-18
+
+  2. Démarrer le backend Node.js :
+     Ouvrir PowerShell NORMAL dans le dossier du projet, puis :
+
+     cd "c:\Users\LENOVO\Desktop\escape - Copie"
+
+     
+     npm start
+
+  → Serveur actif sur : http://localhost:8081
+    Ne pas fermer la fenêtre — c'est le serveur.
+
+
+═══════════════════════════════════════════════════════════════
+  PREMIÈRE FOIS SEULEMENT — auto-démarrage PostgreSQL
+═══════════════════════════════════════════════════════════════
+
+  Clic droit sur SETUP_AUTOSTART.ps1 → "Exécuter avec PowerShell"
+  Accepter la demande admin (UAC).
+  → À faire une seule fois. PostgreSQL démarrera seul au boot.
+
+
+═══════════════════════════════════════════════════════════════
+  OUVRIR LE SITE
+═══════════════════════════════════════════════════════════════
+
+  Site public  →  http://localhost:8081
+  Tableau admin →  http://localhost:8081/admin.html
 
 
 ===============================================================
-  IDENTIFIANTS ADMIN
+  IDENTIFIANTS ADMINISTRATEUR
 ===============================================================
 
-  SUPER ADMIN
-  -----------
-  E-mail   : superadmin@gmail.com
+  SUPER ADMIN (accès complet)
+  ────────────────────────────
+  E-mail       : superadmin@gmail.com
   Mot de passe : superadmin
-  Accès    : Accès complet (toutes les fonctionnalités)
 
-  ADMIN
-  -----
-  E-mail   : admin@gmail.com
+  ADMIN (réservations uniquement)
+  ────────────────────────────────
+  E-mail       : admin@gmail.com
   Mot de passe : admin
-  Accès    : Réservations uniquement
 
 
 ===============================================================
-  CONFIGURATION E-MAIL (pour activer le bouton Envoyer e-mail)
+  CONFIGURATION E-MAIL (bouton "Envoyer e-mail")
 ===============================================================
 
-  Modifier server.js et renseigner ces 3 lignes en haut du fichier :
+  Ouvrir server.js et modifier les lignes 10-12 :
 
-    EMAIL_USER = 'votre_email@gmail.com'
-    EMAIL_PASS = 'votre_mot_de_passe_application'   ← Mot de passe d'application Gmail, PAS votre vrai mot de passe
-    EMAIL_FROM = '"The Room" <votre_email@gmail.com>'
+    const EMAIL_USER = process.env.EMAIL_USER || 'votre_email@gmail.com';
+    const EMAIL_PASS = process.env.EMAIL_PASS || 'votre_mot_de_passe_app';
+    const EMAIL_FROM = process.env.EMAIL_FROM || '"The Room" <votre_email@gmail.com>';
 
   Comment obtenir un mot de passe d'application Gmail :
-    1. Aller sur myaccount.google.com → Sécurité → Validation en 2 étapes (activer)
-    2. Puis aller sur myaccount.google.com → Sécurité → Mots de passe des applications
-    3. Créer un mot de passe pour "Courrier" → copier le mot de passe à 16 caractères
-    4. Le coller comme EMAIL_PASS dans server.js
+    1. myaccount.google.com → Sécurité → Validation en 2 étapes (activer)
+    2. myaccount.google.com → Sécurité → Mots de passe des applications
+    3. Créer un mot de passe pour "Courrier"
+    4. Copier le code à 16 caractères → le coller dans EMAIL_PASS
+
 
 ===============================================================
   INFORMATIONS BASE DE DONNÉES
 ===============================================================
 
-  Type     : PostgreSQL 18
-  Hôte     : localhost
-  Port     : 5433
-  Base     : escape_room
+  Moteur      : PostgreSQL 18
+  Hôte        : localhost
+  Port        : 5433
+  Base        : escape_room
   Utilisateur : postgres
   Mot de passe : postgres123
+
+
+===============================================================
+  DÉPANNAGE — Ce site est inaccessible (ERR_CONNECTION_REFUSED)
+===============================================================
+
+  Cause : le serveur Node.js n'est pas lancé.
+  Solution : lancer START_ALL.bat  OU  exécuter  npm start  dans
+             le dossier du projet.
+
+  PostgreSQL ne démarre pas ?
+    → Ouvrir PowerShell EN ADMINISTRATEUR et taper :
+      net start postgresql-x64-18
+
+  Port 8081 déjà occupé ?
+    → Fermer toute fenêtre noire du projet, puis relancer START_ALL.bat
+
+  Logs PostgreSQL :
+    C:\Program Files\PostgreSQL\18\data\log\
 
 ===============================================================

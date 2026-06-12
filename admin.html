@@ -168,7 +168,7 @@
     .notification-message { line-height: 1.5; color: var(--text); }
     .auth-help { margin-top: .7rem; color: var(--muted); font-size: .86rem; }
 
-    .app-shell { display: none; padding: 1rem 0 1.4rem; position: relative; z-index: 1; }
+    .app-shell { display: none; padding: 1rem 0 1.4rem; position: relative; }
     .layout {
       display: grid;
       grid-template-columns: minmax(220px, var(--sidebar-w)) minmax(0, 1fr);
@@ -457,7 +457,7 @@
       border: 1px solid var(--line);
       border-radius: 10px;
       overflow-y: auto;
-      overflow-x: hidden;
+      overflow-x: auto;
       max-height: 62vh;
       background: rgba(0,0,0,.01);
     }
@@ -811,6 +811,129 @@
     @media (max-width: 620px) {
       .res-tools { grid-template-columns: 1fr; }
     }
+
+    /* ── MOBILE (≤ 700px) ────────────────────────────────── */
+    .mobile-admin-menu-btn {
+      display: none;
+      position: fixed; top: .75rem; left: .75rem; z-index: 9500;
+      background: #f97316; color: #fff; border: none; border-radius: 8px;
+      width: 42px; height: 42px; font-size: 1.3rem; cursor: pointer;
+      align-items: center; justify-content: center;
+      box-shadow: 0 2px 12px rgba(249,115,22,.4);
+    }
+    .sidebar-mob-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.55); z-index: 8000;
+      pointer-events: none;
+    }
+    .sidebar-mob-overlay.open { display: block; pointer-events: auto; }
+
+    @media (max-width: 700px) {
+      .mobile-admin-menu-btn { display: flex; }
+
+      .sidebar {
+        position: fixed !important; left: 0; top: 0; bottom: 0;
+        width: min(280px, 88vw) !important; max-height: 100vh !important;
+        transform: translateX(-100%); transition: transform .25s ease;
+        z-index: 9000 !important; overflow-y: auto !important;
+        box-shadow: 4px 0 24px rgba(0,0,0,.4);
+        background: #f8f9fa !important;
+        pointer-events: auto !important;
+      }
+      .sidebar.mob-open { transform: translateX(0); }
+      .sidebar.mob-open * { pointer-events: auto !important; }
+
+      .layout { grid-template-columns: 1fr !important; padding-top: 3.5rem; }
+      .content { padding: .55rem !important; min-height: auto !important; }
+      .app-shell { width: 100% !important; overflow-x: hidden; }
+      body { overflow-x: hidden; }
+
+      /* Topbar stacks on small screens */
+      .topbar { flex-direction: column; align-items: flex-start; gap: .35rem; margin-bottom: .5rem; }
+      .topbar-meta { width: 100%; }
+      .session-profile { width: 100%; box-sizing: border-box; max-width: 100%; }
+      .session-profile-email { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      #view-title { font-size: 1.15rem !important; word-break: break-word; }
+
+      .stats { grid-template-columns: 1fr 1fr !important; }
+      .scenario-grid { grid-template-columns: 1fr !important; }
+      .kpi-grid { grid-template-columns: 1fr !important; }
+      #revenue-kpis { grid-template-columns: 1fr !important; }
+
+      /* Suivi */
+      .suivi-table-wrap { overflow-x: auto; }
+      .suivi-table { min-width: 560px; font-size: .78rem; }
+
+      /* Email */
+      .email-editor-grid { grid-template-columns: 1fr !important; }
+      .var-chip { font-size: .72rem; padding: .2rem .4rem; }
+
+      /* Slot builder */
+      .slot-builder-controls { flex-wrap: wrap; }
+      .sb-time-input { flex: 1; min-width: 110px; }
+
+      /* Location builder */
+      .loc-add-row { flex-direction: column; }
+      .loc-input { width: 100%; box-sizing: border-box; }
+
+      /* Notifications */
+      .notification-header { flex-wrap: wrap; gap: .3rem; }
+
+      /* Scenario list actions */
+      .scenario-actions-row { flex-wrap: wrap; gap: .3rem; }
+      .scenario-admin-item .scenario-actions-row .btn { flex: 1; min-width: 0; font-size: .74rem; }
+
+      /* Res tools */
+      .res-tools { grid-template-columns: 1fr !important; }
+
+      /* Table → cards on mobile */
+      .table-wrap {
+        overflow-x: visible !important; overflow-y: visible !important;
+        max-height: none !important; border: none !important;
+      }
+      .table-wrap table { display: block; }
+      .table-wrap thead  { display: none; }
+      .table-wrap tbody  { display: flex; flex-direction: column; gap: .65rem; }
+      .table-wrap tr {
+        display: block; border: 1px solid #e2e8f0; border-radius: 10px;
+        padding: .65rem .8rem; background: #fff;
+        box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      }
+      .table-wrap td {
+        display: flex; align-items: flex-start; gap: .5rem;
+        padding: .22rem 0; border: none !important;
+        font-size: .82rem; color: #1e293b; min-height: 0;
+        width: 100% !important; text-align: left !important;
+      }
+      .table-wrap td::before {
+        content: attr(data-label);
+        min-width: 80px; flex-shrink: 0;
+        font-size: .7rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .05em; color: #94a3b8; padding-top: 2px;
+      }
+      .table-wrap td:empty { display: none; }
+      .table-wrap td .td-sub { display: block; font-size: .7rem; color: #94a3b8; }
+      .table-wrap td .btn-row { flex-wrap: wrap; gap: .35rem; }
+      .table-wrap td[data-label="Statut"] { justify-content: flex-start; }
+      .table-wrap td[data-label="Actions"] .btn-row { justify-content: flex-start; }
+
+      .suivi-kanban { gap: .8rem; }
+      .suivi-table-wrap { overflow-x: auto; }
+      .suivi-table { min-width: 600px; }
+
+      .email-editor-grid { grid-template-columns: 1fr !important; }
+      .slot-builder-controls { flex-wrap: wrap; }
+      .sb-time-input { width: 100%; }
+    }
+
+    @media (max-width: 480px) {
+      .stats { grid-template-columns: 1fr !important; }
+      #view-title { font-size: 1rem !important; }
+      .content { padding: .4rem !important; }
+      .kpi h4 { font-size: .85rem; }
+      .slot-preview { max-height: 220px; }
+      .loc-add-btn { width: 100%; }
+    }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: .01ms !important;
@@ -833,13 +956,134 @@
     #admin-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     #admin-toast.ok   { background: #065f46; border-color: #10b981; }
     #admin-toast.err  { background: #7f1d1d; border-color: #ef4444; }
+
+    /* ── SUIVI DES RÉSERVATIONS ──────────────────────────── */
+    #view-suivi { padding: .8rem; overflow-y: auto; }
+    .suivi-kanban { display: flex; flex-direction: column; gap: 1.2rem; }
+    .suivi-section { border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; }
+    .suivi-section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .6rem 1rem; font-weight: 700; font-size: .88rem;
+    }
+    .st-pending   .suivi-section-head { background: #fef3c7; color: #92400e; border-bottom: 2px solid #f59e0b; }
+    .st-confirmed .suivi-section-head { background: #d1fae5; color: #065f46; border-bottom: 2px solid #10b981; }
+    .st-encours   .suivi-section-head { background: #ffedd5; color: #7c2d12; border-bottom: 2px solid #f97316; }
+    .suivi-badge {
+      background: #fff; border-radius: 20px;
+      padding: .1rem .55rem; font-size: .78rem; font-weight: 800;
+    }
+    .suivi-table-wrap { overflow-x: auto; }
+    .suivi-table {
+      width: 100%; border-collapse: collapse; font-size: .82rem; background: #fff;
+    }
+    .suivi-table thead tr { background: #f8fafc; }
+    .suivi-table th {
+      padding: .5rem .75rem; text-align: left; font-size: .72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .05em; color: #64748b;
+      border-bottom: 1px solid #e2e8f0; white-space: nowrap;
+    }
+    .suivi-table td {
+      padding: .55rem .75rem; color: #1e293b; border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle; font-size: .82rem; max-width: 180px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .suivi-table tbody tr:hover { background: #f8fafc; }
+    .st-encours .suivi-table tbody tr td:first-child { border-left: 3px solid #f97316; }
+    .st-pending .suivi-table tbody tr td:first-child  { border-left: 3px solid #f59e0b; }
+    .st-confirmed .suivi-table tbody tr td:first-child { border-left: 3px solid #10b981; }
+    .suivi-empty-td { text-align: center; color: #94a3b8; padding: 1.5rem; font-style: italic; }
+
+    /* ── LOCATION BUILDER ────────────────────────────────── */
+    .loc-builder { display:flex; flex-direction:column; gap:.6rem; }
+    .loc-list { display:flex; flex-direction:column; gap:.35rem; }
+    .loc-empty { font-size:.8rem; color:#94a3b8; padding:.4rem 0; }
+    .loc-item {
+      display:flex; align-items:center; gap:.55rem;
+      background:#f8fafc; border:1px solid #e2e8f0; border-radius:7px;
+      padding:.45rem .75rem;
+    }
+    .loc-icon { font-size:1rem; flex-shrink:0; }
+    .loc-info { display:flex; flex-direction:column; gap:.1rem; flex:1; min-width:0; }
+    .loc-name { font-size:.82rem; font-weight:700; color:#1e293b; }
+    .loc-url {
+      font-size:.75rem; color:#2563eb; text-decoration:none;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:340px;
+    }
+    .loc-url:hover { text-decoration:underline; }
+    .loc-remove {
+      background:none; border:none; color:#ef4444; cursor:pointer;
+      font-size:1.1rem; padding:0 .2rem; opacity:.6; transition:opacity .15s; flex-shrink:0;
+    }
+    .loc-remove:hover { opacity:1; }
+    .loc-add-row { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
+    .loc-input {
+      flex:1; min-width:140px; background:#fff; border:1px solid #e2e8f0;
+      border-radius:6px; padding:.38rem .65rem; font-size:.83rem; color:#1e293b;
+    }
+    .loc-input:focus { outline:none; border-color:#f97316; }
+    .loc-add-btn {
+      background:#f97316; color:#fff; border:none; border-radius:6px;
+      padding:.38rem .9rem; font-size:.8rem; font-weight:700; cursor:pointer;
+      white-space:nowrap; transition:background .2s;
+    }
+    .loc-add-btn:hover { background:#ea580c; }
+
+    /* ── SLOT BUILDER ─────────────────────────────────────── */
+    .slot-builder { display:flex; flex-direction:column; gap:.7rem; }
+    .slot-builder-controls { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
+    .slot-builder-controls .sb-label { font-size:.75rem; color:#888; font-weight:600; letter-spacing:.05em; text-transform:uppercase; }
+    .sb-time-input {
+      background:#161622; border:1px solid #2d2d3d; border-radius:6px;
+      color:#e0e0ff; padding:.38rem .65rem; font-size:.85rem; width:7rem;
+      color-scheme: dark;
+    }
+    .sb-time-input:focus { outline:none; border-color:#f97316; }
+    .slot-gen-btn {
+      background:#f97316; color:#fff; border:none; border-radius:6px;
+      padding:.42rem 1.1rem; font-size:.8rem; font-weight:700; letter-spacing:.06em;
+      cursor:pointer; text-transform:uppercase; transition:background .2s, transform .1s;
+      white-space:nowrap;
+    }
+    .slot-gen-btn:hover { background:#ea580c; transform:translateY(-1px); }
+    .slot-gen-btn:active { transform:translateY(0); }
+    .slot-preview {
+      display:flex; flex-direction:column; gap:0;
+      max-height:300px; overflow-y:auto;
+      background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:.5rem .5rem;
+    }
+    .slot-chip {
+      display:flex; align-items:center; justify-content:space-between;
+      background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px;
+      padding:.38rem .8rem; font-size:.83rem; color:#1e293b; font-weight:600;
+      font-family: monospace;
+    }
+    .slot-chip-remove {
+      background:none; border:none; color:#ef4444; cursor:pointer;
+      font-size:1.1rem; line-height:1; padding:0 .2rem; opacity:.7;
+      transition:opacity .15s;
+    }
+    .slot-chip-remove:hover { opacity:1; }
+    .break-row {
+      display:flex; align-items:center; gap:.35rem; padding:.22rem .8rem;
+    }
+    .break-row-label { font-size:.7rem; color:#94a3b8; flex-shrink:0; min-width:3.5rem; }
+    .break-btn {
+      background:#fff; border:1px solid #cbd5e1; border-radius:20px;
+      color:#475569; font-size:.7rem; padding:.16rem .52rem; cursor:pointer;
+      transition:all .15s; white-space:nowrap;
+    }
+    .break-btn:hover { background:#f97316; border-color:#f97316; color:#fff; }
+    .break-btn.remove-break { border-color:#fca5a5; color:#ef4444; }
+    .break-btn.remove-break:hover { background:#ef4444; border-color:#ef4444; color:#fff; }
+    .slot-builder-empty { color:#94a3b8; font-size:.82rem; text-align:center; padding:1.5rem 1rem; }
+    .slot-count { font-size:.72rem; color:#64748b; }
   </style>
 </head>
 <body>
   <section class="auth-shell" id="auth-shell">
     <article class="auth-card">
       <div class="eyebrow">Accès Admin</div>
-      <h1 class="title">Tableau de bord The Room</h1>
+      <h1 class="title">Tableau de bord The Room Escape</h1>
       <p class="sub">Connectez-vous pour gérer les réservations, les admins, les décharges, les métriques et les rapports.</p>
       <form id="login-form">
         <div class="field">
@@ -857,16 +1101,19 @@
     </article>
   </section>
 
+  <button class="mobile-admin-menu-btn" id="mobile-admin-menu-btn" aria-label="Menu">☰</button>
+  <div class="sidebar-mob-overlay" id="sidebar-mob-overlay"></div>
+
   <section class="app-shell" id="app-shell">
     <div class="layout">
-      <aside class="sidebar">
+      <aside class="sidebar" id="admin-sidebar">
         <div class="eyebrow">Navigation</div>
         <div class="brand">The Room Admin</div>
         <div class="menu" id="side-menu">
           <button data-view="view-reservations" class="active" data-role="ADMIN,SUPER_ADMIN">Réservations</button>
           <button data-view="view-profile" data-role="ADMIN,SUPER_ADMIN">Modifier le profil</button>
           <button data-view="view-manifest" data-role="SUPER_ADMIN">Liste des joueurs</button>
-          <button data-view="view-metrics" data-role="SUPER_ADMIN">Métriques d'évasion</button>
+          <button data-view="view-suivi" data-role="ADMIN,SUPER_ADMIN">Suivi des réservations</button>
           <button data-view="view-revenue" data-role="SUPER_ADMIN">Rapports de revenus</button>
           <button data-view="view-scenarios" data-role="SUPER_ADMIN">Gestion des scénarios</button>
           <button data-view="view-email-templates" data-role="ADMIN,SUPER_ADMIN">Modèles d'e-mail</button>
@@ -931,8 +1178,8 @@
           </div>
         </section>
 
-        <section class="view" id="view-metrics">
-          <div class="kpi-grid" id="metrics-grid"></div>
+        <section class="view" id="view-suivi">
+          <div class="suivi-kanban" id="suivi-content"></div>
         </section>
 
         <section class="view" id="view-revenue">
@@ -991,12 +1238,34 @@
                   <textarea id="scenario-description" rows="4" placeholder="Description publique"></textarea>
                 </div>
                 <div class="field full">
-                  <label for="scenario-access">Labels d'accès</label>
-                  <input id="scenario-access" type="text" placeholder="♿, 💡, 🚫 Crawl" />
+                  <label>Horaires</label>
+                  <!-- Hidden textarea keeps existing save logic intact -->
+                  <textarea id="scenario-slots" style="display:none"></textarea>
+                  <div class="slot-builder" id="slot-builder">
+                    <div class="slot-builder-controls">
+                      <span class="sb-label">Début</span>
+                      <input type="time" id="slot-start" class="sb-time-input" value="10:30" />
+                      <span class="sb-label">Fin</span>
+                      <input type="time" id="slot-end" class="sb-time-input" value="00:00" />
+                      <button type="button" class="slot-gen-btn" id="slot-gen-btn">▶ Générer</button>
+                    </div>
+                    <div class="slot-preview" id="slot-preview">
+                      <div class="slot-builder-empty">Entrez une heure de début / fin puis cliquez sur Générer.</div>
+                    </div>
+                    <div class="slot-count" id="slot-count"></div>
+                  </div>
                 </div>
                 <div class="field full">
-                  <label for="scenario-slots">Horaires</label>
-                  <textarea id="scenario-slots" rows="3" placeholder="10:30 - 12:00, 12:00 - 13:30"></textarea>
+                  <label>Lieux de l'escape game</label>
+                  <input type="hidden" id="scenario-locations" />
+                  <div class="loc-builder" id="loc-builder">
+                    <div class="loc-list" id="loc-list"><div class="loc-empty">Aucun lieu ajouté.</div></div>
+                    <div class="loc-add-row">
+                      <input type="text" id="loc-name-input" placeholder="Nom du lieu (ex : Salle principale)" class="loc-input" />
+                      <input type="text" id="loc-url-input" placeholder="Lien Google Maps ou URL" class="loc-input" />
+                      <button type="button" class="loc-add-btn" id="loc-add-btn">+ Ajouter</button>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="scenario-actions-row">
@@ -1058,6 +1327,7 @@
                 <span class="var-chip" data-var="{date}">📅 Date</span>
                 <span class="var-chip" data-var="{time}">🕐 Heure</span>
                 <span class="var-chip" data-var="{players}">👥 Joueurs</span>
+                <span class="var-chip" data-var="{location}">📍 Lieu</span>
               </div>
 
               <!-- Editor + Preview side by side -->
@@ -1622,6 +1892,7 @@
           pricingHtml: String(item.pricingHtml || (useFallback && fallback.pricingHtml) || '').trim(),
           tags: item.tags || (useFallback && fallback.tags) || { time: '60 min', difficultyClass: 'diff-medium' },
           slots,
+          locations: Array.isArray(item.locations) ? item.locations : [],
           available: item.available !== false,
           detailPlayers: String(item.detailPlayers || (useFallback && fallback.detailPlayers) || '').trim(),
           detailDifficulty: String(item.detailDifficulty || (useFallback && fallback.detailDifficulty) || '').trim()
@@ -1685,7 +1956,14 @@
         if (scenarioAvailable) scenarioAvailable.value = scenario && scenario.available === false ? 'false' : 'true';
         if (scenarioDescription) scenarioDescription.value = scenario ? scenario.description : '';
         if (scenarioAccess) scenarioAccess.value = scenario ? scenario.access.join(', ') : '';
-        if (scenarioSlots) scenarioSlots.value = scenario ? scenario.slots.join(', ') : '';
+        if (typeof window.loadSlotsIntoBuilder === 'function') {
+          window.loadSlotsIntoBuilder(scenario ? scenario.slots : []);
+        } else if (scenarioSlots) {
+          scenarioSlots.value = scenario ? scenario.slots.join(', ') : '';
+        }
+        if (typeof window.loadLocationsIntoBuilder === 'function') {
+          window.loadLocationsIntoBuilder(scenario ? (scenario.locations || []) : []);
+        }
         if (scenarioImagePreview) {
           if (scenario && scenario.image) {
             scenarioImagePreview.innerHTML = '<img src="' + escapeHTML(scenario.image) + '" alt="' + escapeHTML(scenario.name || 'Scenario image') + '" />';
@@ -1795,7 +2073,8 @@
           available: scenarioAvailable ? scenarioAvailable.value !== 'false' : true,
           description: scenarioDescription ? scenarioDescription.value : '',
           access: scenarioAccess ? parseList(scenarioAccess.value) : [],
-          slots: scenarioSlots ? parseList(scenarioSlots.value) : []
+          slots: scenarioSlots ? parseList(scenarioSlots.value) : [],
+          locations: typeof window.getBuilderLocations === 'function' ? window.getBuilderLocations() : []
         }, index >= 0 ? index : scenarios.length);
 
         if (index >= 0) scenarios[index] = next;
@@ -1806,6 +2085,7 @@
         if (scenarioErr) scenarioErr.textContent = '';
         refreshAll();
         populateScenarioForm(getScenarioById(next.id));
+        adminToast('✅ Scénario « ' + name + ' » enregistré avec succès.', 'ok');
       }
 
       function setupScenarioTools() {
@@ -1922,6 +2202,8 @@
       function showApp(show) {
         authShell.style.display = show ? 'none' : 'block';
         appShell.style.display = show ? 'block' : 'none';
+        const hamBtn = document.getElementById('mobile-admin-menu-btn');
+        if (hamBtn) hamBtn.style.display = show ? '' : 'none';
         if (show && sessionEmailEl) {
           const email = getSession();
           sessionEmailEl.textContent = email || '-';
@@ -1945,7 +2227,7 @@
           'view-email-templates': ['ADMIN', 'SUPER_ADMIN'],
           'view-notifications': ['SUPER_ADMIN'],
           'view-manifest': ['SUPER_ADMIN'],
-          'view-metrics': ['SUPER_ADMIN'],
+          'view-suivi': ['ADMIN', 'SUPER_ADMIN'],
           'view-revenue': ['SUPER_ADMIN']
         };
         
@@ -2072,13 +2354,19 @@
       const NOTIFICATIONS_KEY = 'ROOM_NOTIFICATIONS_V1';
 
       const ACTION_META = {
-        confirmed:  { label: 'Confirmé',       color: '#2563eb', bg: 'rgba(37,99,235,.1)',   icon: '✅' },
-        cancelled:  { label: 'Annulé',         color: '#ef4444', bg: 'rgba(239,68,68,.1)',   icon: '❌' },
-        failed:     { label: 'Échoué',         color: '#dc2626', bg: 'rgba(220,38,38,.1)',   icon: '💀' },
-        escaped:    { label: 'Évadé',          color: '#10b981', bg: 'rgba(16,185,129,.1)',  icon: '🏆' },
-        new:        { label: 'Remis à nouveau',color: '#6366f1', bg: 'rgba(99,102,241,.1)',  icon: '🆕' },
-        deleted:    { label: 'Supprimé',       color: '#f59e0b', bg: 'rgba(245,158,11,.1)',  icon: '🗑️' },
-        waiver:     { label: 'Décharge',       color: '#8b5cf6', bg: 'rgba(139,92,246,.1)',  icon: '📋' }
+        confirmed:        { label: 'Confirmé',          color: '#2563eb', bg: 'rgba(37,99,235,.1)',   icon: '✅' },
+        cancelled:        { label: 'Annulé',            color: '#ef4444', bg: 'rgba(239,68,68,.1)',   icon: '❌' },
+        failed:           { label: 'Échoué',            color: '#dc2626', bg: 'rgba(220,38,38,.1)',   icon: '💀' },
+        escaped:          { label: 'Évadé',             color: '#10b981', bg: 'rgba(16,185,129,.1)',  icon: '🏆' },
+        new:              { label: 'Remis à nouveau',   color: '#6366f1', bg: 'rgba(99,102,241,.1)',  icon: '🆕' },
+        deleted:          { label: 'Supprimé',          color: '#f59e0b', bg: 'rgba(245,158,11,.1)',  icon: '🗑️' },
+        waiver:           { label: 'Décharge',          color: '#8b5cf6', bg: 'rgba(139,92,246,.1)',  icon: '📋' },
+        'email-sent':     { label: 'E-mail envoyé',     color: '#0891b2', bg: 'rgba(8,145,178,.1)',   icon: '✉️' },
+        'new-reservation':{ label: 'Nouvelle réserv.',  color: '#16a34a', bg: 'rgba(22,163,74,.1)',   icon: '📅' },
+        'status-change':  { label: 'Statut modifié',   color: '#7c3aed', bg: 'rgba(124,58,237,.1)',  icon: '🔄' },
+        'admin-added':    { label: 'Admin ajouté',      color: '#0284c7', bg: 'rgba(2,132,199,.1)',   icon: '👤' },
+        'admin-deleted':  { label: 'Admin supprimé',    color: '#b91c1c', bg: 'rgba(185,28,28,.1)',   icon: '🚫' },
+        'scenario-saved': { label: 'Scénarios sauveg.', color: '#b45309', bg: 'rgba(180,83,9,.1)',    icon: '🎭' }
       };
 
       function getNotifications() {
@@ -2091,7 +2379,6 @@
 
       async function createActionNotification(reservation, action) {
         console.log('[notif] createActionNotification called, action=', action, 'reservation=', reservation);
-        if (action !== 'confirmed' && action !== 'cancelled') return;
         const adminEmail = getSession();
         const messages = {
           confirmed: 'confirmed reservation',
@@ -2224,18 +2511,25 @@
           return;
         }
         const template = getEmailTemplate();
-        const subject = template.subject
+        const scenarioObj = getScenarios().find(s =>
+          s.name === (reservation.scenario || reservation.scenarioName || '')
+        );
+        const locs = (scenarioObj && Array.isArray(scenarioObj.locations) && scenarioObj.locations.length)
+          ? scenarioObj.locations.map(l => (l.name ? l.name + ' : ' : '') + l.url).join('\n')
+          : '';
+        const replaceVars = str => str
           .replace(/{customerName}/g, customerName)
           .replace(/{scenarioName}/g, reservation.scenario || reservation.scenarioName || '')
           .replace(/{date}/g, reservation.date || '')
           .replace(/{time}/g, reservation.time || '')
-          .replace(/{players}/g, reservation.players || '');
-        const body = template.body
-          .replace(/{customerName}/g, customerName)
-          .replace(/{scenarioName}/g, reservation.scenario || reservation.scenarioName || '')
-          .replace(/{date}/g, reservation.date || '')
-          .replace(/{time}/g, reservation.time || '')
-          .replace(/{players}/g, reservation.players || '');
+          .replace(/{players}/g, reservation.players || '')
+          .replace(/{location}/g, locs || 'Voir notre site pour l\'adresse');
+        const subject = replaceVars(template.subject);
+        let body = replaceVars(template.body);
+        // If template didn't have {location} placeholder but we have locations, append them
+        if (locs && !template.body.includes('{location}')) {
+          body += '\n\nLieu :\n' + locs;
+        }
         try {
           const r = await fetch(BACKEND + '/send-email', {
             method: 'POST',
@@ -2250,6 +2544,12 @@
               saveReservations(list);
               refreshAll();
             }
+            await createActionNotification({
+              id: reservation.id || reservation.backendId || '',
+              name: customerName,
+              scenario: reservation.scenario || reservation.scenarioName || '',
+              date: reservation.date || ''
+            }, 'email-sent');
           } else {
             const d = await r.json();
             adminToast('Échec de l\'envoi de l\'e-mail : ' + (d.error || 'Erreur inconnue'), 'err');
@@ -2259,13 +2559,20 @@
         }
       }
       const DEFAULT_EMAIL_TEMPLATE = {
-        subject: 'Reservation Confirmation - The Room Escape Game',
-        body: 'Dear {customerName},\n\nYour reservation has been confirmed!\n\nScenario: {scenarioName}\nDate: {date}\nTime: {time}\nPlayers: {players}\n\nPlease arrive 15 minutes early.\n\nBest regards,\nThe Room Team'
+        subject: 'Confirmation de réservation - The Room Escape Game',
+        body: 'Bonjour {customerName},\n\nVotre réservation est confirmée !\n\nScénario : {scenarioName}\nDate : {date}\nHeure : {time}\nJoueurs : {players}\n\nLieu :\n{location}\n\nMerci d\'arriver 15 minutes avant votre session.\n\nÀ bientôt,\nL\'équipe The Room'
       };
 
       function getEmailTemplate() {
         const existing = loadJSON(EMAIL_TEMPLATE_KEY, null);
         if (!existing) {
+          saveJSON(EMAIL_TEMPLATE_KEY, DEFAULT_EMAIL_TEMPLATE);
+          return DEFAULT_EMAIL_TEMPLATE;
+        }
+        // Migrate any template that is still English or missing {location}
+        const isOldEnglish = existing.subject === 'Reservation Confirmation - The Room Escape Game';
+        const missingLocation = !String(existing.body || '').includes('{location}');
+        if (isOldEnglish || missingLocation) {
           saveJSON(EMAIL_TEMPLATE_KEY, DEFAULT_EMAIL_TEMPLATE);
           return DEFAULT_EMAIL_TEMPLATE;
         }
@@ -2281,7 +2588,8 @@
         '{scenarioName}': 'Saw Chapter 2',
         '{date}':         '2026-06-15',
         '{time}':         '18:00 - 19:30',
-        '{players}':      '4'
+        '{players}':      '4',
+        '{location}':     'Salle principale : https://maps.google.com/?q=The+Room+Tunis'
       };
 
       function renderEmailPreview() {
@@ -2389,7 +2697,6 @@
               '<div style="display:flex;align-items:center;gap:.4rem">' +
                 '<span class="notification-time" style="font-size:.75rem">' + escapeHTML(created) + '</span>' +
                 (n.read ? '' : '<button class="btn ghost small" type="button" data-read-notif="' + escapeHTML(String(n.id)) + '">Marquer comme lu</button>') +
-                '<button class="btn danger small" type="button" data-dismiss-notif="' + escapeHTML(String(n.id)) + '">Ignorer</button>' +
               '</div>' +
             '</div>' +
             '<div class="notification-message" style="font-size:.88rem;line-height:1.5">' + escapeHTML(n.message) + '</div>' +
@@ -2415,18 +2722,10 @@
           });
         });
 
-        container.querySelectorAll('[data-dismiss-notif]').forEach(btn => {
-          btn.addEventListener('click', () => {
-            dismissNotification(btn.getAttribute('data-dismiss-notif'));
-            renderNotifications();
-          });
-        });
       }
 
       async function detectReservationDecline(reservation, statusValue) {
-        if (statusValue === 'confirmed' || statusValue === 'cancelled') {
-          await createActionNotification(reservation, statusValue);
-        }
+        // Server now creates notifications for status changes — no frontend duplication needed
       }
 
       function escapeHTML(v) {
@@ -2601,17 +2900,18 @@
             ? '<button class="btn small icon-btn' + (emailSent ? ' sent' : '') + '" type="button" data-send-email="' + idx + '" title="' + (emailSent ? 'E-mail déjà envoyé' : 'Envoyer e-mail') + '">' + (emailSent ? '✅' : '✉️') + '</button>'
             : '';
           const session = escapeHTML(r.date || '-') + (r.time ? '<br><span class="td-sub">' + escapeHTML(r.time) + '</span>' : '');
+          const note = getSpecialNote(r);
           return '<tr>' +
-            '<td>' + escapeHTML(r.name) + '<span class="td-sub">' + escapeHTML(r.id || '') + ' · ' + escapeHTML(created) + '</span></td>' +
-            '<td class="td-nowrap">' + escapeHTML(r.phone) + '</td>' +
-            '<td title="' + escapeHTML(r.email) + '">' + escapeHTML(r.email) + '</td>' +
-            '<td title="' + escapeHTML(r.scenario) + '">' + escapeHTML(r.scenario) + '</td>' +
-            '<td class="td-nowrap">' + session + '</td>' +
-            '<td style="text-align:center">' + escapeHTML(r.players) + '</td>' +
-            '<td title="' + escapeHTML(getSpecialNote(r)) + '">' + escapeHTML(getSpecialNote(r)) + '</td>' +
-            '<td style="text-align:center"><input type="checkbox" data-waiver-idx="' + idx + '" ' + (r.waiverSigned ? 'checked' : '') + ' /></td>' +
-            '<td style="text-align:center">' + statusEmojiBtn(r.status, idx) + '</td>' +
-            '<td><div class="btn-row">' + emailBtn + '<button class="btn danger small icon-btn" type="button" data-del-res="' + idx + '" title="Supprimer">🗑️</button></div></td>' +
+            '<td data-label="Nom">' + escapeHTML(r.name) + '<span class="td-sub">' + escapeHTML(r.id || '') + ' · ' + escapeHTML(created) + '</span></td>' +
+            '<td data-label="Téléphone" class="td-nowrap">' + escapeHTML(r.phone) + '</td>' +
+            '<td data-label="E-mail" title="' + escapeHTML(r.email) + '">' + escapeHTML(r.email) + '</td>' +
+            '<td data-label="Scénario" title="' + escapeHTML(r.scenario) + '">' + escapeHTML(r.scenario) + '</td>' +
+            '<td data-label="Session" class="td-nowrap">' + session + '</td>' +
+            '<td data-label="Joueurs" style="text-align:center">' + escapeHTML(r.players) + '</td>' +
+            '<td data-label="Notes">' + escapeHTML(note) + '</td>' +
+            '<td data-label="Décharge" style="text-align:center"><input type="checkbox" data-waiver-idx="' + idx + '" ' + (r.waiverSigned ? 'checked' : '') + ' /></td>' +
+            '<td data-label="Statut" style="text-align:center">' + statusEmojiBtn(r.status, idx) + '</td>' +
+            '<td data-label="Actions"><div class="btn-row">' + emailBtn + '<button class="btn danger small icon-btn" type="button" data-del-res="' + idx + '" title="Supprimer">🗑️</button></div></td>' +
           '</tr>';
         }).join('');
 
@@ -2738,37 +3038,62 @@
         ).join('');
       }
 
-      function renderMetricsView() {
-        const root = document.getElementById('metrics-grid');
+      function renderSuiviView() {
+        const root = document.getElementById('suivi-content');
+        if (!root) return;
         const list = getReservations();
-        const byScenario = {};
+        const now = new Date();
+        const todayStr = now.toISOString().slice(0, 10);
 
-        list.forEach(r => {
-          const key = r.scenario || 'Unknown';
-          if (!byScenario[key]) byScenario[key] = { total: 0, escaped: 0, failed: 0 };
-          byScenario[key].total += 1;
-          if (r.status === 'escaped') byScenario[key].escaped += 1;
-          if (r.status === 'failed') byScenario[key].failed += 1;
-        });
+        const _sMap = { PENDING: 'new', CONFIRMED: 'confirmed', CANCELLED: 'cancelled', COMPLETED: 'escaped' };
+        function ns(s) { return _sMap[s] || (s || 'new'); }
 
-        const keys = Object.keys(byScenario);
-        if (!keys.length) {
-          root.innerHTML = '<div class="empty">Aucune donnée pour les métriques d\'évasion.</div>';
-          return;
+        function isEnCours(r) {
+          if (!r.date || r.date !== todayStr) return false;
+          if (ns(r.status) !== 'confirmed') return false;
+          const m = String(r.time || '').match(/^(\d{1,2}):(\d{2})/);
+          if (!m) return false;
+          const slotStart = new Date(now); slotStart.setHours(+m[1], +m[2], 0, 0);
+          return now >= slotStart && now <= new Date(slotStart.getTime() + 90 * 60 * 1000);
         }
 
-        root.innerHTML = keys.map(name => {
-          const s = byScenario[name];
-          const decisions = s.escaped + s.failed;
-          const successRate = decisions ? (s.escaped / decisions) * 100 : 0;
-          const warning = (s.failed > 0 && s.escaped === 0) ? ' Potentiellement trop difficile (0% d\'évasion).' : '';
-          return '<article class="kpi">'
-            + '<h4>' + escapeHTML(name) + '</h4>'
-            + '<p>Total parties : <strong>' + s.total + '</strong></p>'
-            + '<p>Évadés : <strong>' + s.escaped + '</strong> | Échoués : <strong>' + s.failed + '</strong></p>'
-            + '<p>Taux d\'évasion : <strong>' + successRate.toFixed(1) + '%</strong>' + escapeHTML(warning) + '</p>'
-            + '</article>';
-        }).join('');
+        const groups = [
+          { title: 'En attente',  cls: 'st-pending',   icon: '🕐', items: list.filter(r => ns(r.status) === 'new') },
+          { title: 'Confirmées',  cls: 'st-confirmed', icon: '✅', items: list.filter(r => ns(r.status) === 'confirmed' && !isEnCours(r)) },
+          { title: 'En cours',    cls: 'st-encours',   icon: '▶️', items: list.filter(isEnCours) }
+        ];
+
+        const COLS = ['Nom', 'Scénario', 'Date', 'Heure', 'Joueurs', 'Téléphone', 'E-mail', 'Notes'];
+
+        function tableRows(items) {
+          if (!items.length) return '<tr><td colspan="8" class="suivi-empty-td">Aucune réservation dans cette catégorie</td></tr>';
+          return items.map(r => '<tr>'
+            + '<td><strong>' + escapeHTML(r.name || '—') + '</strong></td>'
+            + '<td>' + escapeHTML(r.scenario || '—') + '</td>'
+            + '<td style="white-space:nowrap">' + escapeHTML(r.date || '—') + '</td>'
+            + '<td style="white-space:nowrap">' + escapeHTML(r.time || '—') + '</td>'
+            + '<td style="text-align:center">' + escapeHTML(String(r.players || '—')) + '</td>'
+            + '<td style="white-space:nowrap">' + escapeHTML(r.phone || '—') + '</td>'
+            + '<td>' + escapeHTML(r.email || '—') + '</td>'
+            + '<td>' + escapeHTML(r.message || r.notes || '') + '</td>'
+            + '</tr>'
+          ).join('');
+        }
+
+        root.innerHTML = groups.map(g =>
+          '<div class="suivi-section ' + g.cls + '">'
+          + '<div class="suivi-section-head">'
+          + '<span>' + g.icon + ' ' + g.title + '</span>'
+          + '<span class="suivi-badge">' + g.items.length + '</span>'
+          + '</div>'
+          + '<div class="suivi-table-wrap">'
+          + '<table class="suivi-table"><thead><tr>'
+          + COLS.map(c => '<th>' + c + '</th>').join('')
+          + '</tr></thead><tbody>'
+          + tableRows(g.items)
+          + '</tbody></table>'
+          + '</div></div>'
+        ).join('');
       }
 
       function isThisWeek(dateObj) {
@@ -2877,7 +3202,7 @@
         renderStats();
         renderReservationsView();
         renderManifestView();
-        renderMetricsView();
+        renderSuiviView();
         renderRevenueView();
         renderAdmins();
       }
@@ -2934,7 +3259,7 @@
           'view-email-templates': ['ADMIN', 'SUPER_ADMIN'],
           'view-notifications': ['SUPER_ADMIN'],
           'view-manifest': ['SUPER_ADMIN'],
-          'view-metrics': ['SUPER_ADMIN'],
+          'view-suivi': ['ADMIN', 'SUPER_ADMIN'],
           'view-revenue': ['SUPER_ADMIN']
         };
         
@@ -2950,7 +3275,7 @@
         const titleMap = {
           'view-reservations': 'Réservations',
           'view-manifest': 'Liste des joueurs',
-          'view-metrics': "Métriques d'évasion",
+          'view-suivi': 'Suivi des réservations',
           'view-revenue': 'Rapports de revenus',
           'view-scenarios': 'Gestion des scénarios',
           'view-admins': 'Gestion des admins',
@@ -2970,6 +3295,8 @@
           populateEmailTemplateForm();
         } else if (id === 'view-notifications') {
           loadBackendNotifications().then(() => renderNotifications());
+        } else if (id === 'view-suivi') {
+          ensureJWT().then(token => fetchAndMergeReservations(token).then(() => renderSuiviView()));
         }
       }
 
@@ -3408,6 +3735,229 @@
             loadBackendNotifications().then(() => renderNotifications());
           }
         }
+      });
+    })();
+
+    // ── MOBILE SIDEBAR TOGGLE ───────────────────────────────────────────────────
+    (function () {
+      const menuBtn  = document.getElementById('mobile-admin-menu-btn');
+      const overlay  = document.getElementById('sidebar-mob-overlay');
+      const sidebar  = document.getElementById('admin-sidebar');
+      if (!menuBtn || !sidebar) return;
+
+      function openSidebar() {
+        sidebar.classList.add('mob-open');
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        menuBtn.textContent = '✕';
+      }
+      function closeSidebar() {
+        sidebar.classList.remove('mob-open');
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+        menuBtn.textContent = '☰';
+      }
+
+      menuBtn.addEventListener('click', () =>
+        sidebar.classList.contains('mob-open') ? closeSidebar() : openSidebar()
+      );
+      overlay.addEventListener('click', closeSidebar);
+
+      // Auto-close when a nav item is tapped on mobile
+      sidebar.querySelectorAll('button[data-view], button[data-logout]').forEach(btn =>
+        btn.addEventListener('click', () => { if (window.innerWidth <= 700) closeSidebar(); })
+      );
+    })();
+
+    // ── LOCATION BUILDER ────────────────────────────────────────────────────────
+    (function () {
+      let lbLocs = [];
+
+      function renderLocs() {
+        const list = document.getElementById('loc-list');
+        if (!list) return;
+        if (!lbLocs.length) {
+          list.innerHTML = '<div class="loc-empty">Aucun lieu ajouté.</div>';
+        } else {
+          list.innerHTML = lbLocs.map((loc, i) => {
+            const isGMap = loc.url && loc.url.includes('google.com/maps');
+            return '<div class="loc-item">'
+              + '<span class="loc-icon">' + (isGMap ? '🗺️' : '🔗') + '</span>'
+              + '<div class="loc-info">'
+              +   '<span class="loc-name">' + escapeHTML(loc.name) + '</span>'
+              +   '<a href="' + escapeHTML(loc.url) + '" target="_blank" rel="noopener" class="loc-url">' + escapeHTML(loc.url) + '</a>'
+              + '</div>'
+              + '<button type="button" class="loc-remove" data-li="' + i + '" title="Supprimer">×</button>'
+              + '</div>';
+          }).join('');
+          list.querySelectorAll('[data-li]').forEach(btn => {
+            btn.addEventListener('click', function () {
+              lbLocs.splice(+this.dataset.li, 1);
+              renderLocs(); syncLocs();
+            });
+          });
+        }
+        syncLocs();
+      }
+
+      function syncLocs() {
+        const h = document.getElementById('scenario-locations');
+        if (h) h.value = JSON.stringify(lbLocs);
+      }
+
+      window.loadLocationsIntoBuilder = function (arr) {
+        lbLocs = Array.isArray(arr) ? arr.filter(l => l && l.url) : [];
+        renderLocs();
+      };
+
+      window.getBuilderLocations = function () { return lbLocs.slice(); };
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const addBtn = document.getElementById('loc-add-btn');
+        if (!addBtn) return;
+        addBtn.addEventListener('click', function () {
+          const nameEl = document.getElementById('loc-name-input');
+          const urlEl  = document.getElementById('loc-url-input');
+          const url  = (urlEl  && urlEl.value.trim())  || '';
+          if (!url) { if (urlEl) urlEl.focus(); return; }
+          const name = (nameEl && nameEl.value.trim()) || url;
+          lbLocs.push({ name, url });
+          if (nameEl) nameEl.value = '';
+          if (urlEl)  urlEl.value  = '';
+          renderLocs();
+        });
+        // Allow pressing Enter on URL input to add
+        const urlEl = document.getElementById('loc-url-input');
+        if (urlEl) urlEl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addBtn.click(); } });
+      });
+    })();
+
+    // ── SLOT BUILDER ────────────────────────────────────────────────────────────
+    (function () {
+      const SLOT_DUR = 90; // minutes per session
+      let sbStarts = [];   // start time (minutes from midnight) for each slot
+      let sbBreaks = [];   // extra gap in minutes after each slot (length = sbStarts.length - 1)
+
+      function minsToHHMM(mins) {
+        const t = ((mins % 1440) + 1440) % 1440;
+        return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0');
+      }
+
+      function hhmmToMins(hhmm) {
+        const p = (hhmm || '').split(':');
+        return parseInt(p[0] || 0, 10) * 60 + parseInt(p[1] || 0, 10);
+      }
+
+      function syncToTextarea() {
+        const ta = document.getElementById('scenario-slots');
+        if (!ta) return;
+        ta.value = sbStarts.map(s => minsToHHMM(s) + ' - ' + minsToHHMM(s + SLOT_DUR)).join(', ');
+      }
+
+      function render() {
+        const preview  = document.getElementById('slot-preview');
+        const countEl  = document.getElementById('slot-count');
+        if (!preview) return;
+
+        if (sbStarts.length === 0) {
+          preview.innerHTML = '<div class="slot-builder-empty">Aucun créneau généré.</div>';
+          if (countEl) countEl.textContent = '';
+          syncToTextarea();
+          return;
+        }
+
+        let html = '';
+        sbStarts.forEach((start, i) => {
+          html += `<div class="slot-chip" data-idx="${i}">
+            <span>${minsToHHMM(start)} – ${minsToHHMM(start + SLOT_DUR)}</span>
+            <button type="button" class="slot-chip-remove" data-remove="${i}" title="Supprimer">×</button>
+          </div>`;
+          if (i < sbStarts.length - 1) {
+            const brk = sbBreaks[i] || 0;
+            html += `<div class="break-row">
+              <span class="break-row-label">${brk > 0 ? '⏸ ' + brk + ' min' : '↕ pause'}</span>
+              <button type="button" class="break-btn" data-bi="${i}" data-m="5">+5 min</button>
+              <button type="button" class="break-btn" data-bi="${i}" data-m="10">+10 min</button>
+              <button type="button" class="break-btn" data-bi="${i}" data-m="15">+15 min</button>
+              ${brk > 0 ? `<button type="button" class="break-btn remove-break" data-bi="${i}" data-m="${-brk}">✕ retirer</button>` : ''}
+            </div>`;
+          }
+        });
+
+        preview.innerHTML = html;
+        if (countEl) countEl.textContent = sbStarts.length + ' créneau' + (sbStarts.length > 1 ? 'x' : '') + ' · ' + minsToHHMM(sbStarts[0]) + ' → ' + minsToHHMM(sbStarts[sbStarts.length - 1] + SLOT_DUR);
+
+        preview.querySelectorAll('[data-remove]').forEach(btn => {
+          btn.addEventListener('click', function () {
+            const idx = parseInt(this.dataset.remove, 10);
+            sbStarts.splice(idx, 1);
+            if (idx < sbBreaks.length) sbBreaks.splice(idx, 1);
+            else sbBreaks.splice(sbBreaks.length - 1, 1);
+            render();
+          });
+        });
+
+        preview.querySelectorAll('[data-bi]').forEach(btn => {
+          btn.addEventListener('click', function () {
+            const i = parseInt(this.dataset.bi, 10);
+            const delta = parseInt(this.dataset.m, 10);
+            sbBreaks[i] = Math.max(0, (sbBreaks[i] || 0) + delta);
+            // Cascade: recompute all starts from i+1 onwards
+            for (let j = i + 1; j < sbStarts.length; j++) {
+              sbStarts[j] = sbStarts[j - 1] + SLOT_DUR + (sbBreaks[j - 1] || 0);
+            }
+            render();
+          });
+        });
+
+        syncToTextarea();
+      }
+
+      function generate() {
+        const startEl = document.getElementById('slot-start');
+        const endEl   = document.getElementById('slot-end');
+        if (!startEl || !endEl) return;
+
+        let startMins = hhmmToMins(startEl.value || '10:30');
+        let endMins   = hhmmToMins(endEl.value   || '00:00');
+        if (endMins === 0) endMins = 1440;          // 00:00 = midnight = end of day
+        if (endMins <= startMins) endMins += 1440;  // handles past-midnight end
+
+        sbStarts = [];
+        let cur = startMins;
+        while (cur + SLOT_DUR <= endMins) { sbStarts.push(cur); cur += SLOT_DUR; }
+        sbBreaks = new Array(Math.max(0, sbStarts.length - 1)).fill(0);
+        render();
+      }
+
+      // Called by populateScenarioForm when editing an existing scenario
+      window.loadSlotsIntoBuilder = function (slotsArray) {
+        sbStarts = [];
+        sbBreaks = [];
+        if (!Array.isArray(slotsArray) || slotsArray.length === 0) { render(); return; }
+
+        slotsArray.forEach(slot => {
+          const m = String(slot).match(/^(\d{1,2}:\d{2})/);
+          if (m) sbStarts.push(hhmmToMins(m[1]));
+        });
+
+        // Compute breaks from gaps between consecutive slots
+        for (let i = 0; i < sbStarts.length - 1; i++) {
+          sbBreaks.push(Math.max(0, sbStarts[i + 1] - (sbStarts[i] + SLOT_DUR)));
+        }
+
+        // Update time inputs to reflect loaded slots
+        const startEl = document.getElementById('slot-start');
+        const endEl   = document.getElementById('slot-end');
+        if (startEl && sbStarts.length > 0) startEl.value = minsToHHMM(sbStarts[0]);
+        if (endEl   && sbStarts.length > 0) endEl.value   = minsToHHMM((sbStarts[sbStarts.length - 1] + SLOT_DUR) % 1440);
+
+        render();
+      };
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const btn = document.getElementById('slot-gen-btn');
+        if (btn) btn.addEventListener('click', generate);
       });
     })();
   </script>

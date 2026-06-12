@@ -97,7 +97,20 @@ async function initDB() {
   `);
   await pool.query(`ALTER TABLE reservations ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ`);
 
-  // Scenarios stored as JSONB — one row per scenario
+  // If scenarios table exists with the wrong schema (legacy Java app columns, no `data` JSONB),
+  // drop it so we can recreate it with the correct structure.
+  await pool.query(`
+    DO $$
+    BEGIN
+      IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'scenarios')
+      AND NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'scenarios' AND column_name = 'data'
+      ) THEN
+        DROP TABLE scenarios CASCADE;
+      END IF;
+    END $$
+  `);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS scenarios (
       id VARCHAR(100) PRIMARY KEY,
@@ -156,7 +169,7 @@ app.post('/api/auth/login', async (req, res) => {
     const admin = rows[0];
     if (!admin) return res.status(401).json({ error: 'Invalid credentials' });
 
-    const valid = await bcrypt.compare(password, admin.password_hash);
+    const valid = await bcrypt.compare(password, admin.password);
     if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
 
     const token = jwt.sign(
@@ -164,7 +177,7 @@ app.post('/api/auth/login', async (req, res) => {
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES }
     );
-    res.json({ token, role: admin.role, name: admin.username });
+    res.json({ token, role: admin.role, name: admin.name });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
@@ -212,6 +225,12 @@ app.post('/api/admins', requireSuperAdmin, async (req, res) => {
       'INSERT INTO admins (email, password, role, name) VALUES ($1,$2,$3,$4) RETURNING id, email, role, name',
       [email.toLowerCase().trim(), hash, safeRole, name || email]
     );
+    await pool.query(
+      `INSERT INTO notifications (type, action, message, admin_email, customer_name)
+       VALUES ($1,$2,$3,$4,$5)`,
+      ['admin', 'admin-added', req.user.email + ' a ajouté un nouvel admin: ' + (name || email) + ' (' + safeRole + ')',
+       req.user.email, name || email]
+    ).catch(() => {});
     res.status(201).json(rows[0]);
   } catch (err) {
     if (err.code === '23505') return res.status(409).json({ error: 'Admin with this email already exists' });
@@ -225,8 +244,16 @@ app.delete('/api/admins/:id', requireSuperAdmin, async (req, res) => {
     return res.status(400).json({ error: 'Cannot delete your own account' });
   }
   try {
+    const adminRow = await pool.query('SELECT email, name FROM admins WHERE id=$1', [req.params.id]);
+    const deleted = adminRow.rows[0] || {};
     const { rowCount } = await pool.query('DELETE FROM admins WHERE id=$1', [req.params.id]);
     if (rowCount === 0) return res.status(404).json({ error: 'Admin not found' });
+    await pool.query(
+      `INSERT INTO notifications (type, action, message, admin_email, customer_name)
+       VALUES ($1,$2,$3,$4,$5)`,
+      ['admin', 'admin-deleted', req.user.email + ' a supprimé l\'admin: ' + (deleted.email || req.params.id),
+       req.user.email, deleted.name || deleted.email || '']
+    ).catch(() => {});
     res.json({ success: true });
   } catch (err) {
     console.error(err);
@@ -262,6 +289,12 @@ app.put('/api/scenarios', requireSuperAdmin, async (req, res) => {
       );
     }
     await client.query('COMMIT');
+    await pool.query(
+      `INSERT INTO notifications (type, action, message, admin_email)
+       VALUES ($1,$2,$3,$4)`,
+      ['scenario', 'scenario-saved', req.user.email + ' a mis à jour les scénarios (' + list.length + ' scénarios)',
+       req.user.email]
+    ).catch(() => {});
     res.json({ success: true, count: list.length });
   } catch (err) {
     await client.query('ROLLBACK');
@@ -326,7 +359,7 @@ app.post('/api/reservations', async (req, res) => {
       `SELECT id
        FROM reservations
        WHERE LOWER(COALESCE(scenario_name, '')) = LOWER($1)
-         AND reservation_date_time = $2::timestamptz
+         AND reservation_date_time = $2::timestamp
          AND status NOT IN ('CANCELLED')
        LIMIT 1`,
       [scenarioName || 'Unknown', slotTime]
@@ -358,6 +391,14 @@ app.post('/api/reservations', async (req, res) => {
       createdAt: r.created_at
     };
     broadcastSSE('new-reservation', payload);
+    // Notification: new reservation from a client
+    await pool.query(
+      `INSERT INTO notifications (type, action, message, admin_email, reservation_id, customer_name, scenario_name)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+      ['new-reservation', 'new-reservation',
+       'Nouvelle réservation: ' + customerName + ' — ' + (scenarioName || 'Unknown') + ' le ' + slotTime,
+       'client', String(r.id), customerName, scenarioName || 'Unknown']
+    ).catch(() => {});
     res.status(201).json(payload);
   } catch (err) {
     console.error(err);
@@ -371,9 +412,19 @@ app.put('/api/reservations/:id/status', requireAuth, async (req, res) => {
   const allowed = ['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED'];
   if (!allowed.includes(status)) return res.status(400).json({ error: 'Invalid status' });
   try {
+    const resRow = await pool.query('SELECT customer_name, scenario_name FROM reservations WHERE id=$1', [id]);
+    const r = resRow.rows[0] || {};
     const { rowCount } = await pool.query('UPDATE reservations SET status=$1, updated_at=NOW() WHERE id=$2', [status, id]);
     if (rowCount === 0) return res.status(404).json({ error: 'Reservation not found' });
     broadcastSSE('reservation-updated', { id: Number(id), status });
+    const verbs = { CONFIRMED: 'a confirmé', CANCELLED: 'a annulé', COMPLETED: 'a complété', PENDING: 'a remis en attente' };
+    const verb = verbs[status] || ('a mis à jour le statut en ' + status + ' pour');
+    await pool.query(
+      `INSERT INTO notifications (type, action, message, admin_email, reservation_id, customer_name, scenario_name)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+      ['status-change', status.toLowerCase(), req.user.email + ' ' + verb + ' la réservation de ' + (r.customer_name || id) + ' — ' + (r.scenario_name || ''),
+       req.user.email, String(id), r.customer_name || '', r.scenario_name || '']
+    ).catch(() => {});
     res.json({ success: true });
   } catch (err) {
     console.error(err);
@@ -383,7 +434,15 @@ app.put('/api/reservations/:id/status', requireAuth, async (req, res) => {
 
 app.delete('/api/reservations/:id', requireAuth, async (req, res) => {
   try {
+    const resRow = await pool.query('SELECT customer_name, scenario_name FROM reservations WHERE id=$1', [req.params.id]);
+    const r = resRow.rows[0] || {};
     await pool.query('DELETE FROM reservations WHERE id=$1', [req.params.id]);
+    await pool.query(
+      `INSERT INTO notifications (type, action, message, admin_email, reservation_id, customer_name, scenario_name)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+      ['deleted', 'deleted', req.user.email + ' a supprimé la réservation de ' + (r.customer_name || req.params.id) + ' — ' + (r.scenario_name || ''),
+       req.user.email, String(req.params.id), r.customer_name || '', r.scenario_name || '']
+    ).catch(() => {});
     res.json({ success: true });
   } catch (err) {
     console.error(err);
@@ -436,7 +495,7 @@ app.post('/api/send-email', requireAuth, async (req, res) => {
 });
 
 // ── Notifications ─────────────────────────────────────────────────────────────
-app.get('/api/notifications', requireAuth, async (req, res) => {
+app.get('/api/notifications', requireSuperAdmin, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM notifications ORDER BY created_at DESC');
     res.json(rows.map(n => ({
@@ -483,15 +542,7 @@ app.put('/api/notifications/:id/read', requireAuth, async (req, res) => {
   }
 });
 
-app.delete('/api/notifications/:id', requireAuth, async (req, res) => {
-  try {
-    await pool.query('DELETE FROM notifications WHERE id=$1', [req.params.id]);
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+// Notifications are permanent — deletion is intentionally disabled.
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 async function startWithRetry(retries = 10, delayMs = 2000) {
