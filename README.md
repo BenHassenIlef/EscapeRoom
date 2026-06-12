@@ -109,7 +109,7 @@ The admin dashboard can send reservation emails through the backend. Gmail requi
 ## 📸 Preview
 
 <!-- Ajoute ici des captures d'écran du site :-->
-![Home Page](img/Capture d'écran 2026-06-12 164703)
+<img src="img/Capture d'écran 2026-06-12 164703.png" alt="Home Page" width="800"/>
 ![Booking Flow](img/screenshot-booking.png)
 ![Admin Dashboard](img/screenshot-admin.png)
 
